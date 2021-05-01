@@ -1,0 +1,74 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net5.0</TargetFramework>
+        <DockerDefaultTargetOS>Windows</DockerDefaultTargetOS>
+        <RootNamespace>NeosCodingApi</RootNamespace>
+        <Nullable>enable</Nullable>
+        <GenerateCode>True</GenerateCode>
+    </PropertyGroup>
+    <Choose>
+        <When Condition=" '$(OS)' == 'Windows_NT' ">
+            <PropertyGroup>
+                <WebApiClientPath>$(MSBuildThisFileDirectory)..\CodingChainApi.Client</WebApiClientPath>
+            </PropertyGroup>
+        </When>
+        <When Condition=" '$(OS)' != 'Windows_NT' ">
+            <PropertyGroup>
+                <WebApiClientPath>$(MSBuildThisFileDirectory)../CodingChainApi.Client</WebApiClientPath>
+            </PropertyGroup>
+        </When>
+    </Choose>
+
+    <ItemGroup>
+        <Content Remove="nswag.json" />
+        <Content Remove="AppData\Templates\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.4" />
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="5.0.4" />
+        <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="5.0.2" />
+        <PackageReference Include="NSwag.AspNetCore" Version="13.10.8" />
+        <PackageReference Include="NSwag.MSBuild" Version="13.10.8">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.1.1" />
+        <PackageReference Include="ZymLabs.NSwag.FluentValidation" Version="0.4.0" />
+        <PackageReference Include="ZymLabs.NSwag.FluentValidation.AspNetCore" Version="0.4.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <!--      <ProjectReference Include="..\Generator\Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />-->
+        <!--      <ProjectReference Include="..\CodingChainApi.Api.Shared\CodingChainApi.Api.Shared.csproj" />-->
+        <ProjectReference Include="..\CodingChainApi.Application\CodingChainApi.Application.csproj" />
+        <ProjectReference Include="..\CodingChainApi.Domain\CodingChainApi.Domain.csproj" />
+        <ProjectReference Include="..\CodingChainApi.Infrastructure\CodingChainApi.Infrastructure.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Compile Remove="AppData\Templates\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <EmbeddedResource Remove="AppData\Templates\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Content Remove="AppData\Templates\**" />
+    </ItemGroup>
+    <Target Name="Echo path">
+        <Message Text="$(MSBuildThisFileDirectory)" Importance="high" />
+    </Target>
+    <Target Name="NSwag" BeforeTargets="AfterBuild" Condition="'$(TF_BUILD)'!='True'">
+        <Exec ConsoleToMSBuild="true" ContinueOnError="true" Command="$(NSwagExe_Net50) run nswag.json /variables:Configuration=$(Configuration),CSharpOutputPath=$(WebApiClientPath)">
+            <Output TaskParameter="ExitCode" PropertyName="NSwagExitCode" />
+            <Output TaskParameter="ConsoleOutput" PropertyName="NSwagOutput" />
+        </Exec>
+
+        <Message Text="$(NSwagOutput)" Condition="'$(NSwagExitCode)' == '0'" Importance="low" />
+        <Error Text="$(NSwagOutput)" Condition="'$(NSwagExitCode)' != '0'" />
+    </Target>
+</Project>
