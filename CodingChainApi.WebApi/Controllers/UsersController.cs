@@ -1,4 +1,10 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Collections.Generic;
+using System.Net;
+using System.Threading.Tasks;
+using Application.Read.Languages;
+using Application.Read.Users;
+using Application.Read.Users.Handlers;
 using Application.Write.Users.LoginUser;
 using Application.Write.Users.RegisterUser;
 using AutoMapper;
@@ -6,7 +12,9 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using NeosCodingApi.Helpers;
 using NeosCodingApi.Services;
+using NSwag.Annotations;
 
 namespace NeosCodingApi.Controllers
 {
@@ -24,8 +32,15 @@ namespace NeosCodingApi.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Registration(RegisterUserCommand registerUserCommand)
         {
-            var res = await Mediator.Send(registerUserCommand);
-            return CreatedAtRoute(nameof(Authentication), new { });
+            try
+            {
+                var res = await Mediator.Send(registerUserCommand);
+                return CreatedAtRoute(nameof(Authentication), new { });
+            }
+            catch (ApplicationException e)
+            {
+                return Conflict();
+            }
         }
 
         [AllowAnonymous]
@@ -34,10 +49,34 @@ namespace NeosCodingApi.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Authentication(LoginUserQuery loginUserQuery)
         {
-            var loggedUser = await Mediator.Send(loginUserQuery);
-            return Ok(loggedUser);
+            try
+            {
+                var userToken = await Mediator.Send(loginUserQuery);
+                return Ok(userToken);
+            }
+            catch (ApplicationException e)
+            {
+                return NotFound();
+            }
+
         }
         
+        [HttpGet(TemplateActionName, Name = nameof(Me))]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [SwaggerResponse(HttpStatusCode.OK, typeof(ConnectedUser))]
+        public async Task<IActionResult> Me()
+        {
+            try
+            {
+                var loggedUser = await Mediator.Send(new GetConnectedUserQuery());
+                return Ok(loggedUser);
+            }
+            catch (ApplicationException e)
+            {
+                return Unauthorized();
+            }
+        }
+
         
     }
 }

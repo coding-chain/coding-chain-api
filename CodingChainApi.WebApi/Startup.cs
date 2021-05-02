@@ -7,6 +7,8 @@ using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -48,11 +50,7 @@ namespace NeosCodingApi
 
             services.AddSignalR();
 
-            services.AddCors(options =>
-            {
-                options.AddPolicy(PolicyName,
-                    builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
-            });
+            services.AddCors();
             // services.Configure<ApiBehaviorOptions>(options => { options.SuppressModelStateInvalidFilter = true; });
 
             services.Configure<FormOptions>(options =>
@@ -82,38 +80,61 @@ namespace NeosCodingApi
                 });
             ;
             services.AddSingleton<FluentValidationSchemaProcessor>();
+            services.AddVersionedApiExplorer(setupAction => { setupAction.GroupNameFormat = "'v'VV"; });
 
-            services.AddSwaggerDocument((settings, serviceProvider) =>
+            services.AddApiVersioning(setupAction =>
             {
-                var fluentValidationSchemaProcessor = serviceProvider.GetService<FluentValidationSchemaProcessor>();
-                // Add the fluent validations schema processor
-                settings.SchemaProcessors.Add(fluentValidationSchemaProcessor);
-                settings.PostProcess = document =>
-                {
-                    document.Info.Version = "v1";
-                    document.Info.Title = "CodingChain API";
-                    document.Info.Description = "REST API for example.";
-                };
+                setupAction.AssumeDefaultVersionWhenUnspecified = true;
+                setupAction.DefaultApiVersion = new ApiVersion(1, 0);
+                setupAction.ReportApiVersions = true;
             });
+
+            var apiVersionDescriptionProvider =
+                services.BuildServiceProvider().GetService<IApiVersionDescriptionProvider>();
+
+            foreach (var apiVersionDescription in apiVersionDescriptionProvider.ApiVersionDescriptions)
+            {
+                services.AddSwaggerDocument((settings, serviceProvider) =>
+                {
+                    var fluentValidationSchemaProcessor = serviceProvider.GetService<FluentValidationSchemaProcessor>();
+                    // Add the fluent validations schema processor
+                    settings.SchemaProcessors.Add(fluentValidationSchemaProcessor);
+                    settings.PostProcess = document =>
+                    {
+                        document.Info.Version = apiVersionDescription.ApiVersion.ToString();
+                        document.Info.Title = "CodingChain API";
+                        document.Info.Description = "REST API for example.";
+                    };
+                });
+            }
+
             services.AddResponseCompression(opts =>
             {
                 opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
                     new[] {"application/octet-stream"});
             });
-
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            app.UseResponseCompression();
-            if (env.IsDevelopment()) app.UseDeveloperExceptionPage();
+            app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
-            app.UseHttpsRedirection();
+            app.UseResponseCompression();
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
+            else
+            {
+                app.UseHttpsRedirection();
+            }
+
+
 
             app.UseRouting();
 
-            app.UseCors(PolicyName);
+
 
             app.UseAuthentication();
 

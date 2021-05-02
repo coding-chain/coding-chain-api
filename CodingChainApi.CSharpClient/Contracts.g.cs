@@ -19,32 +19,32 @@ namespace CodingChainApi.WebApi.Client.Contracts
     public partial interface ILanguagesClient
     {
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task CreateLanguageAsync(CreateLanguageCommand createLanguageCommand);
+        System.Threading.Tasks.Task CreateLanguageAsync(string version, CreateLanguageCommand createLanguageCommand);
     
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task CreateLanguageAsync(CreateLanguageCommand createLanguageCommand, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task CreateLanguageAsync(string version, CreateLanguageCommand createLanguageCommand, System.Threading.CancellationToken cancellationToken);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<HateoasResponseOfIListOfHateoasResponseOfProgrammingLanguageNavigation> GetLanguagesAsync(int page, int size);
-    
-        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<HateoasResponseOfIListOfHateoasResponseOfProgrammingLanguageNavigation> GetLanguagesAsync(int page, int size, System.Threading.CancellationToken cancellationToken);
-    
-        /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task GetLanguageByIdAsync(System.Guid id);
+        System.Threading.Tasks.Task<HateoasResponseOfIListOfHateoasResponseOfProgrammingLanguageNavigation> GetLanguagesAsync(int page, int size, string version);
     
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task GetLanguageByIdAsync(System.Guid id, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<HateoasResponseOfIListOfHateoasResponseOfProgrammingLanguageNavigation> GetLanguagesAsync(int page, int size, string version, System.Threading.CancellationToken cancellationToken);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task TestAsync(TestCommand command);
+        System.Threading.Tasks.Task GetLanguageByIdAsync(System.Guid id, string version);
     
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task TestAsync(TestCommand command, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task GetLanguageByIdAsync(System.Guid id, string version, System.Threading.CancellationToken cancellationToken);
+    
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task TestAsync(string version, TestCommand command);
+    
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task TestAsync(string version, TestCommand command, System.Threading.CancellationToken cancellationToken);
     
     }
     
@@ -52,11 +52,11 @@ namespace CodingChainApi.WebApi.Client.Contracts
     public partial interface ISutClient
     {
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<FileResponse> PostAsync();
+        System.Threading.Tasks.Task<FileResponse> PostAsync(string api_version);
     
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<FileResponse> PostAsync(System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<FileResponse> PostAsync(string api_version, System.Threading.CancellationToken cancellationToken);
     
     }
     
@@ -64,18 +64,25 @@ namespace CodingChainApi.WebApi.Client.Contracts
     public partial interface IUsersClient
     {
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task RegistrationAsync(RegisterUserCommand registerUserCommand);
+        System.Threading.Tasks.Task RegistrationAsync(string version, RegisterUserCommand registerUserCommand);
     
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task RegistrationAsync(RegisterUserCommand registerUserCommand, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task RegistrationAsync(string version, RegisterUserCommand registerUserCommand, System.Threading.CancellationToken cancellationToken);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task AuthenticationAsync(LoginUserQuery loginUserQuery);
+        System.Threading.Tasks.Task AuthenticationAsync(string version, LoginUserQuery loginUserQuery);
     
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task AuthenticationAsync(LoginUserQuery loginUserQuery, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task AuthenticationAsync(string version, LoginUserQuery loginUserQuery, System.Threading.CancellationToken cancellationToken);
+    
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<ConnectedUser> MeAsync(string version);
+    
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<ConnectedUser> MeAsync(string version, System.Threading.CancellationToken cancellationToken);
     
     }
 
@@ -330,6 +337,30 @@ namespace CodingChainApi.WebApi.Client.Contracts
         public static LoginUserQuery FromJson(string data)
         {
             return Newtonsoft.Json.JsonConvert.DeserializeObject<LoginUserQuery>(data);
+        }
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.3.11.0 (Newtonsoft.Json v12.0.0.0)")]
+    public partial class ConnectedUser 
+    {
+        [Newtonsoft.Json.JsonProperty("id", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Guid Id { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("username", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string Username { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("email", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string Email { get; set; }
+    
+        public string ToJson() 
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
+        }
+    
+        public static ConnectedUser FromJson(string data)
+        {
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<ConnectedUser>(data);
         }
     
     }

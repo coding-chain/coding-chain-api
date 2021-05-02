@@ -2,9 +2,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using Application.Common.Pagination;
 using Application.Read.Contracts;
+using Application.Read.Languages;
 using MediatR;
 
-namespace Application.Read.Languages.Handlers
+namespace Application.Read.ProgrammingLanguages.Handlers
 {
     public record GetAllProgrammingLanguagesPaginatedQuery: IPaginationQuery, IRequest<IPagedList<ProgrammingLanguageNavigation>>
     {

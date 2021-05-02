@@ -1,6 +1,6 @@
 {
   "runtime": "Net50",
-  "defaultVariables": "CSharpOutputPath=..\\CodingChainApi.WebApi.Client",
+  "defaultVariables": "CSharpOutputPath=..\\CodingChainApi.Client",
   "documentGenerator": {
     "aspNetCoreToOpenApi": {
       "project": "CodingChainApi.WebApi.csproj",
@@ -139,6 +139,16 @@
       "serviceSchemes": null,
       "output": "$(CSharpOutputPath)/Client.g.cs",
       "newLineBehavior": "Auto"
+    },
+    "openApiToTypeScriptClient": {
+      "template": "Angular", 
+      "promiseType": "Promise",
+      "httpClass": "HttpClient",
+      "injectionTokenType": "InjectionToken",
+      "rxJsVersion": 6.0,
+      "dateTimeType": "OffsetMomentJS",
+      "output": "$(TypescriptOutputPath)/api.generated.clients.ts"
+
     }
   }
 }

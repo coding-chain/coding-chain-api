@@ -14,7 +14,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{47B38034-1
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Infrastructure", "{1EF2800D-B856-402C-A7AC-7EE781DC9951}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodingChainApi.Client", "CodingChainApi.Client\CodingChainApi.Client.csproj", "{EB91BD00-6F7E-4A67-A025-547805C5D482}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodingChainApi.CSharpClient", "CodingChainApi.CSharpClient\CodingChainApi.CSharpClient.csproj", "{EB91BD00-6F7E-4A67-A025-547805C5D482}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

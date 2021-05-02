@@ -10,12 +10,18 @@
     <Choose>
         <When Condition=" '$(OS)' == 'Windows_NT' ">
             <PropertyGroup>
-                <WebApiClientPath>$(MSBuildThisFileDirectory)..\CodingChainApi.Client</WebApiClientPath>
+                <WebApiCSharpClientPath>$(MSBuildThisFileDirectory)..\CodingChainApi.CSharpClient</WebApiCSharpClientPath>
+            </PropertyGroup>
+            <PropertyGroup>
+                <WebApiTypescriptClientPath>$(MSBuildThisFileDirectory)..\coding_api_typescript_client</WebApiTypescriptClientPath>
             </PropertyGroup>
         </When>
         <When Condition=" '$(OS)' != 'Windows_NT' ">
             <PropertyGroup>
-                <WebApiClientPath>$(MSBuildThisFileDirectory)../CodingChainApi.Client</WebApiClientPath>
+                <WebApiCSharpClientPath>$(MSBuildThisFileDirectory)../CodingChainApi.CSharpClient</WebApiCSharpClientPath>
+            </PropertyGroup>
+            <PropertyGroup>
+                <WebApiTypescriptClientPath>$(MSBuildThisFileDirectory)../coding_chain_api_ts_client</WebApiTypescriptClientPath>
             </PropertyGroup>
         </When>
     </Choose>
@@ -29,6 +35,8 @@
         <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.4" />
         <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="5.0.4" />
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="5.0.0" />
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning.ApiExplorer" Version="5.0.0" />
         <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="5.0.2" />
         <PackageReference Include="NSwag.AspNetCore" Version="13.10.8" />
         <PackageReference Include="NSwag.MSBuild" Version="13.10.8">
@@ -41,8 +49,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <!--      <ProjectReference Include="..\Generator\Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />-->
-        <!--      <ProjectReference Include="..\CodingChainApi.Api.Shared\CodingChainApi.Api.Shared.csproj" />-->
         <ProjectReference Include="..\CodingChainApi.Application\CodingChainApi.Application.csproj" />
         <ProjectReference Include="..\CodingChainApi.Domain\CodingChainApi.Domain.csproj" />
         <ProjectReference Include="..\CodingChainApi.Infrastructure\CodingChainApi.Infrastructure.csproj" />
@@ -60,10 +66,10 @@
         <Content Remove="AppData\Templates\**" />
     </ItemGroup>
     <Target Name="Echo path">
-        <Message Text="$(MSBuildThisFileDirectory)" Importance="high" />
+        <Message Text="$(TF_BUILD)" Importance="high" />
     </Target>
     <Target Name="NSwag" BeforeTargets="AfterBuild" Condition="'$(TF_BUILD)'!='True'">
-        <Exec ConsoleToMSBuild="true" ContinueOnError="true" Command="$(NSwagExe_Net50) run nswag.json /variables:Configuration=$(Configuration),CSharpOutputPath=$(WebApiClientPath)">
+        <Exec ConsoleToMSBuild="true" ContinueOnError="true" Command="$(NSwagExe_Net50) run nswag.json /variables:Configuration=$(Configuration),CSharpOutputPath=$(WebApiCSharpClientPath),TypescriptOutputPath=$(WebApiTypescriptClientPath)">
             <Output TaskParameter="ExitCode" PropertyName="NSwagExitCode" />
             <Output TaskParameter="ConsoleOutput" PropertyName="NSwagOutput" />
         </Exec>
