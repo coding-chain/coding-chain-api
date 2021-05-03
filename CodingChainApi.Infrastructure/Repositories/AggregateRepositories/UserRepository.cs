@@ -22,6 +22,11 @@ namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
             _context = context;
         }
 
+        private async Task<Models.User?> FindAsync(Guid id)
+        {
+            return await _context.Users.FirstOrDefaultAsync(u => !u.IsDeleted && u.Id == id);
+        }
+
         public async Task<UserId> SetAsync(User aggregate)
         {
             var user = await ToModel(aggregate);
@@ -34,15 +39,12 @@ namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
         private async Task<Models.User> ToModel(User aggregate)
         {
             var rightsNames = aggregate.Rights.Select(r => r.Name);
-
-            var user = new Models.User()
-            {
-                Email = aggregate.Email,
-                Password = aggregate.Password,
-                Rights = await _context.Rights.Where(r => rightsNames.Contains(r.Name)).ToListAsync(),
-                Username = aggregate.Username,
-                Id = aggregate.Id.Value
-            };
+            var user = await FindAsync(aggregate.Id.Value) ?? new Models.User();
+            user.Email = aggregate.Email;
+            user.Password = aggregate.Password;
+            user.Rights = await _context.Rights.Where(r => rightsNames.Contains(r.Name)).ToListAsync();
+            user.Username = aggregate.Username;
+            user.Id = aggregate.Id.Value;
             return user;
         }
 
@@ -60,13 +62,13 @@ namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
         {
             return ToEntity(await _context.Users
                 .Include(u => u.Rights)
-                .FirstOrDefaultAsync(u => u.Id == id.Value));
+                .FirstOrDefaultAsync(u => u.Id == id.Value && !u.IsDeleted ));
         }
 
         public async Task RemoveAsync(UserId id)
         {
-            var user = await _context.Users.FindAsync(id.Value);
-            _context.Users.Remove(user);
+            var user = await FindAsync(id.Value);
+            user.IsDeleted = true;
         }
 
         public Task<UserId> NextIdAsync()

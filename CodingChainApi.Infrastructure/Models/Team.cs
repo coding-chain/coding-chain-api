@@ -3,12 +3,11 @@ using System.Collections.Generic;
 
 namespace CodingChainApi.Infrastructure.Models
 {
-    public class ProgrammingLanguage
+    public class Team
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
-
         public bool IsDeleted { get; set; }
-        public IList<Step> Steps { get; set; } = new List<Step>();
+        public IList<UserTeam> UserTeams { get; set; } = new List<UserTeam>();
     }
 }
