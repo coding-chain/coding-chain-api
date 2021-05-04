@@ -14,6 +14,6 @@ namespace CodingChainApi.Infrastructure.Models
         public bool IsDeleted { get; set; }
         
         public IList<Participation> Participations = new List<Participation>();
-        public IList<Step> Steps = new List<Step>();
+        public IList<TournamentStep> TournamentSteps = new List<TournamentStep>();
     }
 }

@@ -33,7 +33,7 @@ namespace Application.Write.Users.RegisterUser
             var users = await _userRepository.GetAllAsync();
             var id = await _userRepository.NextIdAsync();
             if (userExists ) throw new ApplicationException("Username or email already exists");
-            var user = new User(id, password, new List<Right>(), request.Email,
+            var user = new UserAggregate(id, password, new List<Right>(), request.Email,
                 request.Username);
 
             user.SetMandatoryRoles(users);

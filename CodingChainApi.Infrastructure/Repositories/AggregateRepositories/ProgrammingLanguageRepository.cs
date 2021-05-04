@@ -1,6 +1,5 @@
 using System.Threading.Tasks;
 using Application.Write.Contracts;
-using Domain.Languages;
 using Domain.ProgrammingLanguages;
 
 namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
@@ -28,9 +27,5 @@ namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
             return _programmingLanguageRepositoryImplementation.NextIdAsync();
         }
 
-        public Task<EnvironmentId> NextEnvironmentIdAsync()
-        {
-            return _programmingLanguageRepositoryImplementation.NextEnvironmentIdAsync();
-        }
     }
 }

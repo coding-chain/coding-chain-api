@@ -35,21 +35,25 @@ namespace CodingChainApi.Infrastructure
             services.AddScoped<IProcessService, ProcessService>();
             services.AddScoped<ISecurityService, SecurityService>();
             services.AddScoped<ITokenService, TokenService>();
+            services.AddScoped<ITimeService, TimeService>();
             RegisterAggregateRepositories(services);
-            RegisterReadRepositories(services);            
+            RegisterReadRepositories(services);
             return services;
         }
 
         private static void RegisterAggregateRepositories(IServiceCollection services)
         {
             services.AddProxiedScoped<IUserRepository, UserRepository>(typeof(EventPublisherInterceptor));
-            services.AddProxiedScoped<IProgrammingLanguageRepository, ProgrammingLanguageRepository>(typeof(EventPublisherInterceptor));
+            services.AddProxiedScoped<IProgrammingLanguageRepository, ProgrammingLanguageRepository>(
+                typeof(EventPublisherInterceptor));
+            services.AddProxiedScoped<ITeamRepository, TeamRepository>(typeof(EventPublisherInterceptor));
         }
-        
+
         private static void RegisterReadRepositories(IServiceCollection services)
         {
             services.AddScoped<IReadProgrammingLanguageRepository, ReadProgrammingLanguageRepository>();
             services.AddScoped<IReadUserRepository, ReadUserRepository>();
+            services.AddScoped<IReadTeamRepository, ReadTeamRepository>();
         }
 
         private static void ConfigureProcess(IServiceCollection services, IConfiguration configuration)
@@ -112,10 +116,8 @@ namespace CodingChainApi.Infrastructure
             {
                 throw new InfrastructureException("Please provide connection string");
             }
+
             services.AddDbContext<CodingChainContext>(o => o.UseSqlServer(dbSettings.ConnectionString));
-
-
-
         }
     }
 }

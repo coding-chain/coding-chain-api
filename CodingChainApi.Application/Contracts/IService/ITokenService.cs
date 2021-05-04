@@ -5,6 +5,6 @@ namespace Application.Contracts.IService
 {
     public interface ITokenService
     {
-        public Task<string> GenerateUserTokenAsync(User user);
+        public Task<string> GenerateUserTokenAsync(UserAggregate user);
     }
 }

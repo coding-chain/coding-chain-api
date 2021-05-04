@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -10,8 +9,6 @@ using Application.Read.Languages.Handlers;
 using Application.Read.ProgrammingLanguages.Handlers;
 using Application.Write.Languages;
 using AutoMapper;
-using Domain.Contracts;
-using Domain.Languages;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -83,12 +80,12 @@ namespace NeosCodingApi.Controllers
         public async Task<IActionResult> GetLanguages([FromQuery] GetAllProgrammingLanguagesPaginatedQuery query)
         {
             var languages = await Mediator.Send(query);
-            var sessionsWithLinks = languages.Select(language =>
+            var languagesWithLinks = languages.Select(language =>
                 new HateoasResponse<ProgrammingLanguageNavigation>(language, GetLinksForLanguage(language.Id)));
             return Ok(HateoasResponseBuilder.FromPagedList(
                 Url,
                 languages.ToPagedListResume(),
-                sessionsWithLinks.ToList(),
+                languagesWithLinks.ToList(),
                 nameof(GetLanguages))
             );
         }

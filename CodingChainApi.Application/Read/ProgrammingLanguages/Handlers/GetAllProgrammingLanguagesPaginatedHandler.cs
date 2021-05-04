@@ -7,10 +7,8 @@ using MediatR;
 
 namespace Application.Read.ProgrammingLanguages.Handlers
 {
-    public record GetAllProgrammingLanguagesPaginatedQuery: IPaginationQuery, IRequest<IPagedList<ProgrammingLanguageNavigation>>
+    public record GetAllProgrammingLanguagesPaginatedQuery: PaginationQueryBase, IRequest<IPagedList<ProgrammingLanguageNavigation>>
     {
-        public int Page { get; set; }
-        public int Size { get; set; }
     }
 
     public class GetAllProgrammingLanguagesPaginatedHandler: IRequestHandler<GetAllProgrammingLanguagesPaginatedQuery, IPagedList<ProgrammingLanguageNavigation>>

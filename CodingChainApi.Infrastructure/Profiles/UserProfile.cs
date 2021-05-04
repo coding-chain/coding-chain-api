@@ -13,7 +13,7 @@ namespace CodingChainApi.Infrastructure.Profiles
             CreateMap<Guid, UserId>().ConvertUsing((val, id) => new UserId(val));
             CreateMap<UserId, Guid>().ConvertUsing((id, val) => id.Value);
             
-            CreateMap<User, Domain.Users.User>().ReverseMap();
+            CreateMap<User, Domain.Users.UserAggregate>().ReverseMap();
         }
     }
 }

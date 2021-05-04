@@ -13,13 +13,13 @@ namespace Domain.Users
         }
     }
 
-    public class User : Aggregate<UserId>
+    public class UserAggregate : Aggregate<UserId>
     {
         public string Email;
         public string Username;
         private List<Right> _rights;
 
-        public User(UserId id, string password, IList<Right> rights, string email, string username) : base(id)
+        public UserAggregate(UserId id, string password, IList<Right> rights, string email, string username) : base(id)
         {
             Password = password;
             _rights = rights.ToList();
@@ -32,7 +32,7 @@ namespace Domain.Users
         public IReadOnlyList<Right> Rights => _rights.AsReadOnly();
 
 
-        public void SetMandatoryRoles(IEnumerable<User> existingUsers)
+        public void SetMandatoryRoles(IEnumerable<UserAggregate> existingUsers)
         {
             var roles = new List<Right>
             {

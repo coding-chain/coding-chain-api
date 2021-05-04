@@ -337,6 +337,476 @@ export class SutClient {
 }
 
 @Injectable()
+export class TeamsClient {
+    private http: HttpClient;
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(@Inject(HttpClient) http: HttpClient, @Optional() @Inject(API_BASE_URL) baseUrl?: string) {
+        this.http = http;
+        this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "";
+    }
+
+    createTeam(version: string | null, createTeamCommand: CreateTeamCommand): Observable<void> {
+        let url_ = this.baseUrl + "/api/v{version}/Teams";
+        if (version === undefined || version === null)
+            throw new Error("The parameter 'version' must be defined.");
+        url_ = url_.replace("{version}", encodeURIComponent("" + version));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(createTeamCommand);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processCreateTeam(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processCreateTeam(<any>response_);
+                } catch (e) {
+                    return <Observable<void>><any>_observableThrow(e);
+                }
+            } else
+                return <Observable<void>><any>_observableThrow(response_);
+        }));
+    }
+
+    protected processCreateTeam(response: HttpResponseBase): Observable<void> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 201) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return _observableOf<void>(<any>null);
+            }));
+        } else if (status === 409) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result409: any = null;
+            let resultData409 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result409 = ProblemDetails.fromJS(resultData409);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result409);
+            }));
+        } else if (status === 422) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result422: any = null;
+            let resultData422 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result422 = ProblemDetails.fromJS(resultData422);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result422);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf<void>(<any>null);
+    }
+
+    getTeams(page: number, size: number, version: string | null): Observable<HateoasResponseOfIListOfHateoasResponseOfTeamNavigation> {
+        let url_ = this.baseUrl + "/api/v{version}/Teams?";
+        if (version === undefined || version === null)
+            throw new Error("The parameter 'version' must be defined.");
+        url_ = url_.replace("{version}", encodeURIComponent("" + version));
+        if (page === undefined || page === null)
+            throw new Error("The parameter 'page' must be defined and cannot be null.");
+        else
+            url_ += "Page=" + encodeURIComponent("" + page) + "&";
+        if (size === undefined || size === null)
+            throw new Error("The parameter 'size' must be defined and cannot be null.");
+        else
+            url_ += "Size=" + encodeURIComponent("" + size) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetTeams(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetTeams(<any>response_);
+                } catch (e) {
+                    return <Observable<HateoasResponseOfIListOfHateoasResponseOfTeamNavigation>><any>_observableThrow(e);
+                }
+            } else
+                return <Observable<HateoasResponseOfIListOfHateoasResponseOfTeamNavigation>><any>_observableThrow(response_);
+        }));
+    }
+
+    protected processGetTeams(response: HttpResponseBase): Observable<HateoasResponseOfIListOfHateoasResponseOfTeamNavigation> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = HateoasResponseOfIListOfHateoasResponseOfTeamNavigation.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf<HateoasResponseOfIListOfHateoasResponseOfTeamNavigation>(<any>null);
+    }
+
+    addMemberToTeam(id: string, version: string | null, addMemberToTeamBodyCommand: AddMemberToTeamBodyCommand): Observable<void> {
+        let url_ = this.baseUrl + "/api/v{version}/Teams/{id}/members";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        if (version === undefined || version === null)
+            throw new Error("The parameter 'version' must be defined.");
+        url_ = url_.replace("{version}", encodeURIComponent("" + version));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(addMemberToTeamBodyCommand);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processAddMemberToTeam(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processAddMemberToTeam(<any>response_);
+                } catch (e) {
+                    return <Observable<void>><any>_observableThrow(e);
+                }
+            } else
+                return <Observable<void>><any>_observableThrow(response_);
+        }));
+    }
+
+    protected processAddMemberToTeam(response: HttpResponseBase): Observable<void> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 201) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return _observableOf<void>(<any>null);
+            }));
+        } else if (status === 409) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result409: any = null;
+            let resultData409 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result409 = ProblemDetails.fromJS(resultData409);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result409);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result404: any = null;
+            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result404 = ProblemDetails.fromJS(resultData404);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result404);
+            }));
+        } else if (status === 403) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result403: any = null;
+            let resultData403 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result403 = ProblemDetails.fromJS(resultData403);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result403);
+            }));
+        } else if (status === 422) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result422: any = null;
+            let resultData422 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result422 = ProblemDetails.fromJS(resultData422);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result422);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf<void>(<any>null);
+    }
+
+    elevateTeamMember(id: string, memberId: string, version: string | null): Observable<void> {
+        let url_ = this.baseUrl + "/api/v{version}/Teams/{id}/members/{memberId}/elevation";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        if (memberId === undefined || memberId === null)
+            throw new Error("The parameter 'memberId' must be defined.");
+        url_ = url_.replace("{memberId}", encodeURIComponent("" + memberId));
+        if (version === undefined || version === null)
+            throw new Error("The parameter 'version' must be defined.");
+        url_ = url_.replace("{version}", encodeURIComponent("" + version));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processElevateTeamMember(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processElevateTeamMember(<any>response_);
+                } catch (e) {
+                    return <Observable<void>><any>_observableThrow(e);
+                }
+            } else
+                return <Observable<void>><any>_observableThrow(response_);
+        }));
+    }
+
+    protected processElevateTeamMember(response: HttpResponseBase): Observable<void> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return _observableOf<void>(<any>null);
+            }));
+        } else if (status === 409) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result409: any = null;
+            let resultData409 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result409 = ProblemDetails.fromJS(resultData409);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result409);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result404: any = null;
+            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result404 = ProblemDetails.fromJS(resultData404);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result404);
+            }));
+        } else if (status === 401) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result401: any = null;
+            let resultData401 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result401 = ProblemDetails.fromJS(resultData401);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result401);
+            }));
+        } else if (status === 403) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result403: any = null;
+            let resultData403 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result403 = ProblemDetails.fromJS(resultData403);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result403);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf<void>(<any>null);
+    }
+
+    removeMemberFromTeam(id: string, memberId: string, version: string | null): Observable<void> {
+        let url_ = this.baseUrl + "/api/v{version}/Teams/{id}/members/{memberId}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        if (memberId === undefined || memberId === null)
+            throw new Error("The parameter 'memberId' must be defined.");
+        url_ = url_.replace("{memberId}", encodeURIComponent("" + memberId));
+        if (version === undefined || version === null)
+            throw new Error("The parameter 'version' must be defined.");
+        url_ = url_.replace("{version}", encodeURIComponent("" + version));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+            })
+        };
+
+        return this.http.request("delete", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processRemoveMemberFromTeam(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processRemoveMemberFromTeam(<any>response_);
+                } catch (e) {
+                    return <Observable<void>><any>_observableThrow(e);
+                }
+            } else
+                return <Observable<void>><any>_observableThrow(response_);
+        }));
+    }
+
+    protected processRemoveMemberFromTeam(response: HttpResponseBase): Observable<void> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return _observableOf<void>(<any>null);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result404: any = null;
+            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result404 = ProblemDetails.fromJS(resultData404);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result404);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf<void>(<any>null);
+    }
+
+    deleteTeam(id: string, version: string | null): Observable<void> {
+        let url_ = this.baseUrl + "/api/v{version}/Teams/{id}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        if (version === undefined || version === null)
+            throw new Error("The parameter 'version' must be defined.");
+        url_ = url_.replace("{version}", encodeURIComponent("" + version));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+            })
+        };
+
+        return this.http.request("delete", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processDeleteTeam(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processDeleteTeam(<any>response_);
+                } catch (e) {
+                    return <Observable<void>><any>_observableThrow(e);
+                }
+            } else
+                return <Observable<void>><any>_observableThrow(response_);
+        }));
+    }
+
+    protected processDeleteTeam(response: HttpResponseBase): Observable<void> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return _observableOf<void>(<any>null);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result404: any = null;
+            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result404 = ProblemDetails.fromJS(resultData404);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result404);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf<void>(<any>null);
+    }
+
+    getTeamById(id: string, version: string | null): Observable<HateoasResponseOfTeamNavigation> {
+        let url_ = this.baseUrl + "/api/v{version}/Teams/{id}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        if (version === undefined || version === null)
+            throw new Error("The parameter 'version' must be defined.");
+        url_ = url_.replace("{version}", encodeURIComponent("" + version));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetTeamById(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetTeamById(<any>response_);
+                } catch (e) {
+                    return <Observable<HateoasResponseOfTeamNavigation>><any>_observableThrow(e);
+                }
+            } else
+                return <Observable<HateoasResponseOfTeamNavigation>><any>_observableThrow(response_);
+        }));
+    }
+
+    protected processGetTeamById(response: HttpResponseBase): Observable<HateoasResponseOfTeamNavigation> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = HateoasResponseOfTeamNavigation.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf<HateoasResponseOfTeamNavigation>(<any>null);
+    }
+}
+
+@Injectable()
 export class UsersClient {
     private http: HttpClient;
     private baseUrl: string;
@@ -477,7 +947,7 @@ export class UsersClient {
         return _observableOf<void>(<any>null);
     }
 
-    me(version: string | null): Observable<ConnectedUser> {
+    me(version: string | null): Observable<PublicUser> {
         let url_ = this.baseUrl + "/api/v{version}/Users/Me";
         if (version === undefined || version === null)
             throw new Error("The parameter 'version' must be defined.");
@@ -499,14 +969,14 @@ export class UsersClient {
                 try {
                     return this.processMe(<any>response_);
                 } catch (e) {
-                    return <Observable<ConnectedUser>><any>_observableThrow(e);
+                    return <Observable<PublicUser>><any>_observableThrow(e);
                 }
             } else
-                return <Observable<ConnectedUser>><any>_observableThrow(response_);
+                return <Observable<PublicUser>><any>_observableThrow(response_);
         }));
     }
 
-    protected processMe(response: HttpResponseBase): Observable<ConnectedUser> {
+    protected processMe(response: HttpResponseBase): Observable<PublicUser> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -517,7 +987,7 @@ export class UsersClient {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
             let result200: any = null;
             let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = ConnectedUser.fromJS(resultData200);
+            result200 = PublicUser.fromJS(resultData200);
             return _observableOf(result200);
             }));
         } else if (status !== 200 && status !== 204) {
@@ -525,7 +995,66 @@ export class UsersClient {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             }));
         }
-        return _observableOf<ConnectedUser>(<any>null);
+        return _observableOf<PublicUser>(<any>null);
+    }
+
+    getAllUsers(page: number, size: number, version: string | null): Observable<HateoasResponseOfIListOfPublicUser> {
+        let url_ = this.baseUrl + "/api/v{version}/Users?";
+        if (version === undefined || version === null)
+            throw new Error("The parameter 'version' must be defined.");
+        url_ = url_.replace("{version}", encodeURIComponent("" + version));
+        if (page === undefined || page === null)
+            throw new Error("The parameter 'page' must be defined and cannot be null.");
+        else
+            url_ += "Page=" + encodeURIComponent("" + page) + "&";
+        if (size === undefined || size === null)
+            throw new Error("The parameter 'size' must be defined and cannot be null.");
+        else
+            url_ += "Size=" + encodeURIComponent("" + size) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetAllUsers(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetAllUsers(<any>response_);
+                } catch (e) {
+                    return <Observable<HateoasResponseOfIListOfPublicUser>><any>_observableThrow(e);
+                }
+            } else
+                return <Observable<HateoasResponseOfIListOfPublicUser>><any>_observableThrow(response_);
+        }));
+    }
+
+    protected processGetAllUsers(response: HttpResponseBase): Observable<HateoasResponseOfIListOfPublicUser> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = HateoasResponseOfIListOfPublicUser.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf<HateoasResponseOfIListOfPublicUser>(<any>null);
     }
 }
 
@@ -895,6 +1424,234 @@ export interface ITestCommand {
     sutFileRelativePath?: string;
 }
 
+export class CreateTeamCommand implements ICreateTeamCommand {
+    name?: string;
+
+    constructor(data?: ICreateTeamCommand) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.name = _data["name"];
+        }
+    }
+
+    static fromJS(data: any): CreateTeamCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new CreateTeamCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["name"] = this.name;
+        return data; 
+    }
+}
+
+export interface ICreateTeamCommand {
+    name?: string;
+}
+
+export class AddMemberToTeamBodyCommand implements IAddMemberToTeamBodyCommand {
+    memberId?: string;
+
+    constructor(data?: IAddMemberToTeamBodyCommand) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.memberId = _data["memberId"];
+        }
+    }
+
+    static fromJS(data: any): AddMemberToTeamBodyCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new AddMemberToTeamBodyCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["memberId"] = this.memberId;
+        return data; 
+    }
+}
+
+export interface IAddMemberToTeamBodyCommand {
+    memberId?: string;
+}
+
+export class HateoasResponseOfTeamNavigation implements IHateoasResponseOfTeamNavigation {
+    result?: TeamNavigation;
+    links?: LinkDto[];
+
+    constructor(data?: IHateoasResponseOfTeamNavigation) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.result = _data["result"] ? TeamNavigation.fromJS(_data["result"]) : <any>undefined;
+            if (Array.isArray(_data["links"])) {
+                this.links = [] as any;
+                for (let item of _data["links"])
+                    this.links!.push(LinkDto.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): HateoasResponseOfTeamNavigation {
+        data = typeof data === 'object' ? data : {};
+        let result = new HateoasResponseOfTeamNavigation();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["result"] = this.result ? this.result.toJSON() : <any>undefined;
+        if (Array.isArray(this.links)) {
+            data["links"] = [];
+            for (let item of this.links)
+                data["links"].push(item.toJSON());
+        }
+        return data; 
+    }
+}
+
+export interface IHateoasResponseOfTeamNavigation {
+    result?: TeamNavigation;
+    links?: LinkDto[];
+}
+
+export class TeamNavigation implements ITeamNavigation {
+    id?: string;
+    name?: string;
+    memberIds?: string[];
+
+    constructor(data?: ITeamNavigation) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.name = _data["name"];
+            if (Array.isArray(_data["memberIds"])) {
+                this.memberIds = [] as any;
+                for (let item of _data["memberIds"])
+                    this.memberIds!.push(item);
+            }
+        }
+    }
+
+    static fromJS(data: any): TeamNavigation {
+        data = typeof data === 'object' ? data : {};
+        let result = new TeamNavigation();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["name"] = this.name;
+        if (Array.isArray(this.memberIds)) {
+            data["memberIds"] = [];
+            for (let item of this.memberIds)
+                data["memberIds"].push(item);
+        }
+        return data; 
+    }
+}
+
+export interface ITeamNavigation {
+    id?: string;
+    name?: string;
+    memberIds?: string[];
+}
+
+export class HateoasResponseOfIListOfHateoasResponseOfTeamNavigation implements IHateoasResponseOfIListOfHateoasResponseOfTeamNavigation {
+    result?: HateoasResponseOfTeamNavigation[];
+    links?: LinkDto[];
+
+    constructor(data?: IHateoasResponseOfIListOfHateoasResponseOfTeamNavigation) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            if (Array.isArray(_data["result"])) {
+                this.result = [] as any;
+                for (let item of _data["result"])
+                    this.result!.push(HateoasResponseOfTeamNavigation.fromJS(item));
+            }
+            if (Array.isArray(_data["links"])) {
+                this.links = [] as any;
+                for (let item of _data["links"])
+                    this.links!.push(LinkDto.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): HateoasResponseOfIListOfHateoasResponseOfTeamNavigation {
+        data = typeof data === 'object' ? data : {};
+        let result = new HateoasResponseOfIListOfHateoasResponseOfTeamNavigation();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        if (Array.isArray(this.result)) {
+            data["result"] = [];
+            for (let item of this.result)
+                data["result"].push(item.toJSON());
+        }
+        if (Array.isArray(this.links)) {
+            data["links"] = [];
+            for (let item of this.links)
+                data["links"].push(item.toJSON());
+        }
+        return data; 
+    }
+}
+
+export interface IHateoasResponseOfIListOfHateoasResponseOfTeamNavigation {
+    result?: HateoasResponseOfTeamNavigation[];
+    links?: LinkDto[];
+}
+
 export class RegisterUserCommand implements IRegisterUserCommand {
     username?: string;
     password?: string;
@@ -979,12 +1736,12 @@ export interface ILoginUserQuery {
     email?: string;
 }
 
-export class ConnectedUser implements IConnectedUser {
+export class PublicUser implements IPublicUser {
     id?: string;
     username?: string;
     email?: string;
 
-    constructor(data?: IConnectedUser) {
+    constructor(data?: IPublicUser) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -1001,9 +1758,9 @@ export class ConnectedUser implements IConnectedUser {
         }
     }
 
-    static fromJS(data: any): ConnectedUser {
+    static fromJS(data: any): PublicUser {
         data = typeof data === 'object' ? data : {};
-        let result = new ConnectedUser();
+        let result = new PublicUser();
         result.init(data);
         return result;
     }
@@ -1017,10 +1774,66 @@ export class ConnectedUser implements IConnectedUser {
     }
 }
 
-export interface IConnectedUser {
+export interface IPublicUser {
     id?: string;
     username?: string;
     email?: string;
+}
+
+export class HateoasResponseOfIListOfPublicUser implements IHateoasResponseOfIListOfPublicUser {
+    result?: PublicUser[];
+    links?: LinkDto[];
+
+    constructor(data?: IHateoasResponseOfIListOfPublicUser) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            if (Array.isArray(_data["result"])) {
+                this.result = [] as any;
+                for (let item of _data["result"])
+                    this.result!.push(PublicUser.fromJS(item));
+            }
+            if (Array.isArray(_data["links"])) {
+                this.links = [] as any;
+                for (let item of _data["links"])
+                    this.links!.push(LinkDto.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): HateoasResponseOfIListOfPublicUser {
+        data = typeof data === 'object' ? data : {};
+        let result = new HateoasResponseOfIListOfPublicUser();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        if (Array.isArray(this.result)) {
+            data["result"] = [];
+            for (let item of this.result)
+                data["result"].push(item.toJSON());
+        }
+        if (Array.isArray(this.links)) {
+            data["links"] = [];
+            for (let item of this.links)
+                data["links"].push(item.toJSON());
+        }
+        return data; 
+    }
+}
+
+export interface IHateoasResponseOfIListOfPublicUser {
+    result?: PublicUser[];
+    links?: LinkDto[];
 }
 
 export interface FileResponse {

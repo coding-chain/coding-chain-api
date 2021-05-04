@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc.Routing;
 namespace NeosCodingApi.Helpers
 {
     public static class HateoasResponseBuilder{
-        public static HateoasResponse<IList<T>> FromPagedList<T>(IUrlHelper urlHelper, PagedListResume page, IList<T> values,
+        public static  HateoasResponse<IList<T>> FromPagedList<T>(IUrlHelper urlHelper, PagedListResume page, IList<T> values,
             string routeName, object? routeValues = null) 
         {
             var valuesDic = routeValues == null ? new Dictionary<string, object>() : routeValues.ToDictionary<object>();

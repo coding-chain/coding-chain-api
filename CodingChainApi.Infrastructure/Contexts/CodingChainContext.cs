@@ -20,11 +20,17 @@ namespace CodingChainApi.Infrastructure.Contexts
             => optionsBuilder.UseSnakeCaseNamingConvention();
 
         public DbSet<User> Users { get; set; }
-
         public DbSet<ProgrammingLanguage> ProgrammingLanguages { get; set; }
         public DbSet<Right> Rights { get; set; }
         public DbSet<Team> Teams { get; set; }
         public DbSet<UserTeam> UserTeams { get; set; }
+        public DbSet<UserFunction> UserFunctions { get; set; }
+        public DbSet<Function> Functions { get; set; }
+        public DbSet<Participation> Participations { get; set; }
+        public DbSet<Tournament> Tournaments { get; set; }
+        public DbSet<TournamentStep> TournamentSteps { get; set; }
+        public DbSet<Step> Steps { get; set; }
+        public DbSet<Test> Tests { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -46,6 +52,8 @@ namespace CodingChainApi.Infrastructure.Contexts
                 .ToTable("participation");
             modelBuilder.Entity<Tournament>()
                 .ToTable("tournament");
+            modelBuilder.Entity<TournamentStep>()
+                .ToTable("tournament_step");
             modelBuilder.Entity<Step>()
                 .ToTable("step");
             modelBuilder.Entity<Test>()
@@ -56,8 +64,7 @@ namespace CodingChainApi.Infrastructure.Contexts
                 .HasMany(s => s.Rights)
                 .WithMany(c => c.Users);
 
-            modelBuilder.Entity<UserTeam>()
-                .HasKey(bc => new {bc.UserId, bc.TeamId});
+
             modelBuilder.Entity<UserTeam>()
                 .HasOne(bc => bc.User)
                 .WithMany(b => b.UserTeams)
@@ -67,8 +74,7 @@ namespace CodingChainApi.Infrastructure.Contexts
                 .WithMany(c => c.UserTeams)
                 .HasForeignKey(bc => bc.TeamId);
 
-            modelBuilder.Entity<UserFunction>()
-                .HasKey(bc => new {bc.UserId, bc.FunctionId});
+
             modelBuilder.Entity<UserFunction>()
                 .HasOne(bc => bc.User)
                 .WithMany(b => b.UserFunctions)
@@ -77,6 +83,15 @@ namespace CodingChainApi.Infrastructure.Contexts
                 .HasOne(bc => bc.Function)
                 .WithMany(c => c.UserFunctions)
                 .HasForeignKey(bc => bc.FunctionId);
+            
+            modelBuilder.Entity<TournamentStep>()
+                .HasOne(bc => bc.Tournament)
+                .WithMany(b => b.TournamentSteps)
+                .HasForeignKey(bc => bc.TournamentId);
+            modelBuilder.Entity<TournamentStep>()
+                .HasOne(bc => bc.Step)
+                .WithMany(c => c.TournamentSteps)
+                .HasForeignKey(bc => bc.StepId);
 
             modelBuilder.Entity<Right>()
                 .Property(c => c.Name)

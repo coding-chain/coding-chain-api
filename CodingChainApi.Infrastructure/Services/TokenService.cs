@@ -20,7 +20,7 @@ namespace CodingChainApi.Infrastructure.Services
             _settings = settings;
         }
 
-        public Task<string> GenerateUserTokenAsync(User user)
+        public Task<string> GenerateUserTokenAsync(UserAggregate user)
         {
             if (_settings.Key is null)
                 throw new InfrastructureException("JWt Key is null please check your JwtSettings");

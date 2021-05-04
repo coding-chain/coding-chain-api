@@ -17,7 +17,7 @@ namespace CodingChainApi.Infrastructure.Models
         
         public ProgrammingLanguage ProgrammingLanguage { get; set; }
         public IList<Test> Tests { get; set; } = new List<Test>();
-        public IList<Tournament> Tournaments { get; set; } = new List<Tournament>();
+        public IList<TournamentStep> TournamentSteps = new List<TournamentStep>();
         public IList<Participation> Participations { get; set; } = new List<Participation>();
     }
 }

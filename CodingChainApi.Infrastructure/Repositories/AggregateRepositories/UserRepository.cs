@@ -9,7 +9,6 @@ using CodingChainApi.Infrastructure.Models;
 using Domain.Users;
 using Microsoft.EntityFrameworkCore;
 using Right = Domain.Users.Right;
-using User = Domain.Users.User;
 
 namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
 {
@@ -27,16 +26,16 @@ namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
             return await _context.Users.FirstOrDefaultAsync(u => !u.IsDeleted && u.Id == id);
         }
 
-        public async Task<UserId> SetAsync(User aggregate)
+        public async Task<UserId> SetAsync(UserAggregate aggregate)
         {
             var user = await ToModel(aggregate);
-            await _context.Users.AddAsync(user);
+            _context.Users.Update(user);
             await _context.SaveChangesAsync();
             return new UserId(user.Id);
         }
 
 
-        private async Task<Models.User> ToModel(User aggregate)
+        private async Task<Models.User> ToModel(UserAggregate aggregate)
         {
             var rightsNames = aggregate.Rights.Select(r => r.Name);
             var user = await FindAsync(aggregate.Id.Value) ?? new Models.User();
@@ -48,7 +47,7 @@ namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
             return user;
         }
 
-        private static User ToEntity(Models.User model)
+        private static UserAggregate ToEntity(Models.User model)
         {
             return new(
                 new UserId(model.Id),
@@ -58,7 +57,7 @@ namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
                 model.Username);
         }
 
-        public async Task<User?> FindByIdAsync(UserId id)
+        public async Task<UserAggregate?> FindByIdAsync(UserId id)
         {
             return ToEntity(await _context.Users
                 .Include(u => u.Rights)
@@ -76,7 +75,7 @@ namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
             return new UserId(new Guid()).ToTask();
         }
 
-        public async Task<IList<User>> GetAllAsync()
+        public async Task<IList<UserAggregate>> GetAllAsync()
         {
             return await _context.Users
                 .Include(u => u.Rights)

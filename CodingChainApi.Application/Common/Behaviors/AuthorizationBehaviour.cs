@@ -36,6 +36,9 @@ namespace Application.Common.Behaviors
                 if (_currentUserService.UserId == null) throw new UnauthorizedAccessException();
 
                 var user = await _userRepository.FindByIdAsync(_currentUserService.UserId);
+                if (user is null)
+                    throw new UnauthorizedAccessException($"User with id {_currentUserService.UserId} not found");
+                _currentUserService.ConnectedUserId = user.Id;
                 var rolesMatch = false;
                 var requiredRoleLists = authorizeAttributes
                     .Select(a => a.Roles.Select(r => new Right(r)).ToList());

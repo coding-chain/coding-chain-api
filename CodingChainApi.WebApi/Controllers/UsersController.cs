@@ -20,7 +20,8 @@ namespace NeosCodingApi.Controllers
 {
     public class UsersController : ApiControllerBase
     {
-        public UsersController(ISender mediator, IMapper mapper, IPropertyCheckerService propertyCheckerService) : base(mediator, mapper, propertyCheckerService)
+        public UsersController(ISender mediator, IMapper mapper, IPropertyCheckerService propertyCheckerService) : base(
+            mediator, mapper, propertyCheckerService)
         {
         }
 
@@ -58,17 +59,16 @@ namespace NeosCodingApi.Controllers
             {
                 return NotFound();
             }
-
         }
-        
+
         [HttpGet(TemplateActionName, Name = nameof(Me))]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [SwaggerResponse(HttpStatusCode.OK, typeof(ConnectedUser))]
+        [SwaggerResponse(HttpStatusCode.OK, typeof(PublicUser))]
         public async Task<IActionResult> Me()
         {
             try
             {
-                var loggedUser = await Mediator.Send(new GetConnectedUserQuery());
+                var loggedUser = await Mediator.Send(new GetPublicUserQuery());
                 return Ok(loggedUser);
             }
             catch (ApplicationException e)
@@ -77,6 +77,16 @@ namespace NeosCodingApi.Controllers
             }
         }
 
-        
+        [HttpGet(Name = nameof(GetAllUsers))]
+        [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasResponse<IList<PublicUser>>))]
+        public async Task<IActionResult> GetAllUsers([FromQuery] GetPaginatedPublicUsersQuery query)
+        {
+            var users = await Mediator.Send(query);
+            return Ok(HateoasResponseBuilder.FromPagedList(
+                Url,
+                users.ToPagedListResume(),
+                users,
+                nameof(GetAllUsers)));
+        }
     }
 }
