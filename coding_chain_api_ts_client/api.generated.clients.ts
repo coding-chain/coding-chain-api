@@ -27,69 +27,58 @@ export class LanguagesClient {
         this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "";
     }
 
-    createLanguage(version: string | null, createLanguageCommand: CreateLanguageCommand): Observable<void> {
-        let url_ = this.baseUrl + "/api/v{version}/Languages";
+    getLanguageById(id: string, version: string | null): Observable<HateoasResponseOfProgrammingLanguageNavigation> {
+        let url_ = this.baseUrl + "/api/v{version}/Languages/{id}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
         if (version === undefined || version === null)
             throw new Error("The parameter 'version' must be defined.");
         url_ = url_.replace("{version}", encodeURIComponent("" + version));
         url_ = url_.replace(/[?&]$/, "");
 
-        const content_ = JSON.stringify(createLanguageCommand);
-
         let options_ : any = {
-            body: content_,
             observe: "response",
             responseType: "blob",
             headers: new HttpHeaders({
-                "Content-Type": "application/json",
+                "Accept": "application/json"
             })
         };
 
-        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
-            return this.processCreateLanguage(response_);
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetLanguageById(response_);
         })).pipe(_observableCatch((response_: any) => {
             if (response_ instanceof HttpResponseBase) {
                 try {
-                    return this.processCreateLanguage(<any>response_);
+                    return this.processGetLanguageById(<any>response_);
                 } catch (e) {
-                    return <Observable<void>><any>_observableThrow(e);
+                    return <Observable<HateoasResponseOfProgrammingLanguageNavigation>><any>_observableThrow(e);
                 }
             } else
-                return <Observable<void>><any>_observableThrow(response_);
+                return <Observable<HateoasResponseOfProgrammingLanguageNavigation>><any>_observableThrow(response_);
         }));
     }
 
-    protected processCreateLanguage(response: HttpResponseBase): Observable<void> {
+    protected processGetLanguageById(response: HttpResponseBase): Observable<HateoasResponseOfProgrammingLanguageNavigation> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
             (<any>response).error instanceof Blob ? (<any>response).error : undefined;
 
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
-        if (status === 201) {
+        if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
-            return _observableOf<void>(<any>null);
-            }));
-        } else if (status === 409) {
-            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
-            let result409: any = null;
-            let resultData409 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result409 = ProblemDetails.fromJS(resultData409);
-            return throwException("A server side error occurred.", status, _responseText, _headers, result409);
-            }));
-        } else if (status === 422) {
-            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
-            let result422: any = null;
-            let resultData422 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result422 = ProblemDetails.fromJS(resultData422);
-            return throwException("A server side error occurred.", status, _responseText, _headers, result422);
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = HateoasResponseOfProgrammingLanguageNavigation.fromJS(resultData200);
+            return _observableOf(result200);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             }));
         }
-        return _observableOf<void>(<any>null);
+        return _observableOf<HateoasResponseOfProgrammingLanguageNavigation>(<any>null);
     }
 
     getLanguages(page: number, size: number, version: string | null): Observable<HateoasResponseOfIListOfHateoasResponseOfProgrammingLanguageNavigation> {
@@ -149,63 +138,6 @@ export class LanguagesClient {
             }));
         }
         return _observableOf<HateoasResponseOfIListOfHateoasResponseOfProgrammingLanguageNavigation>(<any>null);
-    }
-
-    getLanguageById(id: string, version: string | null): Observable<void> {
-        let url_ = this.baseUrl + "/api/v{version}/Languages/{id}";
-        if (id === undefined || id === null)
-            throw new Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        if (version === undefined || version === null)
-            throw new Error("The parameter 'version' must be defined.");
-        url_ = url_.replace("{version}", encodeURIComponent("" + version));
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_ : any = {
-            observe: "response",
-            responseType: "blob",
-            headers: new HttpHeaders({
-            })
-        };
-
-        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
-            return this.processGetLanguageById(response_);
-        })).pipe(_observableCatch((response_: any) => {
-            if (response_ instanceof HttpResponseBase) {
-                try {
-                    return this.processGetLanguageById(<any>response_);
-                } catch (e) {
-                    return <Observable<void>><any>_observableThrow(e);
-                }
-            } else
-                return <Observable<void>><any>_observableThrow(response_);
-        }));
-    }
-
-    protected processGetLanguageById(response: HttpResponseBase): Observable<void> {
-        const status = response.status;
-        const responseBlob =
-            response instanceof HttpResponse ? response.body :
-            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
-
-        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
-        if (status === 200) {
-            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
-            return _observableOf<void>(<any>null);
-            }));
-        } else if (status === 404) {
-            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
-            let result404: any = null;
-            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result404 = ProblemDetails.fromJS(resultData404);
-            return throwException("A server side error occurred.", status, _responseText, _headers, result404);
-            }));
-        } else if (status !== 200 && status !== 204) {
-            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            }));
-        }
-        return _observableOf<void>(<any>null);
     }
 
     test(version: string | null, command: TestCommand): Observable<void> {
@@ -634,32 +566,33 @@ export class TeamsClient {
         return _observableOf<void>(<any>null);
     }
 
-    removeMemberFromTeam(id: string, memberId: string, version: string | null): Observable<void> {
-        let url_ = this.baseUrl + "/api/v{version}/Teams/{id}/members/{memberId}";
+    renameTeam(id: string, version: string | null, command: RenameTeamCommandBody): Observable<void> {
+        let url_ = this.baseUrl + "/api/v{version}/Teams/{id}";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
         url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        if (memberId === undefined || memberId === null)
-            throw new Error("The parameter 'memberId' must be defined.");
-        url_ = url_.replace("{memberId}", encodeURIComponent("" + memberId));
         if (version === undefined || version === null)
             throw new Error("The parameter 'version' must be defined.");
         url_ = url_.replace("{version}", encodeURIComponent("" + version));
         url_ = url_.replace(/[?&]$/, "");
 
+        const content_ = JSON.stringify(command);
+
         let options_ : any = {
+            body: content_,
             observe: "response",
             responseType: "blob",
             headers: new HttpHeaders({
+                "Content-Type": "application/json",
             })
         };
 
-        return this.http.request("delete", url_, options_).pipe(_observableMergeMap((response_ : any) => {
-            return this.processRemoveMemberFromTeam(response_);
+        return this.http.request("put", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processRenameTeam(response_);
         })).pipe(_observableCatch((response_: any) => {
             if (response_ instanceof HttpResponseBase) {
                 try {
-                    return this.processRemoveMemberFromTeam(<any>response_);
+                    return this.processRenameTeam(<any>response_);
                 } catch (e) {
                     return <Observable<void>><any>_observableThrow(e);
                 }
@@ -668,7 +601,7 @@ export class TeamsClient {
         }));
     }
 
-    protected processRemoveMemberFromTeam(response: HttpResponseBase): Observable<void> {
+    protected processRenameTeam(response: HttpResponseBase): Observable<void> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -685,6 +618,20 @@ export class TeamsClient {
             let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result404 = ProblemDetails.fromJS(resultData404);
             return throwException("A server side error occurred.", status, _responseText, _headers, result404);
+            }));
+        } else if (status === 401) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result401: any = null;
+            let resultData401 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result401 = ProblemDetails.fromJS(resultData401);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result401);
+            }));
+        } else if (status === 403) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result403: any = null;
+            let resultData403 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result403 = ProblemDetails.fromJS(resultData403);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result403);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
@@ -803,6 +750,256 @@ export class TeamsClient {
             }));
         }
         return _observableOf<HateoasResponseOfTeamNavigation>(<any>null);
+    }
+
+    removeMemberFromTeam(id: string, memberId: string, version: string | null): Observable<void> {
+        let url_ = this.baseUrl + "/api/v{version}/Teams/{id}/members/{memberId}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        if (memberId === undefined || memberId === null)
+            throw new Error("The parameter 'memberId' must be defined.");
+        url_ = url_.replace("{memberId}", encodeURIComponent("" + memberId));
+        if (version === undefined || version === null)
+            throw new Error("The parameter 'version' must be defined.");
+        url_ = url_.replace("{version}", encodeURIComponent("" + version));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+            })
+        };
+
+        return this.http.request("delete", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processRemoveMemberFromTeam(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processRemoveMemberFromTeam(<any>response_);
+                } catch (e) {
+                    return <Observable<void>><any>_observableThrow(e);
+                }
+            } else
+                return <Observable<void>><any>_observableThrow(response_);
+        }));
+    }
+
+    protected processRemoveMemberFromTeam(response: HttpResponseBase): Observable<void> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return _observableOf<void>(<any>null);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result404: any = null;
+            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result404 = ProblemDetails.fromJS(resultData404);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result404);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf<void>(<any>null);
+    }
+}
+
+@Injectable()
+export class TournamentsClient {
+    private http: HttpClient;
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(@Inject(HttpClient) http: HttpClient, @Optional() @Inject(API_BASE_URL) baseUrl?: string) {
+        this.http = http;
+        this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "";
+    }
+
+    createTournament(version: string | null, createTournamentCommand: CreateTournamentCommand): Observable<void> {
+        let url_ = this.baseUrl + "/api/v{version}/Tournaments";
+        if (version === undefined || version === null)
+            throw new Error("The parameter 'version' must be defined.");
+        url_ = url_.replace("{version}", encodeURIComponent("" + version));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(createTournamentCommand);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processCreateTournament(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processCreateTournament(<any>response_);
+                } catch (e) {
+                    return <Observable<void>><any>_observableThrow(e);
+                }
+            } else
+                return <Observable<void>><any>_observableThrow(response_);
+        }));
+    }
+
+    protected processCreateTournament(response: HttpResponseBase): Observable<void> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 201) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return _observableOf<void>(<any>null);
+            }));
+        } else if (status === 409) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result409: any = null;
+            let resultData409 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result409 = ProblemDetails.fromJS(resultData409);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result409);
+            }));
+        } else if (status === 422) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result422: any = null;
+            let resultData422 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result422 = ProblemDetails.fromJS(resultData422);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result422);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf<void>(<any>null);
+    }
+
+    getTournaments(page: number, size: number, version: string | null): Observable<HateoasResponseOfIListOfHateoasResponseOfTournamentNavigation> {
+        let url_ = this.baseUrl + "/api/v{version}/Tournaments?";
+        if (version === undefined || version === null)
+            throw new Error("The parameter 'version' must be defined.");
+        url_ = url_.replace("{version}", encodeURIComponent("" + version));
+        if (page === undefined || page === null)
+            throw new Error("The parameter 'page' must be defined and cannot be null.");
+        else
+            url_ += "Page=" + encodeURIComponent("" + page) + "&";
+        if (size === undefined || size === null)
+            throw new Error("The parameter 'size' must be defined and cannot be null.");
+        else
+            url_ += "Size=" + encodeURIComponent("" + size) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetTournaments(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetTournaments(<any>response_);
+                } catch (e) {
+                    return <Observable<HateoasResponseOfIListOfHateoasResponseOfTournamentNavigation>><any>_observableThrow(e);
+                }
+            } else
+                return <Observable<HateoasResponseOfIListOfHateoasResponseOfTournamentNavigation>><any>_observableThrow(response_);
+        }));
+    }
+
+    protected processGetTournaments(response: HttpResponseBase): Observable<HateoasResponseOfIListOfHateoasResponseOfTournamentNavigation> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = HateoasResponseOfIListOfHateoasResponseOfTournamentNavigation.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf<HateoasResponseOfIListOfHateoasResponseOfTournamentNavigation>(<any>null);
+    }
+
+    getTournamentById(id: string, version: string | null): Observable<HateoasResponseOfTournamentNavigation> {
+        let url_ = this.baseUrl + "/api/v{version}/Tournaments/{id}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        if (version === undefined || version === null)
+            throw new Error("The parameter 'version' must be defined.");
+        url_ = url_.replace("{version}", encodeURIComponent("" + version));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetTournamentById(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetTournamentById(<any>response_);
+                } catch (e) {
+                    return <Observable<HateoasResponseOfTournamentNavigation>><any>_observableThrow(e);
+                }
+            } else
+                return <Observable<HateoasResponseOfTournamentNavigation>><any>_observableThrow(response_);
+        }));
+    }
+
+    protected processGetTournamentById(response: HttpResponseBase): Observable<HateoasResponseOfTournamentNavigation> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = HateoasResponseOfTournamentNavigation.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf<HateoasResponseOfTournamentNavigation>(<any>null);
     }
 }
 
@@ -1058,166 +1255,6 @@ export class UsersClient {
     }
 }
 
-export class ProblemDetails implements IProblemDetails {
-    type?: string | undefined;
-    title?: string | undefined;
-    status?: number | undefined;
-    detail?: string | undefined;
-    instance?: string | undefined;
-    extensions?: { [key: string]: any; } | undefined;
-
-    constructor(data?: IProblemDetails) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.type = _data["type"];
-            this.title = _data["title"];
-            this.status = _data["status"];
-            this.detail = _data["detail"];
-            this.instance = _data["instance"];
-            if (_data["extensions"]) {
-                this.extensions = {} as any;
-                for (let key in _data["extensions"]) {
-                    if (_data["extensions"].hasOwnProperty(key))
-                        this.extensions![key] = _data["extensions"][key];
-                }
-            }
-        }
-    }
-
-    static fromJS(data: any): ProblemDetails {
-        data = typeof data === 'object' ? data : {};
-        let result = new ProblemDetails();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["type"] = this.type;
-        data["title"] = this.title;
-        data["status"] = this.status;
-        data["detail"] = this.detail;
-        data["instance"] = this.instance;
-        if (this.extensions) {
-            data["extensions"] = {};
-            for (let key in this.extensions) {
-                if (this.extensions.hasOwnProperty(key))
-                    data["extensions"][key] = this.extensions[key];
-            }
-        }
-        return data; 
-    }
-}
-
-export interface IProblemDetails {
-    type?: string | undefined;
-    title?: string | undefined;
-    status?: number | undefined;
-    detail?: string | undefined;
-    instance?: string | undefined;
-    extensions?: { [key: string]: any; } | undefined;
-}
-
-export class CreateLanguageCommand implements ICreateLanguageCommand {
-    name?: string;
-
-    constructor(data?: ICreateLanguageCommand) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.name = _data["name"];
-        }
-    }
-
-    static fromJS(data: any): CreateLanguageCommand {
-        data = typeof data === 'object' ? data : {};
-        let result = new CreateLanguageCommand();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["name"] = this.name;
-        return data; 
-    }
-}
-
-export interface ICreateLanguageCommand {
-    name?: string;
-}
-
-export class HateoasResponseOfIListOfHateoasResponseOfProgrammingLanguageNavigation implements IHateoasResponseOfIListOfHateoasResponseOfProgrammingLanguageNavigation {
-    result?: HateoasResponseOfProgrammingLanguageNavigation[];
-    links?: LinkDto[];
-
-    constructor(data?: IHateoasResponseOfIListOfHateoasResponseOfProgrammingLanguageNavigation) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            if (Array.isArray(_data["result"])) {
-                this.result = [] as any;
-                for (let item of _data["result"])
-                    this.result!.push(HateoasResponseOfProgrammingLanguageNavigation.fromJS(item));
-            }
-            if (Array.isArray(_data["links"])) {
-                this.links = [] as any;
-                for (let item of _data["links"])
-                    this.links!.push(LinkDto.fromJS(item));
-            }
-        }
-    }
-
-    static fromJS(data: any): HateoasResponseOfIListOfHateoasResponseOfProgrammingLanguageNavigation {
-        data = typeof data === 'object' ? data : {};
-        let result = new HateoasResponseOfIListOfHateoasResponseOfProgrammingLanguageNavigation();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        if (Array.isArray(this.result)) {
-            data["result"] = [];
-            for (let item of this.result)
-                data["result"].push(item.toJSON());
-        }
-        if (Array.isArray(this.links)) {
-            data["links"] = [];
-            for (let item of this.links)
-                data["links"].push(item.toJSON());
-        }
-        return data; 
-    }
-}
-
-export interface IHateoasResponseOfIListOfHateoasResponseOfProgrammingLanguageNavigation {
-    result?: HateoasResponseOfProgrammingLanguageNavigation[];
-    links?: LinkDto[];
-}
-
 export class HateoasResponseOfProgrammingLanguageNavigation implements IHateoasResponseOfProgrammingLanguageNavigation {
     result?: ProgrammingLanguageNavigation;
     links?: LinkDto[];
@@ -1364,6 +1401,130 @@ export enum HttpMethod {
     None = 255,
 }
 
+export class HateoasResponseOfIListOfHateoasResponseOfProgrammingLanguageNavigation implements IHateoasResponseOfIListOfHateoasResponseOfProgrammingLanguageNavigation {
+    result?: HateoasResponseOfProgrammingLanguageNavigation[];
+    links?: LinkDto[];
+
+    constructor(data?: IHateoasResponseOfIListOfHateoasResponseOfProgrammingLanguageNavigation) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            if (Array.isArray(_data["result"])) {
+                this.result = [] as any;
+                for (let item of _data["result"])
+                    this.result!.push(HateoasResponseOfProgrammingLanguageNavigation.fromJS(item));
+            }
+            if (Array.isArray(_data["links"])) {
+                this.links = [] as any;
+                for (let item of _data["links"])
+                    this.links!.push(LinkDto.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): HateoasResponseOfIListOfHateoasResponseOfProgrammingLanguageNavigation {
+        data = typeof data === 'object' ? data : {};
+        let result = new HateoasResponseOfIListOfHateoasResponseOfProgrammingLanguageNavigation();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        if (Array.isArray(this.result)) {
+            data["result"] = [];
+            for (let item of this.result)
+                data["result"].push(item.toJSON());
+        }
+        if (Array.isArray(this.links)) {
+            data["links"] = [];
+            for (let item of this.links)
+                data["links"].push(item.toJSON());
+        }
+        return data; 
+    }
+}
+
+export interface IHateoasResponseOfIListOfHateoasResponseOfProgrammingLanguageNavigation {
+    result?: HateoasResponseOfProgrammingLanguageNavigation[];
+    links?: LinkDto[];
+}
+
+export class ProblemDetails implements IProblemDetails {
+    type?: string | undefined;
+    title?: string | undefined;
+    status?: number | undefined;
+    detail?: string | undefined;
+    instance?: string | undefined;
+    extensions?: { [key: string]: any; } | undefined;
+
+    constructor(data?: IProblemDetails) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.type = _data["type"];
+            this.title = _data["title"];
+            this.status = _data["status"];
+            this.detail = _data["detail"];
+            this.instance = _data["instance"];
+            if (_data["extensions"]) {
+                this.extensions = {} as any;
+                for (let key in _data["extensions"]) {
+                    if (_data["extensions"].hasOwnProperty(key))
+                        this.extensions![key] = _data["extensions"][key];
+                }
+            }
+        }
+    }
+
+    static fromJS(data: any): ProblemDetails {
+        data = typeof data === 'object' ? data : {};
+        let result = new ProblemDetails();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["type"] = this.type;
+        data["title"] = this.title;
+        data["status"] = this.status;
+        data["detail"] = this.detail;
+        data["instance"] = this.instance;
+        if (this.extensions) {
+            data["extensions"] = {};
+            for (let key in this.extensions) {
+                if (this.extensions.hasOwnProperty(key))
+                    data["extensions"][key] = this.extensions[key];
+            }
+        }
+        return data; 
+    }
+}
+
+export interface IProblemDetails {
+    type?: string | undefined;
+    title?: string | undefined;
+    status?: number | undefined;
+    detail?: string | undefined;
+    instance?: string | undefined;
+    extensions?: { [key: string]: any; } | undefined;
+}
+
 export class TestCommand implements ITestCommand {
     name?: string;
     runTestsProcess?: string;
@@ -1496,6 +1657,42 @@ export interface IAddMemberToTeamBodyCommand {
     memberId?: string;
 }
 
+export class RenameTeamCommandBody implements IRenameTeamCommandBody {
+    name?: string;
+
+    constructor(data?: IRenameTeamCommandBody) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.name = _data["name"];
+        }
+    }
+
+    static fromJS(data: any): RenameTeamCommandBody {
+        data = typeof data === 'object' ? data : {};
+        let result = new RenameTeamCommandBody();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["name"] = this.name;
+        return data; 
+    }
+}
+
+export interface IRenameTeamCommandBody {
+    name?: string;
+}
+
 export class HateoasResponseOfTeamNavigation implements IHateoasResponseOfTeamNavigation {
     result?: TeamNavigation;
     links?: LinkDto[];
@@ -1547,7 +1744,7 @@ export interface IHateoasResponseOfTeamNavigation {
 export class TeamNavigation implements ITeamNavigation {
     id?: string;
     name?: string;
-    memberIds?: string[];
+    members?: MemberNavigation[];
 
     constructor(data?: ITeamNavigation) {
         if (data) {
@@ -1562,10 +1759,10 @@ export class TeamNavigation implements ITeamNavigation {
         if (_data) {
             this.id = _data["id"];
             this.name = _data["name"];
-            if (Array.isArray(_data["memberIds"])) {
-                this.memberIds = [] as any;
-                for (let item of _data["memberIds"])
-                    this.memberIds!.push(item);
+            if (Array.isArray(_data["members"])) {
+                this.members = [] as any;
+                for (let item of _data["members"])
+                    this.members!.push(MemberNavigation.fromJS(item));
             }
         }
     }
@@ -1581,10 +1778,10 @@ export class TeamNavigation implements ITeamNavigation {
         data = typeof data === 'object' ? data : {};
         data["id"] = this.id;
         data["name"] = this.name;
-        if (Array.isArray(this.memberIds)) {
-            data["memberIds"] = [];
-            for (let item of this.memberIds)
-                data["memberIds"].push(item);
+        if (Array.isArray(this.members)) {
+            data["members"] = [];
+            for (let item of this.members)
+                data["members"].push(item.toJSON());
         }
         return data; 
     }
@@ -1593,7 +1790,55 @@ export class TeamNavigation implements ITeamNavigation {
 export interface ITeamNavigation {
     id?: string;
     name?: string;
-    memberIds?: string[];
+    members?: MemberNavigation[];
+}
+
+export class MemberNavigation implements IMemberNavigation {
+    userId?: string;
+    isAdmin?: boolean;
+    joinDate?: moment.Moment;
+    leaveDate?: moment.Moment | undefined;
+
+    constructor(data?: IMemberNavigation) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.userId = _data["userId"];
+            this.isAdmin = _data["isAdmin"];
+            this.joinDate = _data["joinDate"] ? moment.parseZone(_data["joinDate"].toString()) : <any>undefined;
+            this.leaveDate = _data["leaveDate"] ? moment.parseZone(_data["leaveDate"].toString()) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): MemberNavigation {
+        data = typeof data === 'object' ? data : {};
+        let result = new MemberNavigation();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["userId"] = this.userId;
+        data["isAdmin"] = this.isAdmin;
+        data["joinDate"] = this.joinDate ? this.joinDate.toISOString(true) : <any>undefined;
+        data["leaveDate"] = this.leaveDate ? this.leaveDate.toISOString(true) : <any>undefined;
+        return data; 
+    }
+}
+
+export interface IMemberNavigation {
+    userId?: string;
+    isAdmin?: boolean;
+    joinDate?: moment.Moment;
+    leaveDate?: moment.Moment | undefined;
 }
 
 export class HateoasResponseOfIListOfHateoasResponseOfTeamNavigation implements IHateoasResponseOfIListOfHateoasResponseOfTeamNavigation {
@@ -1649,6 +1894,262 @@ export class HateoasResponseOfIListOfHateoasResponseOfTeamNavigation implements 
 
 export interface IHateoasResponseOfIListOfHateoasResponseOfTeamNavigation {
     result?: HateoasResponseOfTeamNavigation[];
+    links?: LinkDto[];
+}
+
+export class CreateTournamentCommand implements ICreateTournamentCommand {
+    name?: string;
+    description?: string;
+
+    constructor(data?: ICreateTournamentCommand) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.name = _data["name"];
+            this.description = _data["description"];
+        }
+    }
+
+    static fromJS(data: any): CreateTournamentCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new CreateTournamentCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["name"] = this.name;
+        data["description"] = this.description;
+        return data; 
+    }
+}
+
+export interface ICreateTournamentCommand {
+    name?: string;
+    description?: string;
+}
+
+export class HateoasResponseOfTournamentNavigation implements IHateoasResponseOfTournamentNavigation {
+    result?: TournamentNavigation;
+    links?: LinkDto[];
+
+    constructor(data?: IHateoasResponseOfTournamentNavigation) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.result = _data["result"] ? TournamentNavigation.fromJS(_data["result"]) : <any>undefined;
+            if (Array.isArray(_data["links"])) {
+                this.links = [] as any;
+                for (let item of _data["links"])
+                    this.links!.push(LinkDto.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): HateoasResponseOfTournamentNavigation {
+        data = typeof data === 'object' ? data : {};
+        let result = new HateoasResponseOfTournamentNavigation();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["result"] = this.result ? this.result.toJSON() : <any>undefined;
+        if (Array.isArray(this.links)) {
+            data["links"] = [];
+            for (let item of this.links)
+                data["links"].push(item.toJSON());
+        }
+        return data; 
+    }
+}
+
+export interface IHateoasResponseOfTournamentNavigation {
+    result?: TournamentNavigation;
+    links?: LinkDto[];
+}
+
+export class TournamentNavigation implements ITournamentNavigation {
+    id?: string;
+    name?: string;
+    description?: string;
+    isPublished?: boolean;
+    startDate?: moment.Moment | undefined;
+    endDate?: moment.Moment | undefined;
+    steps?: TournamentStepNavigation[];
+
+    constructor(data?: ITournamentNavigation) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.name = _data["name"];
+            this.description = _data["description"];
+            this.isPublished = _data["isPublished"];
+            this.startDate = _data["startDate"] ? moment.parseZone(_data["startDate"].toString()) : <any>undefined;
+            this.endDate = _data["endDate"] ? moment.parseZone(_data["endDate"].toString()) : <any>undefined;
+            if (Array.isArray(_data["steps"])) {
+                this.steps = [] as any;
+                for (let item of _data["steps"])
+                    this.steps!.push(TournamentStepNavigation.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): TournamentNavigation {
+        data = typeof data === 'object' ? data : {};
+        let result = new TournamentNavigation();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["name"] = this.name;
+        data["description"] = this.description;
+        data["isPublished"] = this.isPublished;
+        data["startDate"] = this.startDate ? this.startDate.toISOString(true) : <any>undefined;
+        data["endDate"] = this.endDate ? this.endDate.toISOString(true) : <any>undefined;
+        if (Array.isArray(this.steps)) {
+            data["steps"] = [];
+            for (let item of this.steps)
+                data["steps"].push(item.toJSON());
+        }
+        return data; 
+    }
+}
+
+export interface ITournamentNavigation {
+    id?: string;
+    name?: string;
+    description?: string;
+    isPublished?: boolean;
+    startDate?: moment.Moment | undefined;
+    endDate?: moment.Moment | undefined;
+    steps?: TournamentStepNavigation[];
+}
+
+export class TournamentStepNavigation implements ITournamentStepNavigation {
+    stepId?: string;
+    isOptional?: boolean;
+    order?: number;
+
+    constructor(data?: ITournamentStepNavigation) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.stepId = _data["stepId"];
+            this.isOptional = _data["isOptional"];
+            this.order = _data["order"];
+        }
+    }
+
+    static fromJS(data: any): TournamentStepNavigation {
+        data = typeof data === 'object' ? data : {};
+        let result = new TournamentStepNavigation();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["stepId"] = this.stepId;
+        data["isOptional"] = this.isOptional;
+        data["order"] = this.order;
+        return data; 
+    }
+}
+
+export interface ITournamentStepNavigation {
+    stepId?: string;
+    isOptional?: boolean;
+    order?: number;
+}
+
+export class HateoasResponseOfIListOfHateoasResponseOfTournamentNavigation implements IHateoasResponseOfIListOfHateoasResponseOfTournamentNavigation {
+    result?: HateoasResponseOfTournamentNavigation[];
+    links?: LinkDto[];
+
+    constructor(data?: IHateoasResponseOfIListOfHateoasResponseOfTournamentNavigation) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            if (Array.isArray(_data["result"])) {
+                this.result = [] as any;
+                for (let item of _data["result"])
+                    this.result!.push(HateoasResponseOfTournamentNavigation.fromJS(item));
+            }
+            if (Array.isArray(_data["links"])) {
+                this.links = [] as any;
+                for (let item of _data["links"])
+                    this.links!.push(LinkDto.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): HateoasResponseOfIListOfHateoasResponseOfTournamentNavigation {
+        data = typeof data === 'object' ? data : {};
+        let result = new HateoasResponseOfIListOfHateoasResponseOfTournamentNavigation();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        if (Array.isArray(this.result)) {
+            data["result"] = [];
+            for (let item of this.result)
+                data["result"].push(item.toJSON());
+        }
+        if (Array.isArray(this.links)) {
+            data["links"] = [];
+            for (let item of this.links)
+                data["links"].push(item.toJSON());
+        }
+        return data; 
+    }
+}
+
+export interface IHateoasResponseOfIListOfHateoasResponseOfTournamentNavigation {
+    result?: HateoasResponseOfTournamentNavigation[];
     links?: LinkDto[];
 }
 

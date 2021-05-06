@@ -60,7 +60,17 @@ namespace Domain.Teams
             if (requestingUserId != Admin.Id )
                 throw new DomainException($"User with id {requestingUserId} doesn't has sufficient rights to elevate user");
         }
+        
+        public void ValidateTeamRenamingByMember(UserId requestingUserId)
+        {
+            if (requestingUserId != Admin.Id )
+                throw new DomainException($"User with id {requestingUserId} doesn't has sufficient rights to rename team");
+        }
 
+        public void Rename(string newName)
+        {
+            Name = newName;
+        }
 
         public void AddMember(MemberEntity newMember)
         {

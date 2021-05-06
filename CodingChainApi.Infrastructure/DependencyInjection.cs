@@ -31,6 +31,7 @@ namespace CodingChainApi.Infrastructure
             ConfigureBcrypt(services, configuration);
             ConfigureProcess(services, configuration);
             ConfigureAppData(services, configuration);
+            ConfigureLanguages(services, configuration);
             //
             services.AddScoped<IProcessService, ProcessService>();
             services.AddScoped<ISecurityService, SecurityService>();
@@ -47,6 +48,7 @@ namespace CodingChainApi.Infrastructure
             services.AddProxiedScoped<IProgrammingLanguageRepository, ProgrammingLanguageRepository>(
                 typeof(EventPublisherInterceptor));
             services.AddProxiedScoped<ITeamRepository, TeamRepository>(typeof(EventPublisherInterceptor));
+            services.AddProxiedScoped<ITournamentRepository, TournamentRepository>(typeof(EventPublisherInterceptor));
         }
 
         private static void RegisterReadRepositories(IServiceCollection services)
@@ -54,6 +56,7 @@ namespace CodingChainApi.Infrastructure
             services.AddScoped<IReadProgrammingLanguageRepository, ReadProgrammingLanguageRepository>();
             services.AddScoped<IReadUserRepository, ReadUserRepository>();
             services.AddScoped<IReadTeamRepository, ReadTeamRepository>();
+            services.AddScoped<IReadTournamentRepository, ReadTournamentRepository>();
         }
 
         private static void ConfigureProcess(IServiceCollection services, IConfiguration configuration)
@@ -64,6 +67,11 @@ namespace CodingChainApi.Infrastructure
         private static void ConfigureAppData(IServiceCollection services, IConfiguration configuration)
         {
             ConfigureInjectableSettings<IAppDataSettings, AppDataSettings>(services, configuration);
+        }
+        
+        private static void ConfigureLanguages(IServiceCollection services, IConfiguration configuration)
+        {
+            ConfigureInjectableSettings<ILanguagesSettings, LanguagesSettings>(services, configuration);
         }
 
         private static TImplementation ConfigureInjectableSettings<TInterface, TImplementation>(

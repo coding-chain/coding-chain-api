@@ -21,7 +21,7 @@ namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
             _context = context;
         }
 
-        private async Task<Models.User?> FindAsync(Guid id)
+        private async Task<User?> FindAsync(Guid id)
         {
             return await _context.Users.FirstOrDefaultAsync(u => !u.IsDeleted && u.Id == id);
         }
@@ -29,16 +29,16 @@ namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
         public async Task<UserId> SetAsync(UserAggregate aggregate)
         {
             var user = await ToModel(aggregate);
-            _context.Users.Update(user);
+            _context.Users.Upsert(user);
             await _context.SaveChangesAsync();
             return new UserId(user.Id);
         }
 
 
-        private async Task<Models.User> ToModel(UserAggregate aggregate)
+        private async Task<User> ToModel(UserAggregate aggregate)
         {
             var rightsNames = aggregate.Rights.Select(r => r.Name);
-            var user = await FindAsync(aggregate.Id.Value) ?? new Models.User();
+            var user = await FindAsync(aggregate.Id.Value) ?? new User();
             user.Email = aggregate.Email;
             user.Password = aggregate.Password;
             user.Rights = await _context.Rights.Where(r => rightsNames.Contains(r.Name)).ToListAsync();
@@ -66,20 +66,23 @@ namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
 
         public async Task RemoveAsync(UserId id)
         {
-            var user = await FindAsync(id.Value);
-            user.IsDeleted = true;
+            var user = await _context.Users.FirstOrDefaultAsync(u => !u.IsDeleted && u.Id == id.Value);
+            if(user is not null)
+                user.IsDeleted = true;
+            await _context.SaveChangesAsync();
         }
 
         public Task<UserId> NextIdAsync()
         {
-            return new UserId(new Guid()).ToTask();
+            return new UserId(Guid.NewGuid()).ToTask();
         }
 
         public async Task<IList<UserAggregate>> GetAllAsync()
         {
             return await _context.Users
                 .Include(u => u.Rights)
-                .Select(u => ToEntity(u))
+                .Where(u => !u.IsDeleted)
+                .Select(u =>  ToEntity(u))
                 .ToListAsync();
         }
     }

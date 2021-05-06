@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Application.Contracts.IService;
@@ -25,30 +26,55 @@ namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
 
         private async Task<Team> ToModel(TeamAggregate aggregate)
         {
-            var team = await _context.Teams
-                .Include(t => t.UserTeams)
-                .FirstOrDefaultAsync(t => !t.IsDeleted && t.Id == aggregate.Id.Value) ?? new Team();
-            var leavingMembers = team.UserTeams
-                .Where(uT => uT.LeaveDate == null && aggregate.Members.All(m => m.Id.Value != uT.UserId))
-                .ToList();
-            var currentMembers = team.UserTeams
-                .Where(uT => uT.LeaveDate == null && !uT.User.IsDeleted)
-                .ToList();
-            var newMembers = aggregate.Members
-                .Where(m => currentMembers.All(uT => uT.UserId != m.Id.Value))
-                .Select(m => new UserTeam {IsAdmin = m.IsAdmin, JoinDate = _timeService.Now(), UserId = m.Id.Value})
-                .ToList();
-            currentMembers.ForEach(uT =>
-            {
-                var member = aggregate.Members.FirstOrDefault(m => m.Id.Value == uT.UserId);
-                uT.IsAdmin = member?.IsAdmin ?? uT.IsAdmin;
-            });
-            
+            var team = await GetTeam(aggregate);
+            var leavingMembers = GetLeavingMembers(aggregate, team);
+            var currentMembers = GetCurrentMembers(team);
+            var newMembers = GetNewMembers(aggregate, currentMembers);
+            UpdateMembers(aggregate, currentMembers);
             newMembers.ForEach(uT => team.UserTeams.Add(uT));
             leavingMembers.ForEach(uT => uT.LeaveDate = _timeService.Now());
 
             team.Name = aggregate.Name;
             return team;
+        }
+
+        private static void UpdateMembers(TeamAggregate aggregate, List<UserTeam> currentMembers)
+        {
+            currentMembers.ForEach(uT =>
+            {
+                var member = aggregate.Members.FirstOrDefault(m => m.Id.Value == uT.UserId);
+                uT.IsAdmin = member?.IsAdmin ?? uT.IsAdmin;
+            });
+        }
+
+        private async Task<Team> GetTeam(TeamAggregate aggregate)
+        {
+            return await _context.Teams
+                .Include(t => t.UserTeams)
+                .FirstOrDefaultAsync(t => !t.IsDeleted && t.Id == aggregate.Id.Value) ?? new Team{Id =  aggregate.Id.Value};
+        }
+
+        private static List<UserTeam> GetLeavingMembers(TeamAggregate aggregate, Team team)
+        {
+            return team.UserTeams
+                .Where(uT => uT.LeaveDate == null && aggregate.Members.All(m => m.Id.Value != uT.UserId))
+                .ToList();
+        }
+
+        private static List<UserTeam> GetCurrentMembers(Team team)
+        {
+            return team.UserTeams
+                .Where(uT => uT.LeaveDate == null && !uT.User.IsDeleted)
+                .ToList();
+        }
+
+        private List<UserTeam> GetNewMembers(TeamAggregate aggregate, List<UserTeam> currentMembers)
+        {
+            var newMembers = aggregate.Members
+                .Where(m => currentMembers.All(uT => uT.UserId != m.Id.Value))
+                .Select(m => new UserTeam {IsAdmin = m.IsAdmin, JoinDate = _timeService.Now(), UserId = m.Id.Value})
+                .ToList();
+            return newMembers;
         }
 
         private Task<TeamAggregate> ToEntity(Team team)
@@ -67,7 +93,7 @@ namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
         public async Task<TeamId> SetAsync(TeamAggregate aggregate)
         {
             var team = await ToModel(aggregate);
-            _context.Teams.Update(team);
+            _context.Teams.Upsert(team);
             await _context.SaveChangesAsync();
             return new TeamId(team.Id);
         }
@@ -85,7 +111,8 @@ namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
         {
             var team = await _context.Teams
                 .FirstOrDefaultAsync(t => !t.IsDeleted && t.Id == id.Value);
-            team.IsDeleted = true;
+            if(team is not null)
+                team.IsDeleted = true;
             await _context.SaveChangesAsync();
         }
 

@@ -60,6 +60,18 @@ namespace NeosCodingApi.Controllers
             return NoContent();
         }
 
+        public record RenameTeamCommandBody(string Name);
+        [HttpPut("{id:guid}", Name = nameof(RenameTeam))]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        public async Task<IActionResult> RenameTeam(Guid id, [FromBody] RenameTeamCommandBody command)
+        {
+            await Mediator.Send(new RenameTeamCommand(id, command.Name));
+            return NoContent();
+        }
+
 
         [HttpDelete("{id:guid}/members/{memberId:guid}", Name = nameof(RemoveMemberFromTeam))]
         [ProducesResponseType(StatusCodes.Status204NoContent)]

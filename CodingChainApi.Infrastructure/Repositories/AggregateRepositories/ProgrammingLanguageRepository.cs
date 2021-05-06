@@ -6,26 +6,24 @@ namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
 {
     public class ProgrammingLanguageRepository : IProgrammingLanguageRepository
     {
-        private IProgrammingLanguageRepository _programmingLanguageRepositoryImplementation;
-        public Task<LanguageId> SetAsync(ProgrammingLanguage aggregate)
+        public Task<ProgrammingLanguageId> SetAsync(ProgrammingLanguage aggregate)
         {
-            return _programmingLanguageRepositoryImplementation.SetAsync(aggregate);
+            throw new System.NotImplementedException();
         }
 
-        public Task<ProgrammingLanguage?> FindByIdAsync(LanguageId id)
+        public Task<ProgrammingLanguage?> FindByIdAsync(ProgrammingLanguageId id)
         {
-            return _programmingLanguageRepositoryImplementation.FindByIdAsync(id);
+            throw new System.NotImplementedException();
         }
 
-        public Task RemoveAsync(LanguageId id)
+        public Task RemoveAsync(ProgrammingLanguageId id)
         {
-            return _programmingLanguageRepositoryImplementation.RemoveAsync(id);
+            throw new System.NotImplementedException();
         }
 
-        public Task<LanguageId> NextIdAsync()
+        public Task<ProgrammingLanguageId> NextIdAsync()
         {
-            return _programmingLanguageRepositoryImplementation.NextIdAsync();
+            throw new System.NotImplementedException();
         }
-
     }
 }

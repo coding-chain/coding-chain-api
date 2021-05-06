@@ -10,7 +10,7 @@ namespace Application.Read.Contracts
     {
         public Task<IPagedList<ProgrammingLanguageNavigation>> GetAllLanguageNavigationPaginated(PaginationQueryBase paginationQuery);
         public Task<ProgrammingLanguageNavigation?> GetOneLanguageNavigationByIdAsync(Guid id);
-        public Task<bool> LanguageExistById(LanguageId languageId);
+        public Task<bool> LanguageExistById(Guid programmingLanguageId);
         public Task<bool> LanguageExistsByName(string name);
     }
 }

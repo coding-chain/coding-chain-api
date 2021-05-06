@@ -7,7 +7,7 @@ namespace CodingChainApi.Infrastructure.Models
         public Guid Id { get; set; }
         public string OutputValidator { get; set; }
         public string InputGenerator { get; set; }
-        public int Score { get; set; }
+        public decimal Score { get; set; }
         public bool IsDeleted { get; set; }
 
         public Step Step { get; set; }

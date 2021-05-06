@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using CodingChainApi.Infrastructure.Models;
+using CodingChainApi.Infrastructure.Settings;
 using Domain.Users;
 using Microsoft.EntityFrameworkCore;
 using Right = CodingChainApi.Infrastructure.Models.Right;
@@ -10,9 +11,12 @@ namespace CodingChainApi.Infrastructure.Contexts
 {
     public class CodingChainContext : DbContext
     {
-        public CodingChainContext(DbContextOptions<CodingChainContext> options)
+        private readonly ILanguagesSettings _languagesSettings;
+
+        public CodingChainContext(DbContextOptions<CodingChainContext> options, ILanguagesSettings languagesSettings)
             : base(options)
         {
+            _languagesSettings = languagesSettings;
             Database.EnsureCreated();
         }
 
@@ -35,11 +39,15 @@ namespace CodingChainApi.Infrastructure.Contexts
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<User>()
-                .ToTable("user");
+                .ToTable("user")
+                .Property(p => p.Id)
+                .ValueGeneratedNever();
             modelBuilder.Entity<ProgrammingLanguage>()
                 .ToTable("programming_language");
             modelBuilder.Entity<Team>()
-                .ToTable("team");
+                .ToTable("team")
+                .Property(p => p.Id)
+                .ValueGeneratedNever();
             modelBuilder.Entity<Right>()
                 .ToTable("right");
             modelBuilder.Entity<UserTeam>()
@@ -47,18 +55,27 @@ namespace CodingChainApi.Infrastructure.Contexts
             modelBuilder.Entity<UserFunction>()
                 .ToTable("user_function");
             modelBuilder.Entity<Function>()
-                .ToTable("function");
+                .ToTable("function")
+                .Property(p => p.Id)
+                .ValueGeneratedNever();
             modelBuilder.Entity<Participation>()
-                .ToTable("participation");
+                .ToTable("participation")
+                .Property(p => p.Id)
+                .ValueGeneratedNever();
             modelBuilder.Entity<Tournament>()
-                .ToTable("tournament");
+                .ToTable("tournament")
+                .Property(p => p.Id)
+                .ValueGeneratedNever();
             modelBuilder.Entity<TournamentStep>()
                 .ToTable("tournament_step");
             modelBuilder.Entity<Step>()
-                .ToTable("step");
+                .ToTable("step")
+                .Property(p => p.Id)
+                .ValueGeneratedNever();
             modelBuilder.Entity<Test>()
-                .ToTable("test");
-
+                .ToTable("test")
+                .Property(p => p.Id)
+                .ValueGeneratedNever();
 
             modelBuilder.Entity<User>()
                 .HasMany(s => s.Rights)
@@ -76,6 +93,8 @@ namespace CodingChainApi.Infrastructure.Contexts
 
 
             modelBuilder.Entity<UserFunction>()
+                .HasKey(uF => new {uF.UserId, uF.FunctionId});
+            modelBuilder.Entity<UserFunction>()
                 .HasOne(bc => bc.User)
                 .WithMany(b => b.UserFunctions)
                 .HasForeignKey(bc => bc.UserId);
@@ -83,7 +102,7 @@ namespace CodingChainApi.Infrastructure.Contexts
                 .HasOne(bc => bc.Function)
                 .WithMany(c => c.UserFunctions)
                 .HasForeignKey(bc => bc.FunctionId);
-            
+
             modelBuilder.Entity<TournamentStep>()
                 .HasOne(bc => bc.Tournament)
                 .WithMany(b => b.TournamentSteps)
@@ -96,8 +115,9 @@ namespace CodingChainApi.Infrastructure.Contexts
             modelBuilder.Entity<Right>()
                 .Property(c => c.Name)
                 .HasConversion<string>();
-            
+
             InitRights(modelBuilder);
+            InitLanguages(modelBuilder);
             InitDecimalPrecisions(modelBuilder);
             base.OnModelCreating(modelBuilder);
         }
@@ -109,6 +129,13 @@ namespace CodingChainApi.Infrastructure.Contexts
                 (rights ?? Array.Empty<RightEnum>()).Select(r => new Right {Id = Guid.NewGuid(), Name = r}));
         }
 
+        private void InitLanguages(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<ProgrammingLanguage>().HasData(
+                _languagesSettings.AvailableLanguages.Select(languageName => new ProgrammingLanguage()
+                    {Id = Guid.NewGuid(), Name = languageName, IsDeleted = false}));
+        }
+
         private void InitDecimalPrecisions(ModelBuilder modelBuilder)
         {
             modelBuilder.Model
@@ -116,7 +143,11 @@ namespace CodingChainApi.Infrastructure.Contexts
                 .SelectMany(type => type.GetProperties())
                 .Where(p => p.ClrType == typeof(decimal) || p.ClrType == typeof(decimal?))
                 .ToList()
-                .ForEach(property => { property.SetPrecision(18); property.SetScale(6); });
+                .ForEach(property =>
+                {
+                    property.SetPrecision(18);
+                    property.SetScale(6);
+                });
         }
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Application.Common.Pagination;
@@ -6,6 +7,7 @@ using Application.Read.Contracts;
 using Application.Read.Teams;
 using CodingChainApi.Infrastructure.Common.Extensions;
 using CodingChainApi.Infrastructure.Contexts;
+using CodingChainApi.Infrastructure.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
@@ -25,10 +27,7 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
                 .Include(t => t.UserTeams)
                 .ThenInclude(uT => uT.User)
                 .Where(t => !t.IsDeleted)
-                .Select(t => new TeamNavigation(t.Id, t.Name, t.UserTeams
-                    .Where(uT => !uT.User.IsDeleted && uT.LeaveDate == null)
-                    .Select(uT => uT.UserId)
-                    .ToList()))
+                .Select(t => new TeamNavigation(t.Id, t.Name, ToMemberNavigations(t)))
                 .FromPaginationQueryAsync(paginationQuery);
         }
 
@@ -42,11 +41,16 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
             return new TeamNavigation(
                 team.Id,
                 team.Name,
-                team.UserTeams
-                    .Where(uT => !uT.User.IsDeleted && uT.LeaveDate == null)
-                    .Select(uT => uT.UserId)
-                    .ToList()
+                ToMemberNavigations(team)
             );
+        }
+
+        private static List<MemberNavigation> ToMemberNavigations(Team team)
+        {
+            return team.UserTeams
+                .Where(uT => !uT.User.IsDeleted && uT.LeaveDate == null)
+                .Select(uT => new MemberNavigation(uT.UserId, uT.IsAdmin, uT.JoinDate, uT.LeaveDate))
+                .ToList();
         }
     }
 }

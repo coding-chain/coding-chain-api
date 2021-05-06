@@ -3,7 +3,7 @@ using Domain.Contracts;
 
 namespace Domain.ProgrammingLanguages
 {
-    public record LanguageId(Guid Value): IEntityId
+    public record ProgrammingLanguageId(Guid Value): IEntityId
     {
         public override string ToString()
         {
@@ -11,9 +11,9 @@ namespace Domain.ProgrammingLanguages
         }
     }
 
-    public class ProgrammingLanguage : Aggregate<LanguageId>
+    public class ProgrammingLanguage : Aggregate<ProgrammingLanguageId>
     {
-        public ProgrammingLanguage(LanguageId id, string name): base(id)
+        public ProgrammingLanguage(ProgrammingLanguageId id, string name): base(id)
         {
             Name = name;
         }

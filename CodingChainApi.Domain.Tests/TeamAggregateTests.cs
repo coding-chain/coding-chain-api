@@ -23,6 +23,10 @@ namespace CodingChainApi.Domain.Tests
 
         private MemberEntity GetCommonMember() => new(new UserId(Guid.NewGuid()), false);
 
+        private TeamAggregate GetValidTeam() =>
+            new(_teamId, _teamName, new List<MemberEntity>() {_adminMember});
+
+
         [Test]
         public void create_team_without_admin_should_throw()
         {
@@ -35,7 +39,7 @@ namespace CodingChainApi.Domain.Tests
         [Test]
         public void create_team_should_work()
         {
-            var team = new TeamAggregate(_teamId, _teamName, new List<MemberEntity>() {_adminMember});
+            var team = GetValidTeam();
             Assert.AreEqual(_teamId, team.Id);
         }
 
@@ -81,28 +85,53 @@ namespace CodingChainApi.Domain.Tests
         [Test]
         public void remove_member_should_throw_if_user_is_admin()
         {
-            var team = new TeamAggregate(_teamId, _teamName, new List<MemberEntity>() {_adminMember});
+            var team = GetValidTeam();
             Assert.Throws<DomainException>(() => team.RemoveMember(_adminMember.Id));
         }
-        
+
         [Test]
         public void remove_member_should_throw_if_user_not_found()
         {
-            var team = new TeamAggregate(_teamId, _teamName, new List<MemberEntity>() {_adminMember});
+            var team = GetValidTeam();
             Assert.Throws<DomainException>(() => team.RemoveMember(GetCommonMember().Id));
         }
 
         [Test]
         public void validate_member_addition_should_throw_if_not_admin()
         {
-            var team = new TeamAggregate(_teamId, _teamName, new List<MemberEntity>() {_adminMember});
+            var team = GetValidTeam();
             Assert.Throws<DomainException>(() => team.ValidateMemberAdditionByMember(GetCommonMember().Id));
+        }
+
+        [Test]
+        public void validate_team_rename_should_work_if_admin()
+        {
+            var team = GetValidTeam();
+            team.ValidateTeamRenamingByMember(_adminMember.Id);
+        }
+
+        [Test]
+        public void validate_team_rename_should_throw_if_not_admin()
+        {
+            var team = GetValidTeam();
+            Assert.Throws<DomainException>(() => team.ValidateTeamRenamingByMember(GetCommonMember().Id));
+        }
+
+        [Test]
+        public void rename_should_rename_team()
+        {
+            var newName = "New name";
+            var team = GetValidTeam();
+            var oldName = team.Name;
+            team.Rename(newName);
+            Assert.AreNotEqual(oldName, team.Name);
+            Assert.AreEqual(newName, team.Name);
         }
 
         [Test]
         public void validate_member_addition_should_work_if_admin()
         {
-            var team = new TeamAggregate(_teamId, _teamName, new List<MemberEntity>() {_adminMember});
+            var team = GetValidTeam();
             team.ValidateMemberAdditionByMember(_adminMember.Id);
         }
 
@@ -113,36 +142,39 @@ namespace CodingChainApi.Domain.Tests
             var team = new TeamAggregate(_teamId, _teamName, new List<MemberEntity>() {_adminMember, existingUser});
             Assert.Throws<DomainException>(() => team.AddMember(existingUser));
         }
-        
+
         [Test]
         public void add_member_should_works()
         {
             var newMember = GetCommonMember();
-            var team = new TeamAggregate(_teamId, _teamName, new List<MemberEntity>() {_adminMember});
+            var team = GetValidTeam();
             team.AddMember(newMember);
             Assert.AreEqual(2, team.Members.Count);
             CollectionAssert.Contains(team.Members, newMember);
         }
+
         [Test]
         public void elevate_member_should_throw_if_not_admin()
         {
-            var team = new TeamAggregate(_teamId, _teamName, new List<MemberEntity>() {_adminMember});
+            var team = GetValidTeam();
             Assert.Throws<DomainException>(() => team.ValidateMemberElevationByMember(GetCommonMember().Id));
         }
+
         [Test]
         public void elevate_member_should_throw_if_not_exists()
         {
-            var team = new TeamAggregate(_teamId, _teamName, new List<MemberEntity>() {_adminMember});
+            var team = GetValidTeam();
             Assert.Throws<DomainException>(() => team.ElevateMember(GetCommonMember().Id));
         }
+
         [Test]
         public void elevate_member_should_work()
         {
             var targetMember = GetCommonMember();
-            var team = new TeamAggregate(_teamId, _teamName, new List<MemberEntity>() {_adminMember,targetMember});
+            var team = new TeamAggregate(_teamId, _teamName, new List<MemberEntity>() {_adminMember, targetMember});
             team.ElevateMember(targetMember.Id);
-            Assert.AreEqual(true,targetMember.IsAdmin);
-            Assert.AreEqual(false,_adminMember.IsAdmin);
+            Assert.AreEqual(true, targetMember.IsAdmin);
+            Assert.AreEqual(false, _adminMember.IsAdmin);
         }
     }
 }

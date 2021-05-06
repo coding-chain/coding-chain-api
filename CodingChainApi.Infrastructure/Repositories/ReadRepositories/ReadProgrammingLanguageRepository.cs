@@ -24,6 +24,7 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
             PaginationQueryBase paginationQuery)
         {
             return await _context.ProgrammingLanguages
+                .Where(l => !l.IsDeleted)
                 .Select(l => new ProgrammingLanguageNavigation(l.Id, l.Name))
                 .FromPaginationQueryAsync(paginationQuery);
         }
@@ -31,20 +32,22 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
 
         public async Task<ProgrammingLanguageNavigation?> GetOneLanguageNavigationByIdAsync(Guid id)
         {
-            var language = await _context.ProgrammingLanguages.FirstOrDefaultAsync(l => l.Id == id);
+            var language = await _context.ProgrammingLanguages.FirstOrDefaultAsync(l => l.Id == id && !l.IsDeleted);
             if (language is null) return null;
             return new ProgrammingLanguageNavigation(language.Id, language.Name);
         }
 
 
-        public Task<bool> LanguageExistById(LanguageId languageId)
+        public async Task<bool> LanguageExistById(Guid programmingLanguageId)
         {
-            throw new NotImplementedException();
+            return await _context.ProgrammingLanguages.AnyAsync(
+                l => !l.IsDeleted && l.Id == programmingLanguageId);
         }
 
-        public Task<bool> LanguageExistsByName(string name)
+        public async Task<bool> LanguageExistsByName(string name)
         {
-            throw new NotImplementedException();
+            return await _context.ProgrammingLanguages.AnyAsync(
+                l => !l.IsDeleted && l.Name == name);
         }
     }
 }
