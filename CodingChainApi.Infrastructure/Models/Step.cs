@@ -6,8 +6,9 @@ namespace CodingChainApi.Infrastructure.Models
     public class Step
     {
         public Guid Id { get; set; }
-        public string Name { get; set; }
-        public string Description { get; set; }
+        public string Name { get; set; } = "";
+        public string Description { get; set; } = "";
+        public string? HeaderCode { get; set; } = "";
         public int? MinFunctionsCount { get; set; }
         public int? MaxFunctionsCount { get; set; }
         public decimal Score { get; set; }

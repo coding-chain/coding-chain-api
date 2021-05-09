@@ -9,5 +9,8 @@ namespace Application.Read.Contracts
     {
          public Task<IPagedList<TeamNavigation>> GetAllTeamNavigationPaginated(PaginationQueryBase paginationQuery);
          public Task<TeamNavigation?> GetOneTeamNavigationByIdAsync(Guid id);
+
+         public Task<MemberNavigation?> GetOneMemberNavigationByIdAsync(Guid teamId, Guid userId);
+
     }
 }

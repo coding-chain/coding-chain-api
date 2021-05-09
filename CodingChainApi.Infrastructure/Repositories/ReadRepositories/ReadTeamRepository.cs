@@ -21,13 +21,21 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
             _context = context;
         }
 
+        private static TeamNavigation ToTeamNavigation(Team team) => new TeamNavigation(
+            team.Id,
+            team.Name,
+            team.UserTeams
+                .Where(uT => uT.LeaveDate == null && !uT.User.IsDeleted)
+                .Select(uT => uT.Id).ToList()
+        );
+
         public async Task<IPagedList<TeamNavigation>> GetAllTeamNavigationPaginated(PaginationQueryBase paginationQuery)
         {
             return await _context.Teams
                 .Include(t => t.UserTeams)
                 .ThenInclude(uT => uT.User)
                 .Where(t => !t.IsDeleted)
-                .Select(t => new TeamNavigation(t.Id, t.Name, ToMemberNavigations(t)))
+                .Select(t => ToTeamNavigation(t))
                 .FromPaginationQueryAsync(paginationQuery);
         }
 
@@ -38,19 +46,27 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
                 .ThenInclude(uT => uT.User)
                 .FirstOrDefaultAsync(t => !t.IsDeleted);
             if (team is null) return null;
-            return new TeamNavigation(
-                team.Id,
-                team.Name,
-                ToMemberNavigations(team)
-            );
+            return ToTeamNavigation(team);
         }
 
-        private static List<MemberNavigation> ToMemberNavigations(Team team)
+        public async Task<MemberNavigation?> GetOneMemberNavigationByIdAsync(Guid teamId, Guid userId)
         {
-            return team.UserTeams
-                .Where(uT => !uT.User.IsDeleted && uT.LeaveDate == null)
-                .Select(uT => new MemberNavigation(uT.UserId, uT.IsAdmin, uT.JoinDate, uT.LeaveDate))
-                .ToList();
+            var member = await _context.UserTeams
+                .Include(uT => uT.Team)
+                .Include(uT => uT.User)
+                .FirstOrDefaultAsync(uT =>
+                    uT.TeamId == teamId && uT.UserId == userId && !uT.Team.IsDeleted && !uT.User.IsDeleted &&
+                    uT.LeaveDate == null);
+            return member is null ? null : ToMemberNavigation(member);
         }
+
+
+        private static MemberNavigation ToMemberNavigation(UserTeam member) => new MemberNavigation(
+            member.UserId,
+            member.TeamId,
+            member.IsAdmin,
+            member.JoinDate,
+            member.LeaveDate
+        );
     }
 }

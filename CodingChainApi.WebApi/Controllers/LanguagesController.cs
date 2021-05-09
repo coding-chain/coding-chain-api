@@ -26,7 +26,7 @@ namespace NeosCodingApi.Controllers
 
 
         [HttpGet("{id}", Name = nameof(GetLanguageById))]
-        [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasResponse<ProgrammingLanguageNavigation>))]
+        [Produces(typeof(HateoasResponse<ProgrammingLanguageNavigation>))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetLanguageById(Guid id)
         {

@@ -27,40 +27,37 @@ namespace CodingChainApi.Domain.Tests
         private StepEntity GetStep(int order, bool isOptional) =>
             new StepEntity(new StepId(Guid.NewGuid()), order, isOptional);
 
-        private TournamentAggregate GetNewTournament() => new TournamentAggregate(
+        private TournamentAggregate GetNewTournament() => TournamentAggregate.CreateNew(
+            _tournamentId,
+            _tournamentName,
+            _tournamentDescription);
+
+        private TournamentAggregate GetNewTournamentWithSteps() => TournamentAggregate.Restore(
             _tournamentId,
             _tournamentName,
             _tournamentDescription,
             false,
             null,
             null,
-            new List<StepEntity>());
-
-        private TournamentAggregate GetNewTournamentWithSteps() => new(
-            _tournamentId,
-            _tournamentName,
-            _tournamentDescription,
-            false,
-            null,
-            null,
-            new List<StepEntity>()
-            {
-                GetStep(0, false),
-                GetStep(1, false)
-            });
-
-        private TournamentAggregate GetPublishedTournament() => new TournamentAggregate(
-            _tournamentId,
-            _tournamentName,
-            _tournamentDescription,
-            true,
-            DateTime.Now,
-            DateTime.Now.AddDays(2),
             new List<StepEntity>
             {
                 GetStep(0, false),
                 GetStep(1, false)
             });
+
+        private TournamentAggregate GetPublishedTournament(DateTime? startDate = null, DateTime? endDate = null) =>
+            TournamentAggregate.Restore(
+                _tournamentId,
+                _tournamentName,
+                _tournamentDescription,
+                true,
+                startDate ?? DateTime.Now,
+                endDate ?? DateTime.Now.AddDays(2),
+                new List<StepEntity>
+                {
+                    GetStep(0, false),
+                    GetStep(1, false)
+                });
 
         [Test]
         public void create_new_tournament_should_work()
@@ -121,7 +118,7 @@ namespace CodingChainApi.Domain.Tests
         public void set_start_date_greater_than_end_date_should_throw()
         {
             var endDate = DateTime.Now;
-            var tournament = new TournamentAggregate(
+            var tournament = TournamentAggregate.Restore(
                 _tournamentId, _tournamentName, _tournamentDescription,
                 false, endDate.AddDays(-1), endDate, new List<StepEntity>());
             Assert.Throws<DomainException>(() => tournament.SetStartDate(endDate.AddDays(1)));
@@ -131,7 +128,7 @@ namespace CodingChainApi.Domain.Tests
         public void set_start_date_equals_to_end_date_should_throw()
         {
             var endDate = DateTime.Now;
-            var tournament = new TournamentAggregate(
+            var tournament = TournamentAggregate.Restore(
                 _tournamentId, _tournamentName, _tournamentDescription,
                 false, endDate.AddDays(-1), endDate, new List<StepEntity>());
             Assert.Throws<DomainException>(() => tournament.SetStartDate(endDate));
@@ -178,7 +175,7 @@ namespace CodingChainApi.Domain.Tests
         public void publish_tournament_without_mandatory_steps_should_throw()
         {
             var steps = new List<StepEntity>() {GetStep(0, true)};
-            var tournament = new TournamentAggregate(_tournamentId, _tournamentName, _tournamentDescription, false,
+            var tournament = TournamentAggregate.Restore(_tournamentId, _tournamentName, _tournamentDescription, false,
                 DateTime.Now, DateTime.Now.AddDays(1), steps);
             Assert.Throws<DomainException>(() => tournament.Publish());
         }
@@ -186,7 +183,7 @@ namespace CodingChainApi.Domain.Tests
         [Test]
         public void publish_tournament_without_steps_should_throw()
         {
-            var tournament = new TournamentAggregate(_tournamentId, _tournamentName, _tournamentDescription, false,
+            var tournament = TournamentAggregate.Restore(_tournamentId, _tournamentName, _tournamentDescription, false,
                 DateTime.Now, DateTime.Now.AddDays(1), new List<StepEntity>());
             Assert.Throws<DomainException>(() => tournament.Publish());
         }
@@ -195,7 +192,7 @@ namespace CodingChainApi.Domain.Tests
         public void publish_tournament_without_end_date_should_throw()
         {
             var steps = new List<StepEntity>() {GetStep(0, false)};
-            var tournament = new TournamentAggregate(_tournamentId, _tournamentName, _tournamentDescription, false,
+            var tournament = TournamentAggregate.Restore(_tournamentId, _tournamentName, _tournamentDescription, false,
                 DateTime.Now, null, steps);
             Assert.Throws<DomainException>(() => tournament.Publish());
         }
@@ -205,7 +202,7 @@ namespace CodingChainApi.Domain.Tests
         {
             var steps = new List<StepEntity> {GetStep(0, false)};
             var startDate = DateTime.Now;
-            var tournament = new TournamentAggregate(_tournamentId, _tournamentName, _tournamentDescription, false,
+            var tournament = TournamentAggregate.Restore(_tournamentId, _tournamentName, _tournamentDescription, false,
                 startDate, startDate.AddDays(1), steps);
             tournament.Publish();
             Assert.AreEqual(true, tournament.IsPublished);
@@ -255,6 +252,74 @@ namespace CodingChainApi.Domain.Tests
             var newStep = GetStep(3, false);
             tournament.AddStep(newStep);
             CollectionAssert.Contains(tournament.Steps, newStep);
+        }
+
+        [Test]
+        public void validate_deletion_should_throw_on_published_and_not_ended_tournament()
+        {
+            var startDate = DateTime.Now;
+            var tournament = GetPublishedTournament(startDate, startDate.AddDays(3));
+            Assert.Throws<DomainException>(() =>
+                tournament.ValidateDeletion(startDate));
+        }
+
+        [Test]
+        public void validate_deletion_should_work()
+        {
+            var startDate = DateTime.Now;
+            var tournament = GetPublishedTournament(startDate, startDate.AddDays(1));
+            tournament.ValidateDeletion(startDate.AddDays(3));
+            Assert.Pass();
+        }
+
+        [Test]
+        public void update_published_tournament_should_throw()
+        {
+            var tournament = GetPublishedTournament();
+            Assert.Throws<DomainException>(() =>
+                tournament.Update("name", "description",true, DateTime.Now, DateTime.Now.AddDays(2)));
+        }
+
+        [Test]
+        public void update_tournament_should_work()
+        {
+            var startDate = DateTime.Now;
+            var endDate = DateTime.Now.AddDays(2);
+            const string name = "testName";
+            const string description = "testDescription";
+            const bool isPublished = true;
+            var tournament = GetNewTournamentWithSteps();
+            tournament.Update(name, description, isPublished, startDate, endDate);
+            Assert.AreEqual(startDate, tournament.StartDate);
+            Assert.AreEqual(endDate, tournament.EndDate);
+            Assert.AreEqual(name, tournament.Name);
+            Assert.AreEqual(description, tournament.Description);
+            Assert.AreEqual(isPublished, tournament.IsPublished);
+        }
+
+        [Test]
+        public void update_start_and_end_date_should_throw_with_end_date_not_null_and_start_date_null()
+        {
+            var tournament = GetNewTournament();
+            Assert.Throws<DomainException>(() => tournament.SetStartDateAndEndDate(null, DateTime.Now));
+        }
+
+        [Test]
+        public void update_start_and_end_date_should_throw_with_end_date_lower_than_start_date()
+        {
+            var tournament = GetNewTournament();
+            Assert.Throws<DomainException>(() =>
+                tournament.SetStartDateAndEndDate(DateTime.Now.AddDays(123), DateTime.Now));
+        }
+
+        [Test]
+        public void update_start_and_end_date_should_work()
+        {
+            var tournament = GetNewTournament();
+            var startDate = DateTime.Now;
+            tournament.SetStartDateAndEndDate(startDate, null);
+            Assert.Null(tournament.EndDate);
+            Assert.AreEqual(startDate, tournament.StartDate);
         }
     }
 }

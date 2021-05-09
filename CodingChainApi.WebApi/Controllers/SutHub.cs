@@ -6,14 +6,12 @@ using Microsoft.AspNetCore.SignalR;
 namespace NeosCodingApi.Controllers
 {
     public class SutHub : Hub
-
     {
         public async Task RunSut(CodeRequest request)
-
         {
             await File.WriteAllTextAsync("C:\\NEOS\\CodingChainApi\\templates\\csharp_template\\Sut.cs", request.Content);
 
-
+            //Presentation -> Application -> Domain -> Application -> Infra
             using var process = new Process
             {
                 StartInfo =

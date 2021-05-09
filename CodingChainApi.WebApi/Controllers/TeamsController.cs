@@ -18,12 +18,13 @@ using NSwag.Annotations;
 
 namespace NeosCodingApi.Controllers
 {
-    public class TeamsController: ApiControllerBase
+    public class TeamsController : ApiControllerBase
     {
-        public TeamsController(ISender mediator, IMapper mapper, IPropertyCheckerService propertyCheckerService) : base(mediator, mapper, propertyCheckerService)
+        public TeamsController(ISender mediator, IMapper mapper, IPropertyCheckerService propertyCheckerService) : base(
+            mediator, mapper, propertyCheckerService)
         {
         }
-        
+
         [HttpPost(Name = nameof(CreateTeam))]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
@@ -35,73 +36,88 @@ namespace NeosCodingApi.Controllers
         }
 
         public record AddMemberToTeamBodyCommand(Guid MemberId);
-        
-        [HttpPost("{id:guid}/members", Name = nameof(AddMemberToTeam))]
+
+        [HttpPost("{teamId:guid}/members", Name = nameof(AddMemberToTeam))]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
-        public async Task<IActionResult> AddMemberToTeam([FromRoute] Guid id, [FromBody] AddMemberToTeamBodyCommand addMemberToTeamBodyCommand)
+        public async Task<IActionResult> AddMemberToTeam([FromRoute] Guid teamId,
+            [FromBody] AddMemberToTeamBodyCommand addMemberToTeamBodyCommand)
         {
-            var teamId = await Mediator.Send(new AddMemberToTeamCommand(id, addMemberToTeamBodyCommand.MemberId));
-            return CreatedAtAction(nameof(GetTeamById), new {id = teamId}, null);
+            var memberId = await Mediator.Send(new AddMemberToTeamCommand(teamId, addMemberToTeamBodyCommand.MemberId));
+            return CreatedAtAction(nameof(GetTeamMemberById), new {teamId, memberId}, null);
         }
-        
-        [HttpPost("{id:guid}/members/{memberId:guid}/elevation", Name = nameof(ElevateTeamMember))]
+
+        [HttpPost("{teamId:guid}/members/{memberId:guid}/elevation", Name = nameof(ElevateTeamMember))]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<IActionResult> ElevateTeamMember(Guid id,Guid memberId )
+        public async Task<IActionResult> ElevateTeamMember(Guid teamId, Guid memberId)
         {
-            await Mediator.Send(new ElevateTeamMemberCommand(id, memberId));
+            await Mediator.Send(new ElevateTeamMemberCommand(teamId, memberId));
             return NoContent();
         }
 
         public record RenameTeamCommandBody(string Name);
-        [HttpPut("{id:guid}", Name = nameof(RenameTeam))]
+
+        [HttpPut("{teamId:guid}", Name = nameof(RenameTeam))]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<IActionResult> RenameTeam(Guid id, [FromBody] RenameTeamCommandBody command)
+        public async Task<IActionResult> RenameTeam(Guid teamId, [FromBody] RenameTeamCommandBody command)
         {
-            await Mediator.Send(new RenameTeamCommand(id, command.Name));
+            await Mediator.Send(new RenameTeamCommand(teamId, command.Name));
             return NoContent();
         }
 
 
-        [HttpDelete("{id:guid}/members/{memberId:guid}", Name = nameof(RemoveMemberFromTeam))]
+        [HttpDelete("{teamId:guid}/members/{memberId:guid}", Name = nameof(RemoveMemberFromTeam))]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> RemoveMemberFromTeam(Guid id, Guid memberId)
+        public async Task<IActionResult> RemoveMemberFromTeam(Guid teamId, Guid memberId)
         {
-            await Mediator.Send(new DeleteMemberFromTeamCommand(id, memberId));
+            await Mediator.Send(new DeleteMemberFromTeamCommand(teamId, memberId));
             return NoContent();
         }
-        
-        
-        [HttpDelete("{id:guid}", Name = nameof(DeleteTeam))]
+
+
+        [HttpDelete("{teamId:guid}", Name = nameof(DeleteTeam))]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> DeleteTeam(Guid id)
+        public async Task<IActionResult> DeleteTeam(Guid teamId)
         {
-            await Mediator.Send(new DeleteTeamCommand(id));
+            await Mediator.Send(new DeleteTeamCommand(teamId));
             return NoContent();
         }
 
 
-        [HttpGet("{id:guid}", Name = nameof(GetTeamById))]
+        [HttpGet("{teamId:guid}", Name = nameof(GetTeamById))]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasResponse<TeamNavigation>))]
-        public async Task<IActionResult> GetTeamById(Guid id)
+        public async Task<IActionResult> GetTeamById(Guid teamId)
         {
-            var team = await Mediator.Send(new GetTeamNavigationByIdQuery(id));
-            var teamWithLinks =  new HateoasResponse<TeamNavigation>(team, GetLinksForTeam(team.Id));
+            var team = await Mediator.Send(new GetTeamNavigationByIdQuery(teamId));
+            var teamWithLinks = new HateoasResponse<TeamNavigation>(team, GetLinksForTeam(team.Id));
             return Ok(teamWithLinks);
+        }
+
+
+        [HttpGet("{teamId:guid}/members/{memberId:guid}", Name = nameof(GetTeamMemberById))]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasResponse<TeamNavigation>))]
+        public async Task<IActionResult> GetTeamMemberById(Guid teamId, Guid memberId)
+        {
+            var member = await Mediator.Send(new GetMemberNavigationByIdQuery(teamId, memberId));
+            var memberWithLinks =
+                new HateoasResponse<MemberNavigation>(member, GetLinksForMember(member.UserId, member.TeamId));
+            return Ok(memberWithLinks);
         }
 
         [HttpGet(Name = nameof(GetTeams))]
@@ -124,9 +140,18 @@ namespace NeosCodingApi.Controllers
             return new List<LinkDto>()
             {
                 LinkDto.CreateLink(Url.Link(nameof(CreateTeam), null)),
-                LinkDto.SelfLink(Url.Link(nameof(GetTeamById), new {id = teamId}))
+                LinkDto.SelfLink(Url.Link(nameof(GetTeamById), new {teamId}))
             };
         }
-        
+
+        private IList<LinkDto> GetLinksForMember(Guid memberId, Guid teamId)
+        {
+            return new List<LinkDto>()
+            {
+                LinkDto.CreateLink(Url.Link(nameof(AddMemberToTeam), new {teamId})),
+                LinkDto.DeleteLink(Url.Link(nameof(RemoveMemberFromTeam), new {teamId, memberId})),
+                LinkDto.SelfLink(Url.Link(nameof(GetTeamMemberById), new {teamId, memberId}))
+            };
+        }
     }
 }

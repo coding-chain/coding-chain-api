@@ -49,6 +49,7 @@ namespace CodingChainApi.Infrastructure
                 typeof(EventPublisherInterceptor));
             services.AddProxiedScoped<ITeamRepository, TeamRepository>(typeof(EventPublisherInterceptor));
             services.AddProxiedScoped<ITournamentRepository, TournamentRepository>(typeof(EventPublisherInterceptor));
+            services.AddProxiedScoped<IStepEditionRepository, StepEditionRepository>(typeof(EventPublisherInterceptor));
         }
 
         private static void RegisterReadRepositories(IServiceCollection services)
@@ -57,6 +58,8 @@ namespace CodingChainApi.Infrastructure
             services.AddScoped<IReadUserRepository, ReadUserRepository>();
             services.AddScoped<IReadTeamRepository, ReadTeamRepository>();
             services.AddScoped<IReadTournamentRepository, ReadTournamentRepository>();
+            services.AddScoped<IReadStepRepository, ReadStepRepository>();
+            services.AddScoped<IReadTestRepository, ReadTestRepository>();
         }
 
         private static void ConfigureProcess(IServiceCollection services, IConfiguration configuration)
@@ -68,7 +71,7 @@ namespace CodingChainApi.Infrastructure
         {
             ConfigureInjectableSettings<IAppDataSettings, AppDataSettings>(services, configuration);
         }
-        
+
         private static void ConfigureLanguages(IServiceCollection services, IConfiguration configuration)
         {
             ConfigureInjectableSettings<ILanguagesSettings, LanguagesSettings>(services, configuration);

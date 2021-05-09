@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using Application.Common.Pagination;
 using Application.Read.Teams;
 using Application.Read.Teams.Handlers;
 using Application.Read.Tournaments;
@@ -18,12 +19,15 @@ using NSwag.Annotations;
 
 namespace NeosCodingApi.Controllers
 {
-    public class TournamentsController: ApiControllerBase
+    public class TournamentsController : ApiControllerBase
     {
-        public TournamentsController(ISender mediator, IMapper mapper, IPropertyCheckerService propertyCheckerService) : base(mediator, mapper, propertyCheckerService)
+        public TournamentsController(ISender mediator, IMapper mapper, IPropertyCheckerService propertyCheckerService) :
+            base(mediator, mapper, propertyCheckerService)
         {
         }
-        
+
+        #region Tournaments
+
         [HttpPost(Name = nameof(CreateTournament))]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
@@ -31,20 +35,30 @@ namespace NeosCodingApi.Controllers
         public async Task<IActionResult> CreateTournament(CreateTournamentCommand createTournamentCommand)
         {
             var tournamentId = await Mediator.Send(createTournamentCommand);
-            return CreatedAtAction(nameof(GetTournamentById), new {id = tournamentId}, null);
+            return CreatedAtAction(nameof(GetTournamentById), new {tournamentId}, null);
         }
-        
-        [HttpGet("{id:guid}", Name = nameof(GetTournamentById))]
+
+        [HttpGet("{tournamentId:guid}", Name = nameof(GetTournamentById))]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasResponse<TournamentNavigation>))]
-        public async Task<IActionResult> GetTournamentById(Guid id)
+        public async Task<IActionResult> GetTournamentById(Guid tournamentId)
         {
-            var tournament = await Mediator.Send(new GetTournamentNavigationByIdQuery(id));
-            var tournamentWithLinks =  new HateoasResponse<TournamentNavigation>(tournament, GetLinksForTournament(tournament.Id));
+            var tournament = await Mediator.Send(new GetTournamentNavigationByIdQuery(tournamentId));
+            var tournamentWithLinks =
+                new HateoasResponse<TournamentNavigation>(tournament, GetLinksForTournament(tournament.Id));
             return Ok(tournamentWithLinks);
         }
-        
+
+        [HttpDelete("{tournamentId:guid}", Name = nameof(DeleteTournament))]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> DeleteTournament(Guid tournamentId)
+        {
+            await Mediator.Send(new DeleteTournamentCommand(tournamentId));
+            return NoContent();
+        }
+
         [HttpGet(Name = nameof(GetTournaments))]
         [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasResponse<IList<HateoasResponse<TournamentNavigation>>>))]
         public async Task<IActionResult> GetTournaments([FromQuery] GetTournamentNavigationPaginatedQuery query)
@@ -59,13 +73,118 @@ namespace NeosCodingApi.Controllers
                 nameof(GetTournaments))
             );
         }
+
+        public record UpdateTournamentCommandBody(string Name, string Description, bool IsPublished,
+            DateTime? StartDate,
+            DateTime? EndDate);
+
+        [HttpPut("{tournamentId:guid}", Name = nameof(UpdateTournament))]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        public async Task<IActionResult> UpdateTournament(Guid tournamentId,
+            [FromBody] UpdateTournamentCommandBody command)
+        {
+            await Mediator.Send(new UpdateTournamentCommand(
+                tournamentId,
+                command.Name,
+                command.Description,
+                command.IsPublished,
+                command.StartDate,
+                command.EndDate
+            ));
+            return NoContent();
+        }
+
+        public record SetTournamentStepsCommandBody(IList<TournamentStep> Steps);
+
+        [HttpPut("{tournamentId:guid}/steps", Name = nameof(UpdateTournamentSteps))]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        public async Task<IActionResult> UpdateTournamentSteps(Guid tournamentId,
+            [FromBody] SetTournamentStepsCommandBody command)
+        {
+            await Mediator.Send(new SetTournamentStepsCommand(tournamentId, command.Steps));
+            return NoContent();
+        }
+
+        #endregion
+
+        #region Steps
+
+        [HttpDelete("{tournamentId:guid}/steps/{stepId:guid}", Name = nameof(DeleteTournamentStep))]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> DeleteTournamentStep(Guid tournamentId, Guid stepId)
+        {
+            await Mediator.Send(new DeleteTournamentStepCommand(tournamentId, stepId));
+            return NoContent();
+        }
+
+        [HttpGet("{tournamentId:guid}/steps/{stepId:guid}", Name = nameof(GetTournamentStepById))]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasResponse<TournamentStepNavigation>))]
+        public async Task<IActionResult> GetTournamentStepById(Guid tournamentId, Guid stepId)
+        {
+            var member = await Mediator.Send(new GetTournamentStepByIdQuery(tournamentId, stepId));
+            var memberWithLinks =
+                new HateoasResponse<TournamentStepNavigation>(member, GetLinksForTournamentStep(tournamentId, stepId));
+            return Ok(memberWithLinks);
+        }
+
+        public record GetTournamentNavigationPaginatedQueryParameters : PaginationQueryBase;
+
+        [HttpGet("{tournamentId:guid}/steps", Name = nameof(GetTournamentSteps))]
+        [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasResponse<IList<HateoasResponse<TournamentStepNavigation>>>))]
+        public async Task<IActionResult> GetTournamentSteps(Guid tournamentId,
+            [FromQuery] GetTournamentNavigationPaginatedQueryParameters query)
+        {
+            var steps = await Mediator.Send(new GetPaginatedTournamentStepNavigationQuery
+            {
+                Page = query.Page,
+                Size = query.Size,
+                TournamentId = tournamentId
+            });
+            var stepsWithLinks = steps.Select(step =>
+                new HateoasResponse<TournamentStepNavigation>(step, GetLinksForTournamentStep(tournamentId, step.StepId)));
+            return Ok(HateoasResponseBuilder.FromPagedList(
+                Url,
+                steps.ToPagedListResume(),
+                stepsWithLinks.ToList(),
+                nameof(GetTournamentSteps))
+            );
+        }
+
+        #endregion
+
+        #region Links
+
         private IList<LinkDto> GetLinksForTournament(Guid tournamentId)
         {
             return new List<LinkDto>()
             {
                 LinkDto.CreateLink(Url.Link(nameof(CreateTournament), null)),
-                LinkDto.SelfLink(Url.Link(nameof(GetTournamentById), new {id = tournamentId}))
+                LinkDto.SelfLink(Url.Link(nameof(GetTournamentById), new {tournamentId})),
+                LinkDto.DeleteLink(Url.Link(nameof(DeleteTournament), new {tournamentId})),
+                LinkDto.UpdateLink(Url.Link(nameof(UpdateTournament), new {tournamentId})),
+                LinkDto.UpdateLink(Url.Link(nameof(UpdateTournamentSteps), new {tournamentId})),
             };
         }
+
+        private IList<LinkDto> GetLinksForTournamentStep(Guid tournamentId, Guid stepId)
+        {
+            return new List<LinkDto>()
+            {
+                LinkDto.DeleteLink(Url.Link(nameof(DeleteTournamentStep), new {tournamentId, stepId})),
+                LinkDto.SelfLink(Url.Link(nameof(GetTournamentStepById), new {tournamentId,stepId})),
+                LinkDto.AllLink(Url.Link(nameof(GetTournamentSteps), new {tournamentId})),
+            };
+        }
+
+        #endregion
     }
 }

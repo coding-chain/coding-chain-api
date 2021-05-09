@@ -23,7 +23,7 @@ namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
 
         private TournamentAggregate ToAggregate(Tournament tournamentEntity)
         {
-            return new(
+            return TournamentAggregate.Restore(
                 new TournamentId(tournamentEntity.Id),
                 tournamentEntity.Name,
                 tournamentEntity.Description,
@@ -43,9 +43,11 @@ namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
 
         private async Task<Tournament> ToModel(TournamentAggregate aggregate)
         {
-            var tournament = await GetTournament(aggregate);
+            var tournament = await GetTournament(aggregate.Id.Value);
             var removedSteps = GetRemovedSteps(aggregate, tournament);
-            var currentSteps = GetCurrentSteps(tournament);
+            var currentSteps = GetCurrentSteps(tournament)
+                .Where(step => !removedSteps.Contains(step))
+                .ToList();
             var newSteps = GetNewSteps(aggregate, currentSteps);
             currentSteps.ForEach(tS =>
                 {
@@ -85,11 +87,11 @@ namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
                 .ToList();
         }
 
-        private async Task<Tournament> GetTournament(TournamentAggregate aggregate)
+        private async Task<Tournament> GetTournament(Guid aggregateId)
         {
             return await _context.Tournaments
                 .Include(t => t.TournamentSteps)
-                .FirstOrDefaultAsync(t => !t.IsDeleted && aggregate.Id.Value == t.Id) ?? new Tournament{Id =  aggregate.Id.Value};
+                .FirstOrDefaultAsync(t => !t.IsDeleted && aggregateId == t.Id) ?? new Tournament{Id =  aggregateId};
         }
 
         public async Task<TournamentId> SetAsync(TournamentAggregate aggregate)

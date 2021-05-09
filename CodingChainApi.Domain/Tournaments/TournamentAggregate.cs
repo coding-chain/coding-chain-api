@@ -1,6 +1,8 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Intrinsics.Arm;
 using Domain.Contracts;
 using Domain.Exceptions;
 using Domain.Steps;
@@ -12,18 +14,6 @@ namespace Domain.Tournaments
         public override string ToString() => Value.ToString();
     }
 
-    public class StepEntity : Entity<StepId>
-    {
-        public bool IsOptional { get; set; }
-        public int Order { get; set; }
-
-        public StepEntity(StepId id, int order, bool isOptional) : base(id)
-        {
-            Order = order;
-            IsOptional = isOptional;
-        }
-    }
-
     public class TournamentAggregate : Aggregate<TournamentId>
     {
         public string Name { get; private set; }
@@ -31,25 +21,51 @@ namespace Domain.Tournaments
         public bool IsPublished { get; private set; }
         public DateTime? StartDate { get; private set; }
         public DateTime? EndDate { get; private set; }
-        private List<StepEntity> _steps;
-        public IReadOnlyList<StepEntity> Steps => _steps.AsReadOnly();
+        private SortedSet<StepEntity> _steps;
+        public IReadOnlyList<StepEntity> Steps => _steps.ToList().AsReadOnly();
 
-        public TournamentAggregate(TournamentId id, string name, string description,
+        private class StepEntityComparer : IComparer<StepEntity>
+        {
+            public int Compare(StepEntity? x, StepEntity? y)
+            {
+                return x?.Order ?? 0 - y?.Order ?? 0;
+            }
+        }
+        private TournamentAggregate(TournamentId id, string name, string description,
             bool isPublished, DateTime? startDate, DateTime? endDate, IList<StepEntity> steps) : base(id)
         {
-            _steps = steps.OrderBy(s => s.Order).ToList();
+            _steps = new SortedSet<StepEntity>(steps, new StepEntityComparer());
             Name = name;
             Description = description;
             StartDate = startDate;
-            EndDate = EndDate;
+            EndDate = endDate;
             IsPublished = isPublished;
         }
-        
+
+        private TournamentAggregate(TournamentId id, string name, string description) : base(id)
+        {
+            Id = id;
+            Name = name;
+            Description = description;
+            _steps = new SortedSet<StepEntity>();
+        }
+
+        public static TournamentAggregate Restore(TournamentId id, string name, string description,
+            bool isPublished, DateTime? startDate, DateTime? endDate, IList<StepEntity> steps)
+        {
+            return new (id, name, description, isPublished, startDate, endDate, steps);
+        }
+        public static TournamentAggregate CreateNew(TournamentId id, string name, string description)
+        {
+            return new(id, name, description);
+        }
+
+
         public void SetSteps(IList<StepEntity> steps)
         {
-            var orderedSteps = steps.OrderBy(s => s.Order).ToList();
+            var orderedSteps = new SortedSet<StepEntity>(steps);
             var errors = orderedSteps
-                .Where((t, i) => t.Order != i)
+                .Where((t, i) => t.Order != i + 1)
                 .Select(t => $"Step with id {t.Id} and order {t.Order} isn't ordered")
                 .ToList();
             if (errors.Any())
@@ -61,7 +77,7 @@ namespace Domain.Tournaments
         {
             if (IsPublished)
                 throw new DomainException("Cannot add step from published tournament");
-            if (_steps.Any(s => s.Id == stepEntity.Id))
+            if (_steps.Contains(stepEntity))
                 throw new DomainException($"Step {stepEntity.Id} already in steps");
             _steps.Add(stepEntity);
             ReorderSteps();
@@ -80,11 +96,12 @@ namespace Domain.Tournaments
 
         private void ReorderSteps()
         {
-            var orderedSteps = _steps.OrderBy(s => s.Order).ToList();
+            var orderedSteps = _steps.ToList();
             for (var i = 0; i < orderedSteps.Count; i++)
             {
                 orderedSteps[i].Order = i;
             }
+            _steps = new SortedSet<StepEntity>(orderedSteps, new StepEntityComparer());
         }
 
         public void SetEndDate(DateTime date)
@@ -102,24 +119,54 @@ namespace Domain.Tournaments
         {
             if (IsPublished)
                 throw new DomainException("Cannot change start date from published tournament");
-            if(date >= EndDate)
+            if (date >= EndDate)
                 throw new DomainException("End date couldn't be greater or equal than end date");
             StartDate = date;
+        }
+
+        public void SetStartDateAndEndDate(DateTime? startDate, DateTime? endDate)
+        {
+            if (IsPublished)
+                throw new DomainException("Cannot change start or end date from published tournament");
+            if(startDate is null && endDate is not null)
+                throw new DomainException("Set start date first");
+            if (startDate >= endDate)
+                throw new DomainException("End date couldn't be lower or equal than start date");
+            StartDate = startDate;
+            EndDate = endDate;
         }
 
         public void Publish()
         {
             var errors = new List<string>();
-            if(Steps.All(s => s.IsOptional))
+            if (Steps.All(s => s.IsOptional))
                 errors.Add("Tournament should contains mandatory steps");
-            if(StartDate is null)
+            if (StartDate is null)
                 errors.Add("Tournament should have start date");
-            if(EndDate is null)
+            if (EndDate is null)
                 errors.Add("Tournament should have end date");
             if (errors.Any())
                 throw new DomainException(errors);
             IsPublished = true;
         }
-        
+
+        public void ValidateDeletion(DateTime nowTime)
+        {
+            if (IsPublished && EndDate > nowTime)
+                throw new DomainException("Cannot delete published and not ended tournament");
+        }
+
+        public void Update(string name, string description, bool isPublished, DateTime? startDate, DateTime? endDate)
+        {
+            if (IsPublished)
+                throw new DomainException("Cannot update published tournament");
+            Name = name;
+            Description = description;
+            SetStartDateAndEndDate(startDate, endDate);
+            if(isPublished)
+                Publish();
+        }
+
+
     }
 }
