@@ -9,7 +9,6 @@ using CodingChainApi.Infrastructure.Contexts;
 using CodingChainApi.Infrastructure.Models;
 using Domain.ProgrammingLanguages;
 using Domain.StepEditions;
-using Domain.Steps;
 using Domain.Tournaments;
 using Microsoft.EntityFrameworkCore;
 
@@ -43,9 +42,9 @@ namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
             currentTests.ForEach(currentTest =>
             {
                 var test = aggregate.Tests.First(t => t.Id.Value == currentTest.Id);
-                test.Score = currentTest.Score;
-                test.InputGenerator = currentTest.InputGenerator;
-                test.OutputValidator = currentTest.OutputValidator;
+                currentTest.Score = test.Score;
+                currentTest.InputGenerator = test.InputGenerator;
+                currentTest.OutputValidator = test.OutputValidator;
             });
             newTests.ForEach(test => step.Tests.Add(test));
             step.MinFunctionsCount = aggregate.MinFunctionsCount;

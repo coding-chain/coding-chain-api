@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Application.Common.Pagination;
@@ -9,6 +10,7 @@ using CodingChainApi.Infrastructure.Common.Extensions;
 using CodingChainApi.Infrastructure.Contexts;
 using CodingChainApi.Infrastructure.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 
 namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
 {
@@ -49,21 +51,24 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
         public async Task<IPagedList<StepNavigation>> GetAllStepNavigationPaginated(
             PaginationQueryBase paginationQuery)
         {
-            return await _context.Steps
-                .Include(s => s.Tests)
-                .Include(s => s.ProgrammingLanguage)
-                .Include(s => s.Participations)
-                .Include(s => s.TournamentSteps)
+            return await  GetStepIncludeQueryable()
                 .Where(t => !t.IsDeleted)
                 .Select(s => ToStepNavigation(s))
                 .FromPaginationQueryAsync(paginationQuery);
         }
 
-        public async Task<StepNavigation?> GetOneStepNavigationByID(Guid id)
+        private IIncludableQueryable<Step, IList<TournamentStep>> GetStepIncludeQueryable()
         {
-            var step = await _context.Steps
+            return _context.Steps
                 .Include(s => s.Tests)
                 .Include(s => s.ProgrammingLanguage)
+                .Include(s => s.Participations)
+                .Include(s => s.TournamentSteps);
+        }
+
+        public async Task<StepNavigation?> GetOneStepNavigationById(Guid id)
+        {
+            var step = await GetStepIncludeQueryable()
                 .FirstOrDefaultAsync(s => !s.IsDeleted && s.Id == id);
             return step is null ? null : ToStepNavigation(step);
         }

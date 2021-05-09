@@ -6,7 +6,7 @@ using Application.Write.Contracts;
 using CodingChainApi.Infrastructure.Common.Extensions;
 using CodingChainApi.Infrastructure.Contexts;
 using CodingChainApi.Infrastructure.Models;
-using Domain.Steps;
+using Domain.StepEditions;
 using Domain.Tournaments;
 using Microsoft.EntityFrameworkCore;
 
@@ -49,11 +49,11 @@ namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
                 .Where(step => !removedSteps.Contains(step))
                 .ToList();
             var newSteps = GetNewSteps(aggregate, currentSteps);
-            currentSteps.ForEach(tS =>
+            currentSteps.ForEach(currentStep =>
                 {
-                    var step = aggregate.Steps.First(m => m.Id.Value == tS.StepId);
-                    tS.Order = step.Order;
-                    tS.IsOptional = step.IsOptional;
+                    var step = aggregate.Steps.First(m => m.Id.Value == currentStep.StepId);
+                    currentStep.Order = step.Order;
+                    currentStep.IsOptional = step.IsOptional;
                 });
             newSteps.ForEach(tS => tournament.TournamentSteps.Add(tS));
             _context.TournamentSteps.RemoveRange(removedSteps);

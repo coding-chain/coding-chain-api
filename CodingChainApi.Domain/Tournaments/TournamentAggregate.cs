@@ -5,7 +5,7 @@ using System.Linq;
 using System.Runtime.Intrinsics.Arm;
 using Domain.Contracts;
 using Domain.Exceptions;
-using Domain.Steps;
+using Domain.StepEditions;
 
 namespace Domain.Tournaments
 {

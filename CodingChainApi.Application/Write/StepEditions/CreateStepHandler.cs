@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Application.Read.Contracts;
 using Application.Write.Contracts;
 using Domain.ProgrammingLanguages;
-using Domain.Steps;
+using Domain.StepEditions;
 using MediatR;
 
 namespace Application.Write.StepEditions

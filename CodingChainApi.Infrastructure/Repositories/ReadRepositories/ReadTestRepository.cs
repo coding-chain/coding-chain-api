@@ -8,6 +8,7 @@ using CodingChainApi.Infrastructure.Common.Extensions;
 using CodingChainApi.Infrastructure.Contexts;
 using CodingChainApi.Infrastructure.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 
 namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
 {
@@ -30,19 +31,23 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
 
         public async Task<TestNavigation?> GetOneTestNavigationByID(Guid testId)
         {
-            var test = await _context.Tests
-                .Include(t => t.Step)
+            var test = await GetTestIncludeQueryable()
                 .FirstOrDefaultAsync(t => !t.IsDeleted && t.Id == testId);
             return test == null ? null : ToTestNavigation(test);
         }
 
         public async Task<IPagedList<TestNavigation>> GetPaginatedTestNavigation(PaginationQueryBase query)
         {
-            return await _context.Tests
-                .Include(t => t.Step)
+            return await GetTestIncludeQueryable()
                 .Where(t => t.IsDeleted)
                 .Select(t => ToTestNavigation(t))
                 .FromPaginationQueryAsync(query);
+        }
+
+        private IIncludableQueryable<Test, Step> GetTestIncludeQueryable()
+        {
+            return _context.Tests
+                .Include(t => t.Step);
         }
     }
 }

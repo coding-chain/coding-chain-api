@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Application.Common.Exceptions;
 using Application.Write.Contracts;
-using Domain.Steps;
+using Domain.StepEditions;
 using MediatR;
 
 namespace Application.Write.StepEditions

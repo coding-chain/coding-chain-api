@@ -11,9 +11,10 @@ namespace Application.Read.Contracts
     public interface IReadTournamentRepository
     {
         public Task<IPagedList<TournamentNavigation>> GetAllTournamentNavigationPaginated(PaginationQueryBase paginationQuery);
-        public Task<TournamentNavigation?> GetOneTournamentNavigationByID(Guid id);
+        public Task<TournamentNavigation?> GetOneTournamentNavigationById(Guid id);
         
         public Task<IPagedList<TournamentStepNavigation>> GetAllTournamentStepNavigationPaginated(GetPaginatedTournamentStepNavigationQuery paginationQuery);
         public Task<TournamentStepNavigation?> GetOneTournamentStepNavigationByID(Guid tournamentId, Guid stepId);
+        public Task<bool> TournamentExistsById(Guid tournamentId);
     }
 }

@@ -11,6 +11,7 @@ using CodingChainApi.Infrastructure.Common.Extensions;
 using CodingChainApi.Infrastructure.Contexts;
 using CodingChainApi.Infrastructure.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 
 namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
 {
@@ -26,9 +27,7 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
         public async Task<IPagedList<TournamentNavigation>> GetAllTournamentNavigationPaginated(
             PaginationQueryBase paginationQuery)
         {
-            return await _context.Tournaments
-                .Include(t => t.TournamentSteps)
-                .ThenInclude(uT => uT.Step)
+            return await GetTournamentIncludeQueryable()
                 .Where(t => !t.IsDeleted)
                 .Select(t => new TournamentNavigation(t.Id, t.Name, t.Description, t.IsPublished, t.StartDate,
                     t.EndDate, ToStepsIds(t)))
@@ -43,15 +42,20 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
                 .ToList();
         }
 
-        public async Task<TournamentNavigation?> GetOneTournamentNavigationByID(Guid id)
+        public async Task<TournamentNavigation?> GetOneTournamentNavigationById(Guid id)
         {
-            var tournament = await _context.Tournaments
-                .Include(t => t.TournamentSteps)
-                .ThenInclude(uT => uT.Step)
+            var tournament = await GetTournamentIncludeQueryable()
                 .FirstOrDefaultAsync(t => !t.IsDeleted && t.Id == id);
             if (tournament is null) return null;
             return new TournamentNavigation(tournament.Id, tournament.Name, tournament.Description,
                 tournament.IsPublished, tournament.StartDate, tournament.EndDate, ToStepsIds(tournament));
+        }
+
+        private IIncludableQueryable<Tournament, Step> GetTournamentIncludeQueryable()
+        {
+            return _context.Tournaments
+                .Include(t => t.TournamentSteps)
+                .ThenInclude(uT => uT.Step);
         }
 
         private static TournamentStepNavigation ToTournamentStepNavigation(TournamentStep tournamentStep) =>
@@ -65,9 +69,7 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
         public async Task<IPagedList<TournamentStepNavigation>> GetAllTournamentStepNavigationPaginated(
             GetPaginatedTournamentStepNavigationQuery paginationQuery)
         {
-            return await _context.TournamentSteps
-                .Include(tS => tS.Tournament)
-                .Include(tS => tS.Step)
+            return await GetTournamentStepIncludeQueryable()
                 .Where(tournamentStep => !tournamentStep.Tournament.IsDeleted && !tournamentStep.Step.IsDeleted &&
                                          tournamentStep.TournamentId == paginationQuery.TournamentId)
                 .Select(tournamentStep => ToTournamentStepNavigation(tournamentStep))
@@ -76,11 +78,21 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
 
         public async Task<TournamentStepNavigation?> GetOneTournamentStepNavigationByID(Guid tournamentId, Guid stepId)
         {
-            var tournamentStep = await _context.TournamentSteps
-                .Include(tS => tS.Tournament)
-                .Include(tS => tS.Step)
+            var tournamentStep = await GetTournamentStepIncludeQueryable()
                 .FirstOrDefaultAsync(tS => !tS.Tournament.IsDeleted && !tS.Step.IsDeleted && tS.TournamentId == tournamentId);
             return tournamentStep is null ? null : ToTournamentStepNavigation(tournamentStep);
+        }
+
+        public Task<bool> TournamentExistsById(Guid tournamentId)
+        {
+            return _context.Tournaments.AnyAsync(t => !t.IsDeleted && t.Id == tournamentId);
+        }
+
+        private IIncludableQueryable<TournamentStep, Step> GetTournamentStepIncludeQueryable()
+        {
+            return _context.TournamentSteps
+                .Include(tS => tS.Tournament)
+                .Include(tS => tS.Step);
         }
     }
 }

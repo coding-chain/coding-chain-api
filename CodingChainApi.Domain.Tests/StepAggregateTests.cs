@@ -4,7 +4,6 @@ using System.Linq;
 using Domain.Exceptions;
 using Domain.ProgrammingLanguages;
 using Domain.StepEditions;
-using Domain.Steps;
 using NUnit.Framework;
 
 namespace CodingChainApi.Domain.Tests

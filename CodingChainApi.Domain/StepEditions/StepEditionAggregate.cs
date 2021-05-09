@@ -4,10 +4,8 @@ using System.Linq;
 using Domain.Contracts;
 using Domain.Exceptions;
 using Domain.ProgrammingLanguages;
-using Domain.StepEditions;
-using Domain.Tournaments;
 
-namespace Domain.Steps
+namespace Domain.StepEditions
 {
     public record StepId(Guid Value) : IEntityId
     {

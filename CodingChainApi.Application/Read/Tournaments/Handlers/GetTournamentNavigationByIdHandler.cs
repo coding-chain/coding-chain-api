@@ -18,7 +18,7 @@ namespace Application.Read.Tournaments.Handlers
 
         public async Task<TournamentNavigation> Handle(GetTournamentNavigationByIdQuery request, CancellationToken cancellationToken)
         {
-            var tournament = await _readTournamentRepository.GetOneTournamentNavigationByID(request.Id);
+            var tournament = await _readTournamentRepository.GetOneTournamentNavigationById(request.Id);
             if (tournament is null)
                 throw new ApplicationException($"Tournament {request.Id} not found");
             return tournament;

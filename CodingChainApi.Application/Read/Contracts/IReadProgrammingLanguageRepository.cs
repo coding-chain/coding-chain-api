@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Application.Common.Pagination;
-using Application.Read.Languages;
+using Application.Read.ProgrammingLanguages;
 using Domain.ProgrammingLanguages;
 
 namespace Application.Read.Contracts

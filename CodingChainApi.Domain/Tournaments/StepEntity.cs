@@ -1,6 +1,6 @@
 using System;
 using Domain.Contracts;
-using Domain.Steps;
+using Domain.StepEditions;
 
 namespace Domain.Tournaments
 {

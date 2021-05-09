@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Domain.Exceptions;
-using Domain.Steps;
+using Domain.StepEditions;
 using Domain.Teams;
 using Domain.Tournaments;
 using Domain.Users;
@@ -161,8 +161,8 @@ namespace CodingChainApi.Domain.Tests
             var tournament = GetNewTournament();
             var steps = new List<StepEntity>()
             {
-                GetStep(0, false),
-                GetStep(1, false)
+                GetStep(1, false),
+                GetStep(2, false)
             };
             tournament.SetSteps(steps);
             for (var i = 0; i < tournament.Steps.Count; i++)

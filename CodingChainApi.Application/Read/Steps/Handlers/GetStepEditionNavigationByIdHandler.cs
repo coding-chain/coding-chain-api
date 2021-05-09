@@ -18,7 +18,7 @@ namespace Application.Read.Steps.Handlers
 
         public async Task<StepNavigation> Handle(GetStepNavigationByIdQuery request, CancellationToken cancellationToken)
         {
-            var step = await _readStepRepository.GetOneStepNavigationByID(request.StepId);
+            var step = await _readStepRepository.GetOneStepNavigationById(request.StepId);
             if (step is null)
                 throw new ApplicationException($"Step with id {request.StepId} not found");
             return step;

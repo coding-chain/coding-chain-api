@@ -12,10 +12,12 @@ namespace Domain.Exceptions
 
         public DomainException(string? message) : base(message)
         {
+            Errors.Add(message ?? "Domain error raised");
         }
 
         public DomainException(string? message, Exception? innerException) : base(message, innerException)
         {
+            Errors.Add(message ?? "Domain error raised");
         }
 
         public IList<string> Errors { get; } = new List<string>();
