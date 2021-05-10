@@ -40,7 +40,7 @@ namespace Application.Common.MessageBroker.RabbitMQ.Code.CodeExecution
             }
             catch (Exception ex)
             {
-                _logger.LogInformation($"Process fail,error:{ex.Message},stackTrace:{ex.StackTrace},message:{message}");
+                _logger.LogError($"Process fail,error:{ex.Message},stackTrace:{ex.StackTrace},message:{message}");
                 _logger.LogError(-1, ex, "Process fail");
                 return false;
             }
