@@ -29,26 +29,30 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
         {
             return await GetTournamentIncludeQueryable()
                 .Where(t => !t.IsDeleted)
-                .Select(t => new TournamentNavigation(t.Id, t.Name, t.Description, t.IsPublished, t.StartDate,
-                    t.EndDate, ToStepsIds(t)))
+                .Select(t => ToTournamentNavigation(t))
                 .FromPaginationQueryAsync(paginationQuery);
         }
 
-        private static List<Guid> ToStepsIds(Tournament t)
-        {
-            return t.TournamentSteps
-                .Where(tS => !tS.Step.IsDeleted)
-                .Select(tS => tS.Id)
-                .ToList();
-        }
+
+        
+        private static TournamentNavigation ToTournamentNavigation(Tournament tournament) => new TournamentNavigation(
+                tournament.Id,
+                tournament.Name,
+                tournament.Description,
+                tournament.IsPublished,
+                tournament.StartDate,
+                tournament.EndDate,
+                tournament.TournamentSteps
+                    .Where(tS => !tS.Step.IsDeleted)
+                    .Select(tS => tS.StepId)
+                    .ToList()
+            );
 
         public async Task<TournamentNavigation?> GetOneTournamentNavigationById(Guid id)
         {
             var tournament = await GetTournamentIncludeQueryable()
                 .FirstOrDefaultAsync(t => !t.IsDeleted && t.Id == id);
-            if (tournament is null) return null;
-            return new TournamentNavigation(tournament.Id, tournament.Name, tournament.Description,
-                tournament.IsPublished, tournament.StartDate, tournament.EndDate, ToStepsIds(tournament));
+            return tournament is null ? null : ToTournamentNavigation(tournament);
         }
 
         private IIncludableQueryable<Tournament, Step> GetTournamentIncludeQueryable()
