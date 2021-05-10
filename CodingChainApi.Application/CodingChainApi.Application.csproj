@@ -7,6 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\CodingChainApi.CSharpClient\CodingChainApi.CSharpClient.csproj" />
       <ProjectReference Include="..\CodingChainApi.Domain\CodingChainApi.Domain.csproj" />
     </ItemGroup>
 
@@ -16,6 +17,7 @@
       <PackageReference Include="Castle.Core" Version="4.4.1" />
       <PackageReference Include="FluentValidation.AspNetCore" Version="9.5.3" />
       <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
+      <PackageReference Include="RabbitMQ.Client" Version="6.2.1" />
     </ItemGroup>
 
     <ItemGroup>

@@ -17,6 +17,71 @@ import * as moment from 'moment';
 export const API_BASE_URL = new InjectionToken<string>('API_BASE_URL');
 
 @Injectable()
+export class CodeClient {
+    private http: HttpClient;
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(@Inject(HttpClient) http: HttpClient, @Optional() @Inject(API_BASE_URL) baseUrl?: string) {
+        this.http = http;
+        this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "";
+    }
+
+    execute(version: string | null, command: RunParticipationTestsCommand): Observable<FileResponse> {
+        let url_ = this.baseUrl + "/api/v{version}/Code/Execute";
+        if (version === undefined || version === null)
+            throw new Error("The parameter 'version' must be defined.");
+        url_ = url_.replace("{version}", encodeURIComponent("" + version));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(command);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+                "Accept": "application/octet-stream"
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processExecute(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processExecute(<any>response_);
+                } catch (e) {
+                    return <Observable<FileResponse>><any>_observableThrow(e);
+                }
+            } else
+                return <Observable<FileResponse>><any>_observableThrow(response_);
+        }));
+    }
+
+    protected processExecute(response: HttpResponseBase): Observable<FileResponse> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200 || status === 206) {
+            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
+            const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
+            const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
+            return _observableOf({ fileName: fileName, data: <any>responseBlob, status: status, headers: _headers });
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf<FileResponse>(<any>null);
+    }
+}
+
+@Injectable()
 export class LanguagesClient {
     private http: HttpClient;
     private baseUrl: string;
@@ -1253,6 +1318,154 @@ export class UsersClient {
         }
         return _observableOf<HateoasResponseOfIListOfPublicUser>(<any>null);
     }
+}
+
+export class RunParticipationTestsCommand implements IRunParticipationTestsCommand {
+    participationId?: string;
+    language?: string;
+    headerCode?: string;
+    tests?: Test[];
+    functions?: Function[];
+
+    constructor(data?: IRunParticipationTestsCommand) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.participationId = _data["participationId"];
+            this.language = _data["language"];
+            this.headerCode = _data["headerCode"];
+            if (Array.isArray(_data["tests"])) {
+                this.tests = [] as any;
+                for (let item of _data["tests"])
+                    this.tests!.push(Test.fromJS(item));
+            }
+            if (Array.isArray(_data["functions"])) {
+                this.functions = [] as any;
+                for (let item of _data["functions"])
+                    this.functions!.push(Function.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): RunParticipationTestsCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new RunParticipationTestsCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["participationId"] = this.participationId;
+        data["language"] = this.language;
+        data["headerCode"] = this.headerCode;
+        if (Array.isArray(this.tests)) {
+            data["tests"] = [];
+            for (let item of this.tests)
+                data["tests"].push(item.toJSON());
+        }
+        if (Array.isArray(this.functions)) {
+            data["functions"] = [];
+            for (let item of this.functions)
+                data["functions"].push(item.toJSON());
+        }
+        return data; 
+    }
+}
+
+export interface IRunParticipationTestsCommand {
+    participationId?: string;
+    language?: string;
+    headerCode?: string;
+    tests?: Test[];
+    functions?: Function[];
+}
+
+export class Test implements ITest {
+    outputValidator?: string | undefined;
+    inputGenerator?: string | undefined;
+
+    constructor(data?: ITest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.outputValidator = _data["outputValidator"];
+            this.inputGenerator = _data["inputGenerator"];
+        }
+    }
+
+    static fromJS(data: any): Test {
+        data = typeof data === 'object' ? data : {};
+        let result = new Test();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["outputValidator"] = this.outputValidator;
+        data["inputGenerator"] = this.inputGenerator;
+        return data; 
+    }
+}
+
+export interface ITest {
+    outputValidator?: string | undefined;
+    inputGenerator?: string | undefined;
+}
+
+export class Function implements IFunction {
+    code?: string | undefined;
+    order?: number;
+
+    constructor(data?: IFunction) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.code = _data["code"];
+            this.order = _data["order"];
+        }
+    }
+
+    static fromJS(data: any): Function {
+        data = typeof data === 'object' ? data : {};
+        let result = new Function();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["code"] = this.code;
+        data["order"] = this.order;
+        return data; 
+    }
+}
+
+export interface IFunction {
+    code?: string | undefined;
+    order?: number;
 }
 
 export class HateoasResponseOfProgrammingLanguageNavigation implements IHateoasResponseOfProgrammingLanguageNavigation {
