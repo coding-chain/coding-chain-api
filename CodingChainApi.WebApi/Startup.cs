@@ -1,10 +1,7 @@
 using System.Linq;
 using System.Reflection;
 using Application;
-using Application.Common.MessageBroker.RabbitMQ;
-using Application.Common.MessageBroker.RabbitMQ.Code.CodeExecution;
 using Application.Contracts.IService;
-using Application.Settings;
 using CodingChainApi.Infrastructure;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
@@ -49,18 +46,6 @@ namespace NeosCodingApi
             services.AddSingleton<ICurrentUserService, CurrentUserService>();
             services.AddScoped<IPropertyCheckerService, PropertyCheckerService>();
             services.AddHttpContextAccessor();
-
-            // RabbitMQ
-            services.AddHostedService<CodeExecutionListener>();
-            services.AddSingleton<RabbitMQPublisher, RabbitMQPublisher>();
-            services.Configure<MessageBrokerConfiguration>(options =>
-            {
-                options.RabbitHost = "localhost";
-                options.RabbitPort = 15672;
-                options.RabbitUserName = "lapin";
-                options.RabbitPassword = "lapin";
-            });
-            // End RabbitMQ Configuration
 
             services.AddSignalR();
 

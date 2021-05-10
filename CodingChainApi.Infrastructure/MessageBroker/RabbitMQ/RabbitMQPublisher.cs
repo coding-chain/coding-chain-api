@@ -1,26 +1,26 @@
 using System;
 using System.Text;
-using Application.Settings;
+using Application.Common.MessageBroker.RabbitMQ;
+using CodingChainApi.Infrastructure.Settings;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 
-namespace Application.Common.MessageBroker.RabbitMQ
+namespace CodingChainApi.Infrastructure.MessageBroker.RabbitMQ
 {
-    public class RabbitMQPublisher
+    public class RabbitMQPublisher : IRabbitMQPublisher
     {
         private readonly IModel _channel;
 
         private readonly ILogger _logger;
 
-        public RabbitMQPublisher(IOptions<MessageBrokerConfiguration> options, ILogger<RabbitMQPublisher> logger)
+        public RabbitMQPublisher(IRabbitMQSettings settings, ILogger<RabbitMQPublisher> logger)
         {
             try
             {
                 var factory = new ConnectionFactory()
                 {
-                    HostName = options.Value.RabbitHost
+                    HostName = settings.RabbitHost
                 };
                 var connection = factory.CreateConnection();
                 _channel = connection.CreateModel();

@@ -1,10 +1,12 @@
-namespace Application.Settings
+namespace CodingChainApi.Infrastructure.Settings
 {
-    public class MessageBrokerConfiguration
+    public class RabbitMQSettings : IRabbitMQSettings
     {
         public string RabbitHost { get; set; }
         public string RabbitUserName { get; set; }
         public string RabbitPassword { get; set; }
         public int RabbitPort { get; set; }
+        public string ExecutionCodeRoute { get; set; }
+        public string CodeRouteKey { get; set; }
     }
 }

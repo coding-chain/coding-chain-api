@@ -1,29 +1,35 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Application.Common.MessageBroker.RabbitMQ;
-using Application.Common.MessageBroker.RabbitMQ.Code.CodeExecution;
-using CodingChainApi.WebApi.Client.Contracts;
 using MediatR;
-using Microsoft.Extensions.DependencyInjection;
-using NeosCodingApi.Records;
 
-namespace Application.Publisher.Code.CodeExecution
+namespace Application.Write.Code.CodeExecution
 {
-    public class CodeExecutionHandler : IRequestHandler<CodeExecutionRecords.RunParticipationTestsCommand, string>
+    public record RunParticipationTestsCommand(Guid ParticipationId, string Language, string HeaderCode,
+        IList<RunParticipationTestsCommand.Test> Tests,
+        IList<RunParticipationTestsCommand.Function> Functions) : IRequest<string>
     {
-        private IServiceProvider _service;
+        public record Test(string OutputValidator, string InputGenerator);
 
-        public CodeExecutionHandler(IServiceProvider service)
+        public record Function(string Code, int Order);
+    }
+
+    public class CodeExecutionHandler : IRequestHandler<ICodeExecutionRecords.RunParticipationTestsCommand, string>
+    {
+        private RabbitMQPublisher _rabbitMqPublisher;
+
+        public CodeExecutionHandler(RabbitMQPublisher rabbitMqPublisher)
         {
-            _service = service;
+            _rabbitMqPublisher = rabbitMqPublisher;
         }
 
-        public async Task<string> Handle(CodeExecutionRecords.RunParticipationTestsCommand request,
+        public async Task<string> Handle(ICodeExecutionRecords.RunParticipationTestsCommand request,
             CancellationToken cancellationToken)
         {
-            var codeExecutionPublisher = _service.GetService<RabbitMQPublisher>();
+            var codeExecutionPublisher = _rabbitMqPublisher;
             codeExecutionPublisher?.PushMessage("code.execution.pending", request);
+
             return request.ParticipationId.ToString();
         }
     }

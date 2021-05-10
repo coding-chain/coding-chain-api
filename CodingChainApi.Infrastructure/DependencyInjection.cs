@@ -2,14 +2,18 @@
 using System.Text;
 using Application;
 using Application.Common.Interceptors;
+using Application.Common.MessageBroker.RabbitMQ;
 using Application.Contracts.IService;
 using Application.Read.Contracts;
 using Application.Write.Contracts;
 using CodingChainApi.Infrastructure.Common.Exceptions;
 using CodingChainApi.Infrastructure.Contexts;
+using CodingChainApi.Infrastructure.MessageBroker.RabbitMQ;
+using CodingChainApi.Infrastructure.MessageBroker.RabbitMQ.Code.CodeExecution;
 using CodingChainApi.Infrastructure.Repositories.AggregateRepositories;
 using CodingChainApi.Infrastructure.Repositories.ReadRepositories;
 using CodingChainApi.Infrastructure.Services;
+using CodingChainApi.Infrastructure.Services.Processes;
 using CodingChainApi.Infrastructure.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -32,11 +36,13 @@ namespace CodingChainApi.Infrastructure
             ConfigureProcess(services, configuration);
             ConfigureAppData(services, configuration);
             ConfigureLanguages(services, configuration);
+            ConfigureRabbitMQ(services, configuration);
             //
             services.AddScoped<IProcessService, ProcessService>();
             services.AddScoped<ISecurityService, SecurityService>();
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<ITimeService, TimeService>();
+            services.AddScoped<IParticipationExecutionService, ParticipationExecutionService>();
             RegisterAggregateRepositories(services);
             RegisterReadRepositories(services);
             return services;
@@ -68,7 +74,7 @@ namespace CodingChainApi.Infrastructure
         {
             ConfigureInjectableSettings<IAppDataSettings, AppDataSettings>(services, configuration);
         }
-        
+
         private static void ConfigureLanguages(IServiceCollection services, IConfiguration configuration)
         {
             ConfigureInjectableSettings<ILanguagesSettings, LanguagesSettings>(services, configuration);
@@ -126,6 +132,15 @@ namespace CodingChainApi.Infrastructure
             }
 
             services.AddDbContext<CodingChainContext>(o => o.UseSqlServer(dbSettings.ConnectionString));
+        }
+
+        private static void ConfigureRabbitMQ(IServiceCollection serviceCollection, IConfiguration configuration)
+        {
+            // RabbitMQ
+            serviceCollection.AddHostedService<CodeExecutionListener>();
+            serviceCollection.AddSingleton<RabbitMQPublisher, RabbitMQPublisher>();
+            ConfigureInjectableSettings<IRabbitMQSettings, RabbitMQSettings>(serviceCollection, configuration);
+            // End RabbitMQ Configuration
         }
     }
 }

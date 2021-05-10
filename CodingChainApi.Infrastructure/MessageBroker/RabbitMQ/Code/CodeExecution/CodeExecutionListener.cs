@@ -1,29 +1,27 @@
 using System;
-using Application.Settings;
+using CodingChainApi.Infrastructure.Settings;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using Newtonsoft.Json.Linq;
 
-namespace Application.Common.MessageBroker.RabbitMQ.Code.CodeExecution
+namespace CodingChainApi.Infrastructure.MessageBroker.RabbitMQ.Code.CodeExecution
 {
-    public class CodeExecutionListener : RabbitMqListener
+    public class CodeExecutionListener : RabbitMqBaseListener
     {
-        private readonly ILogger<RabbitMqListener> _logger;
+        private readonly ILogger<RabbitMqBaseListener> _logger;
         private readonly IServiceProvider _services;
 
-        public CodeExecutionListener(IServiceProvider services, IOptions<MessageBrokerConfiguration> options,
-            ILogger<RabbitMqListener> logger) : base(options)
+        public CodeExecutionListener(IServiceProvider services, IRabbitMQSettings settings,
+            ILogger<RabbitMqBaseListener> logger) : base(settings, logger)
         {
-            base.RouteKey = "code.execution.done";
-            base.QueueName = "coding.chain.worker";
+            base.RouteKey = settings.ExecutionCodeRoute;
+            base.QueueName = settings.CodeRouteKey;
             _services = services;
             _logger = logger;
         }
 
         public override bool Process(string message)
         {
-            var taskMessage = JToken.Parse(message);
+            var taskMessage = message;
             if (taskMessage == null)
             {
                 // When false is returned, the message is rejected directly, indicating that it cannot be processed
@@ -34,6 +32,7 @@ namespace Application.Common.MessageBroker.RabbitMQ.Code.CodeExecution
             {
                 using (var scope = _services.CreateScope())
                 {
+                    _logger.LogDebug($"message: ${taskMessage}");
                     //var xxxService = scope.ServiceProvider.GetRequiredService<XXXXService>();
                     return true;
                 }
