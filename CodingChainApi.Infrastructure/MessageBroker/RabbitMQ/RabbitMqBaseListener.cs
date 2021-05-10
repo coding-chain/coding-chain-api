@@ -17,13 +17,15 @@ namespace CodingChainApi.Infrastructure.MessageBroker.RabbitMQ
         private readonly IModel _channel;
         protected string RouteKey;
         protected string QueueName;
+        protected string QueueWorker;
         protected readonly ILogger<TImplementation> _logger;
 
         public RabbitMqBaseListener(IRabbitMQSettings settings, ILogger<TImplementation> logger)
         {
             _logger = logger;
-            RouteKey = settings.CodeRouteKey;
+            RouteKey = settings.RoutingKey;
             QueueName = "code.execution.done";
+            QueueWorker = settings.RabbitMqWorker;
             try
             {
                 var factory = new ConnectionFactory()
@@ -61,10 +63,10 @@ namespace CodingChainApi.Infrastructure.MessageBroker.RabbitMQ
             try
             {
                 Console.WriteLine($"RabbitListener register,routeKey:{RouteKey}");
-                _channel.ExchangeDeclare(exchange: "message", type: "topic");
+                _channel.ExchangeDeclare(exchange: QueueWorker, type: "topic");
                 _channel.QueueDeclare(queue: QueueName, exclusive: false);
                 _channel.QueueBind(queue: QueueName,
-                    exchange: "message",
+                    exchange: QueueWorker,
                     routingKey: RouteKey);
                 var consumer = new EventingBasicConsumer(_channel);
                 consumer.Received += (model, ea) =>
@@ -88,7 +90,7 @@ namespace CodingChainApi.Infrastructure.MessageBroker.RabbitMQ
 
         public void DeRegister()
         {
-            this._connection.Close();
+            _connection.Close();
         }
 
         // How to process messages

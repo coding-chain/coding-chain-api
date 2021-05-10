@@ -2,7 +2,6 @@
 using System.Text;
 using Application;
 using Application.Common.Interceptors;
-using Application.Common.MessageBroker.RabbitMQ;
 using Application.Contracts.IService;
 using Application.Read.Contracts;
 using Application.Write.Contracts;
@@ -137,7 +136,7 @@ namespace CodingChainApi.Infrastructure
         {
             // RabbitMQ
             serviceCollection.AddHostedService<ParticipationExecutionService>();
-            serviceCollection.AddSingleton<IRabbitMQPublisher, RabbitMQPublisher>();
+            serviceCollection.AddSingleton<IRabbitMqPublisher, RabbitMQPublisher>();
             ConfigureInjectableSettings<IRabbitMQSettings, RabbitMQSettings>(serviceCollection, configuration);
             // End RabbitMQ Configuration
         }

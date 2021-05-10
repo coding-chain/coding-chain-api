@@ -1,7 +1,7 @@
-namespace Application.Common.MessageBroker.RabbitMQ
+namespace CodingChainApi.Infrastructure.MessageBroker.RabbitMQ
 {
-    public interface IRabbitMQPublisher
+    public interface IRabbitMqPublisher
     {
-        void PushMessage(string routingKey, object message);
+        void PushMessage(string queueName, object message);
     }
 }

@@ -1,37 +1,36 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using Application.Common.MessageBroker.RabbitMQ;
+using Application.Common.Exceptions;
 using Application.Contracts.IService;
 using Application.Contracts.Processes;
 using Application.Write.Code.CodeExecution;
 using CodingChainApi.Infrastructure.MessageBroker.RabbitMQ;
 using CodingChainApi.Infrastructure.Settings;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using ILogger = Castle.Core.Logging.ILogger;
 
 namespace CodingChainApi.Infrastructure.Services.Processes
 {
     public class ParticipationExecutionService : RabbitMqBaseListener<ParticipationExecutionService>,
         IParticipationExecutionService
     {
-        private readonly IRabbitMQPublisher _rabbitMqPublisher;
+        private readonly IRabbitMqPublisher _rabbitMqPublisher;
 
-        private ProcessEndHandler<Guid>? _processEndHandler = null;
+        private ProcessEndHandler<Guid>? _processEndHandler;
 
-        public ParticipationExecutionService(IRabbitMQSettings settings, ILogger<ParticipationExecutionService> logger, IRabbitMQPublisher rabbitMqPublisher)
+        public ParticipationExecutionService(IRabbitMQSettings settings, ILogger<ParticipationExecutionService> logger,
+            IRabbitMqPublisher rabbitMqPublisher)
             : base(settings, logger)
         {
             _rabbitMqPublisher = rabbitMqPublisher;
-            RouteKey = settings.CodeRouteKey;
+            RouteKey = settings.RoutingKey;
             QueueName = settings.ExecutionCodeRoute;
         }
 
         public void StartExecution(RunParticipationTestsCommand command)
         {
-            _rabbitMqPublisher.PushMessage("code.execution.pending", command);
+            _rabbitMqPublisher.PushMessage(QueueName, command);
             _processEndHandler = new ProcessEndHandler<Guid>(command.ParticipationId);
         }
 
@@ -40,10 +39,9 @@ namespace CodingChainApi.Infrastructure.Services.Processes
             return _processEndHandler;
         }
 
-        public override bool Process(string message)
+        public override bool Process(string? message)
         {
-            var taskMessage = message;
-            if (taskMessage == null)
+            if (message == null)
             {
                 // When false is returned, the message is rejected directly, indicating that it cannot be processed
                 return false;
@@ -51,9 +49,15 @@ namespace CodingChainApi.Infrastructure.Services.Processes
 
             try
             {
-                _logger.LogDebug($"message: ${taskMessage}");
-                var json = JObject.Parse(taskMessage);
+                _logger.LogDebug($"message: ${message}");
+                var json = JObject.Parse(message);
                 var result = JsonConvert.DeserializeObject<ProcessEndResult>(json.ToString());
+
+                if (_processEndHandler == null)
+                {
+                    if (result is not null) _processEndHandler = new ProcessEndHandler<Guid>(result.ParticipationId);
+                    else throw new InputFormatterException("Message in queue doesn't have any participation ID ! ");
+                }
 
                 _processEndHandler?.AddError(result?.Errors);
                 _processEndHandler?.AddOutput(result?.Output);

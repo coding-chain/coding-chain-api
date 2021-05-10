@@ -21,10 +21,6 @@ namespace NeosCodingApi.Controllers
             var res = await Mediator.Send(command);
             res.ProcessEnded += (sender, args) => Console.WriteLine($"output: {args.Output}, erros: {args.Error}");
             Console.WriteLine(command.ToString());
-            while (true)
-            {
-                
-            }
             return Ok();
         }
     }

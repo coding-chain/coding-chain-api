@@ -7,6 +7,7 @@ namespace CodingChainApi.Infrastructure.Settings
         string RabbitPassword { get; set; }
         int RabbitPort { get; set; }
         string ExecutionCodeRoute { get; set; }
-        string CodeRouteKey { get; set; }
+        string RabbitMqWorker { get; set; }
+        string RoutingKey { get; set; }
     }
 }
