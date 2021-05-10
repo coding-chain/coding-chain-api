@@ -38,7 +38,6 @@ namespace CodingChainApi.Infrastructure
             ConfigureLanguages(services, configuration);
             ConfigureRabbitMQ(services, configuration);
             //
-            services.AddScoped<IProcessService, ProcessService>();
             services.AddScoped<ISecurityService, SecurityService>();
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<ITimeService, TimeService>();
@@ -137,8 +136,8 @@ namespace CodingChainApi.Infrastructure
         private static void ConfigureRabbitMQ(IServiceCollection serviceCollection, IConfiguration configuration)
         {
             // RabbitMQ
-            serviceCollection.AddHostedService<CodeExecutionListener>();
-            serviceCollection.AddSingleton<RabbitMQPublisher, RabbitMQPublisher>();
+            serviceCollection.AddHostedService<ParticipationExecutionService>();
+            serviceCollection.AddSingleton<IRabbitMQPublisher, RabbitMQPublisher>();
             ConfigureInjectableSettings<IRabbitMQSettings, RabbitMQSettings>(serviceCollection, configuration);
             // End RabbitMQ Configuration
         }

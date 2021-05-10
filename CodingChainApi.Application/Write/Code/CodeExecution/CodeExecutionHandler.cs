@@ -2,35 +2,35 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Application.Contracts.IService;
+using Application.Contracts.Processes;
 using MediatR;
 
 namespace Application.Write.Code.CodeExecution
 {
     public record RunParticipationTestsCommand(Guid ParticipationId, string Language, string HeaderCode,
         IList<RunParticipationTestsCommand.Test> Tests,
-        IList<RunParticipationTestsCommand.Function> Functions) : IRequest<string>
+        IList<RunParticipationTestsCommand.Function> Functions) : IRequest<IProcessEndHandler>
     {
         public record Test(string OutputValidator, string InputGenerator);
 
         public record Function(string Code, int Order);
     }
 
-    public class CodeExecutionHandler : IRequestHandler<ICodeExecutionRecords.RunParticipationTestsCommand, string>
+    public class CodeExecutionHandler : IRequestHandler<RunParticipationTestsCommand, IProcessEndHandler>
     {
-        private RabbitMQPublisher _rabbitMqPublisher;
+        private readonly IParticipationExecutionService _participationExecutionService;
 
-        public CodeExecutionHandler(RabbitMQPublisher rabbitMqPublisher)
+        public CodeExecutionHandler(IParticipationExecutionService participationExecutionService)
         {
-            _rabbitMqPublisher = rabbitMqPublisher;
+            _participationExecutionService = participationExecutionService;
         }
 
-        public async Task<string> Handle(ICodeExecutionRecords.RunParticipationTestsCommand request,
+        public async Task<IProcessEndHandler> Handle(RunParticipationTestsCommand request,
             CancellationToken cancellationToken)
         {
-            var codeExecutionPublisher = _rabbitMqPublisher;
-            codeExecutionPublisher?.PushMessage("code.execution.pending", request);
-
-            return request.ParticipationId.ToString();
+            _participationExecutionService.StartExecution(request);
+            return _participationExecutionService.FollowExecution(request.ParticipationId);
         }
     }
 }

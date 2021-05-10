@@ -4,10 +4,17 @@ using Application.Write.Code.Contracts.Processes;
 
 namespace CodingChainApi.Infrastructure.Services.Processes
 {
-    public class ProcessEndHandler : IProcessEndHandler
+    public class ProcessEndHandler<TId> : IProcessEndHandler
     {
         private string? _error;
         private string? _output;
+
+        public ProcessEndHandler(TId id)
+        {
+            Id = id;
+        }
+
+        public TId Id { get; private set; }
         public event EventHandler<ProcessEndedEventArgs>? ProcessEnded;
 
         public string AddError(string? newError)

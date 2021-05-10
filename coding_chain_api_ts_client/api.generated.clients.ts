@@ -1389,8 +1389,8 @@ export interface IRunParticipationTestsCommand {
 }
 
 export class Test implements ITest {
-    outputValidator?: string | undefined;
-    inputGenerator?: string | undefined;
+    outputValidator?: string;
+    inputGenerator?: string;
 
     constructor(data?: ITest) {
         if (data) {
@@ -1424,12 +1424,12 @@ export class Test implements ITest {
 }
 
 export interface ITest {
-    outputValidator?: string | undefined;
-    inputGenerator?: string | undefined;
+    outputValidator?: string;
+    inputGenerator?: string;
 }
 
 export class Function implements IFunction {
-    code?: string | undefined;
+    code?: string;
     order?: number;
 
     constructor(data?: IFunction) {
@@ -1464,7 +1464,7 @@ export class Function implements IFunction {
 }
 
 export interface IFunction {
-    code?: string | undefined;
+    code?: string;
     order?: number;
 }
 

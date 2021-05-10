@@ -36,14 +36,11 @@ namespace CodingChainApi.Infrastructure.MessageBroker.RabbitMQ
         public virtual void PushMessage(string routingKey, object message)
         {
             _logger.LogInformation($"PushMessage,routingKey:{routingKey}");
-            _channel.QueueDeclare(queue: "message",
-                durable: false,
-                exclusive: false,
-                autoDelete: false,
-                arguments: null);
+            _channel.QueueDeclare(queue: routingKey, durable: false, exclusive: false, autoDelete: true, arguments: null);
+
             string msgJson = JsonConvert.SerializeObject(message);
             var body = Encoding.UTF8.GetBytes(msgJson);
-            _channel.BasicPublish(exchange: "message",
+            _channel.BasicPublish(exchange: "",
                 routingKey: routingKey,
                 basicProperties: null,
                 body: body);

@@ -1,6 +1,6 @@
 using System;
 using System.Threading.Tasks;
-using Application.Records;
+using Application.Write.Code.CodeExecution;
 using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -16,10 +16,15 @@ namespace NeosCodingApi.Controllers
         }
 
         [HttpPost(TemplateActionName, Name = nameof(Execute))]
-        public async Task<IActionResult> Execute(ICodeExecutionRecords.RunParticipationTestsCommand command)
+        public async Task<IActionResult> Execute(RunParticipationTestsCommand command)
         {
             var res = await Mediator.Send(command);
+            res.ProcessEnded += (sender, args) => Console.WriteLine($"output: {args.Output}, erros: {args.Error}");
             Console.WriteLine(command.ToString());
+            while (true)
+            {
+                
+            }
             return Ok();
         }
     }

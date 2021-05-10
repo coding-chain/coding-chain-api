@@ -11,17 +11,19 @@ using RabbitMQ.Client.Events;
 
 namespace CodingChainApi.Infrastructure.MessageBroker.RabbitMQ
 {
-    public abstract class RabbitMqBaseListener : IHostedService
+    public abstract class RabbitMqBaseListener<TImplementation> : IHostedService
     {
         private readonly IConnection _connection;
         private readonly IModel _channel;
         protected string RouteKey;
         protected string QueueName;
-        private readonly ILogger<RabbitMqBaseListener> _logger;
+        protected readonly ILogger<TImplementation> _logger;
 
-        public RabbitMqBaseListener(IRabbitMQSettings settings, ILogger<RabbitMqBaseListener> logger)
+        public RabbitMqBaseListener(IRabbitMQSettings settings, ILogger<TImplementation> logger)
         {
             _logger = logger;
+            RouteKey = settings.CodeRouteKey;
+            QueueName = "code.execution.done";
             try
             {
                 var factory = new ConnectionFactory()
@@ -58,7 +60,7 @@ namespace CodingChainApi.Infrastructure.MessageBroker.RabbitMQ
         {
             try
             {
-                _logger.LogDebug($"RabbitListener register,routeKey:{RouteKey}");
+                Console.WriteLine($"RabbitListener register,routeKey:{RouteKey}");
                 _channel.ExchangeDeclare(exchange: "message", type: "topic");
                 _channel.QueueDeclare(queue: QueueName, exclusive: false);
                 _channel.QueueBind(queue: QueueName,
@@ -69,6 +71,7 @@ namespace CodingChainApi.Infrastructure.MessageBroker.RabbitMQ
                 {
                     var body = ea.Body;
                     var message = Encoding.UTF8.GetString(body.ToArray());
+
                     var result = Process(message);
                     if (result)
                     {

@@ -8,6 +8,6 @@ namespace Application.Contracts.IService
     {
         public void StartExecution(RunParticipationTestsCommand command);
 
-        public IProcessEndHandler FollowExecution(Guid participationId);
+        public IProcessEndHandler? FollowExecution(Guid participationId);
     }
 }
