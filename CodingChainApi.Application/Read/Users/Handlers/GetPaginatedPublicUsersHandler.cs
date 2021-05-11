@@ -6,7 +6,7 @@ using MediatR;
 
 namespace Application.Read.Users.Handlers
 {
-    public record GetPaginatedPublicUsersQuery : PaginationQueryBase, IRequest<IPagedList<PublicUser>>;
+    public record GetPaginatedPublicUsersQuery(string? UsernameFilter = null, string? EmailFilter = null)  : PaginationQueryBase, IRequest<IPagedList<PublicUser>>;
     public class GetPaginatedPublicUsersHandler: IRequestHandler<GetPaginatedPublicUsersQuery, IPagedList<PublicUser>>
     {
         private readonly IReadUserRepository _readUserRepository;

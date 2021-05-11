@@ -24,12 +24,12 @@ namespace NeosCodingApi.Controllers
         }
 
 
-        [HttpGet("{id}", Name = nameof(GetLanguageById))]
+        [HttpGet("{languageId}", Name = nameof(GetLanguageById))]
         [Produces(typeof(HateoasResponse<ProgrammingLanguageNavigation>))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetLanguageById(Guid id)
+        public async Task<IActionResult> GetLanguageById(Guid languageId)
         {
-            var language = await Mediator.Send(new GetLanguageNavigationByIdQuery(id));
+            var language = await Mediator.Send(new GetLanguageNavigationByIdQuery(languageId));
             var languageWithLinks =
                 new HateoasResponse<ProgrammingLanguageNavigation>(language, GetLinksForLanguage(language.Id));
             return Ok(languageWithLinks);
@@ -51,55 +51,18 @@ namespace NeosCodingApi.Controllers
             );
         }
 
-        [HttpPost(TemplateActionName)]
-        [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status409Conflict)]
-        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
-        public async Task<IActionResult> Test(TestCommand command)
-        {
-            using var process = new Process
-            {
-                StartInfo =
-                {
-                    FileName = command.InstallationProcess,
-                    RedirectStandardInput = true,
-                    RedirectStandardOutput = true,
-                    CreateNoWindow = false,
-                    UseShellExecute = false,
-                    Arguments = command.InstallationCommand
-                }
-            };
-            process.ErrorDataReceived += (sender, args) => Console.WriteLine(args.Data);
-            process.OutputDataReceived += (sender, args) => Console.WriteLine(args.Data);
-            process.Start();
-            process.BeginOutputReadLine();
-            process.WaitForExit();
-            return Ok();
-        }
-
         private IList<LinkDto> GetLinksForLanguage(Guid languageId)
         {
             return new List<LinkDto>()
             {
-                LinkDto.SelfLink(Url.Link(nameof(GetLanguageById), new {id = languageId}))
+                LinkDto.SelfLink(Url.Link(nameof(GetLanguageById), new {languageId})),
+                LinkDto.AllLink(Url.Link(nameof(GetLanguages), null))
             };
         }
 
 
-        public record TestCommand(string Name, string RunTestsProcess, string RunTestsCommand,
-            string InstallationProcess, string InstallationCommand, string TestsFileRelativePath,
-            string SutFileRelativePath);
+      
 
-        public record AddEnvironmentToLanguageBodyCommand(
-            Guid PlatformId,
-            string? TemplateInstallationProcess,
-            string? TemplateInstallationCommand,
-            string RunTestsProcess,
-            string RunTestsCommand,
-            string InstallationProcess,
-            string InstallationCommand,
-            string TestsFileRelativePath,
-            string SutFileRelativePath,
-            IFormFile Template);
+       
     }
 }

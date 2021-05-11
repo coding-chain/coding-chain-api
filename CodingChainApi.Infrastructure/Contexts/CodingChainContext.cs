@@ -81,6 +81,9 @@ namespace CodingChainApi.Infrastructure.Contexts
                 .HasMany(s => s.Rights)
                 .WithMany(c => c.Users);
 
+            modelBuilder.Entity<Tournament>()
+                .HasMany(t => t.Participations)
+                .WithOne(p => p.Tournament);
 
             modelBuilder.Entity<UserTeam>()
                 .HasOne(bc => bc.User)

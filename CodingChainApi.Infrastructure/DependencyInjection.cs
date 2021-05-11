@@ -62,6 +62,7 @@ namespace CodingChainApi.Infrastructure
             services.AddScoped<IReadStepRepository, ReadStepRepository>();
             services.AddScoped<IReadTestRepository, ReadTestRepository>();
             services.AddScoped<IReadParticipationRepository, ReadParticipationRepository>();
+            services.AddScoped<IReadRightRepository, ReadRightRepository>();
         }
 
         private static void ConfigureProcess(IServiceCollection services, IConfiguration configuration)

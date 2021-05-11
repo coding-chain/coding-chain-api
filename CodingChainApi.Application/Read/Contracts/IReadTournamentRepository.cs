@@ -10,7 +10,7 @@ namespace Application.Read.Contracts
 {
     public interface IReadTournamentRepository
     {
-        public Task<IPagedList<TournamentNavigation>> GetAllTournamentNavigationPaginated(PaginationQueryBase paginationQuery);
+        public Task<IPagedList<TournamentNavigation>> GetAllTournamentNavigationPaginated(GetTournamentNavigationPaginatedQuery paginationQuery);
         public Task<TournamentNavigation?> GetOneTournamentNavigationById(Guid id);
         
         public Task<IPagedList<TournamentStepNavigation>> GetAllTournamentStepNavigationPaginated(GetPaginatedTournamentStepNavigationQuery paginationQuery);
