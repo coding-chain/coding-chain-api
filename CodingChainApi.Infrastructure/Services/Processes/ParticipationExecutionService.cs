@@ -49,7 +49,7 @@ namespace CodingChainApi.Infrastructure.Services.Processes
 
             try
             {
-                _logger.LogDebug($"message: ${message}");
+                _logger.LogDebug($"Code executed: ${message}");
                 var json = JObject.Parse(message);
                 var result = JsonConvert.DeserializeObject<ProcessEndResult>(json.ToString());
 
