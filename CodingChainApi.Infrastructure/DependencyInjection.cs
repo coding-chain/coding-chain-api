@@ -50,7 +50,8 @@ namespace CodingChainApi.Infrastructure
             services.AddProxiedScoped<ITeamRepository, TeamRepository>(typeof(EventPublisherInterceptor));
             services.AddProxiedScoped<ITournamentRepository, TournamentRepository>(typeof(EventPublisherInterceptor));
             services.AddProxiedScoped<IStepEditionRepository, StepEditionRepository>(typeof(EventPublisherInterceptor));
-            services.AddProxiedScoped<IParticipationRepository, ParticipationRepository>(typeof(EventPublisherInterceptor));
+            services.AddProxiedScoped<IParticipationRepository, ParticipationRepository>(
+                typeof(EventPublisherInterceptor));
         }
 
         private static void RegisterReadRepositories(IServiceCollection services)
@@ -131,7 +132,10 @@ namespace CodingChainApi.Infrastructure
                 throw new InfrastructureException("Please provide connection string");
             }
 
-            services.AddDbContext<CodingChainContext>(o => o.UseSqlServer(dbSettings.ConnectionString));
+            services.AddDbContext<CodingChainContext>(options =>
+                options.UseSqlServer(dbSettings.ConnectionString,
+                    o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery))
+            );
         }
     }
 }

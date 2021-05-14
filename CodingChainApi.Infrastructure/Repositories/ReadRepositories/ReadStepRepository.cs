@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Application.Common.Pagination;
 using Application.Read.Contracts;
 using Application.Read.Steps;
+using Application.Read.Steps.Handlers;
 using Application.Read.Tournaments;
 using CodingChainApi.Infrastructure.Common.Extensions;
 using CodingChainApi.Infrastructure.Contexts;
@@ -33,9 +35,9 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
             step.Score,
             step.Difficulty,
             step.HeaderCode,
-            step.Tests.Where(t => !t.IsDeleted).Select(t => t.Id).ToList(),
-            step.TournamentSteps.Select(t => t.TournamentId).ToList(),
-            step.Participations.Select(p => p.Id).ToList());
+            step.TestsIds,
+            step.TournamentsIds,
+            step.ActiveParticipationsIds);
 
         public Task<bool> StepExistsById(Guid stepId)
         {
@@ -47,12 +49,18 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
             var res = await Task.WhenAll(stepIds.Select(async stepId => await _context.Steps.AnyAsync(s => !s.IsDeleted && s.Id == stepId)));
             return res.Length == stepIds.Length;
         }
+        
+        public static Expression<Func<Step,bool>> FromQuery(GetPaginatedStepNavigationQuery query)
+        {
+            return step => !step.IsDeleted && (query.IsPublished == null || step.IsPublished == query.IsPublished);
+        }   
 
         public async Task<IPagedList<StepNavigation>> GetAllStepNavigationPaginated(
-            PaginationQueryBase paginationQuery)
+            GetPaginatedStepNavigationQuery paginationQuery)
         {
             return await  GetStepIncludeQueryable()
-                .Where(t => !t.IsDeleted)
+                .ThenInclude(tS => tS.Tournament)
+                .Where(FromQuery(paginationQuery))
                 .Select(s => ToStepNavigation(s))
                 .FromPaginationQueryAsync(paginationQuery);
         }

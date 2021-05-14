@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using Application.Common.Pagination;
 using Application.Read.Steps;
 using Application.Read.Steps.Handlers;
 using Application.Read.Tests;
@@ -37,11 +38,12 @@ namespace NeosCodingApi.Controllers
             return Ok(testWithLinks);
         }
 
+        public record GetPaginatedTestNavigationQueryParams() : PaginationQueryBase;
         [HttpGet(Name = nameof(GetTests))]
         [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasResponse<IList<HateoasResponse<TestNavigation>>>))]
-        public async Task<IActionResult> GetTests([FromQuery] GetPaginatedTestNavigationQuery query)
+        public async Task<IActionResult> GetTests([FromQuery] GetPaginatedTestNavigationQueryParams query)
         {
-            var test = await Mediator.Send(query);
+            var test = await Mediator.Send(new GetPaginatedTestNavigationQuery(){Page = query.Page,Size = query.Size});
             var testWithLinks = test.Select(test =>
                 new HateoasResponse<TestNavigation>(test, GetLinksForTest(test.StepId, test.Id)));
             return Ok(HateoasResponseBuilder.FromPagedList(
@@ -60,7 +62,8 @@ namespace NeosCodingApi.Controllers
             return new List<LinkDto>()
             {
                 LinkDto.SelfLink(Url.Link(nameof(GetTestById), new {testId})),
-                LinkDto.DeleteLink(Url.Link(nameof(StepsController.AddTest), new {stepId, testId}))
+                LinkDto.CreateLink(Url.Link(nameof(StepsController.AddTest), new {stepId, testId})),
+                LinkDto.AllLink(Url.Link(nameof(GetTests), null))
             };
         }
         

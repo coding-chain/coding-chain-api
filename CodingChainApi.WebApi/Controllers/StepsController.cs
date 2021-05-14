@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using Application.Common.Pagination;
 using Application.Read.Steps;
 using Application.Read.Steps.Handlers;
+using Application.Read.Tests;
+using Application.Read.Tests.Handlers;
 using Application.Write.StepEditions;
 using AutoMapper;
 using MediatR;
@@ -60,6 +63,24 @@ namespace NeosCodingApi.Controllers
                 steps.ToPagedListResume(),
                 stepsWithLinks.ToList(),
                 nameof(GetSteps))
+            );
+        }
+        
+        public record GetPaginatedTestNavigationQueryParams() : PaginationQueryBase;
+
+        [HttpGet("{stepId:guid}/tests", Name = nameof(GetStepTests))]
+        [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasResponse<IList<HateoasResponse<TestNavigation>>>))]
+        public async Task<IActionResult> GetStepTests(Guid stepId, [FromQuery] GetPaginatedTestNavigationQueryParams query)
+        {
+            var tests = await Mediator.Send(new GetPaginatedTestNavigationQuery
+                {StepId = stepId, Page = query.Page, Size = query.Size});
+            var testsWithLinks = tests.Select(test =>
+                new HateoasResponse<TestNavigation>(test, GetLinksForTest(stepId,test.Id)));
+            return Ok(HateoasResponseBuilder.FromPagedList(
+                Url,
+                tests.ToPagedListResume(),
+                testsWithLinks.ToList(),
+                nameof(GetStepTests))
             );
         }
 
@@ -146,7 +167,15 @@ namespace NeosCodingApi.Controllers
                 new(Url.Link(nameof(AddTest), new {stepId}), "add test", HttpMethod.Post)
             };
         }
-        
+        private IList<LinkDto> GetLinksForTest(Guid stepId, Guid testId)
+        {
+            return new List<LinkDto>()
+            {
+                LinkDto.SelfLink(Url.Link(nameof(TestsController.GetTestById), new {testId})),
+                LinkDto.CreateLink(Url.Link(nameof(AddTest), new {stepId, testId})),
+                LinkDto.AllLink(Url.Link(nameof(GetStepTests),new {stepId}))
+            };
+        }
 
         #endregion
 

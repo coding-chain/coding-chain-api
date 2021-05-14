@@ -6,8 +6,11 @@ using MediatR;
 
 namespace Application.Read.Steps.Handlers
 {
-    public record GetPaginatedStepNavigationQuery() : PaginationQueryBase,
-        IRequest<IPagedList<StepNavigation>>;
+    public record GetPaginatedStepNavigationQuery : PaginationQueryBase,
+        IRequest<IPagedList<StepNavigation>>
+    {
+        public bool? IsPublished { get; set; }
+    };
 
     public class GetPaginatedStepEditionNavigationHandler : IRequestHandler<GetPaginatedStepNavigationQuery,
         IPagedList<StepNavigation>>
@@ -19,7 +22,8 @@ namespace Application.Read.Steps.Handlers
             _readStepRepository = readStepRepository;
         }
 
-        public Task<IPagedList<StepNavigation>> Handle(GetPaginatedStepNavigationQuery request, CancellationToken cancellationToken)
+        public Task<IPagedList<StepNavigation>> Handle(GetPaginatedStepNavigationQuery request,
+            CancellationToken cancellationToken)
         {
             return _readStepRepository.GetAllStepNavigationPaginated(request);
         }

@@ -1,9 +1,11 @@
 using System;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Application.Common.Pagination;
 using Application.Read.Contracts;
 using Application.Read.Tests;
+using Application.Read.Tests.Handlers;
 using CodingChainApi.Infrastructure.Common.Extensions;
 using CodingChainApi.Infrastructure.Contexts;
 using CodingChainApi.Infrastructure.Models;
@@ -36,10 +38,12 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
             return test == null ? null : ToTestNavigation(test);
         }
 
-        public async Task<IPagedList<TestNavigation>> GetPaginatedTestNavigation(PaginationQueryBase query)
+        private static Expression<Func<Test, bool>> ToExpression(GetPaginatedTestNavigationQuery query) =>
+            test => !test.IsDeleted && (query.StepId == null || query.StepId == test.Step.Id);
+        public async Task<IPagedList<TestNavigation>> GetPaginatedTestNavigation(GetPaginatedTestNavigationQuery query)
         {
             return await GetTestIncludeQueryable()
-                .Where(t => t.IsDeleted)
+                .Where(ToExpression(query))
                 .Select(t => ToTestNavigation(t))
                 .FromPaginationQueryAsync(query);
         }

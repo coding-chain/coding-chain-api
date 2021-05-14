@@ -12,6 +12,7 @@ namespace CodingChainApi.Infrastructure.Models
         public Guid TournamentId {get; set; }
         public Step Step { get; set; }
         public Guid StepId { get; set; }
+        
 
     }
 }

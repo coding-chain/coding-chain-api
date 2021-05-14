@@ -68,14 +68,8 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
             tournament.IsPublished,
             tournament.StartDate,
             tournament.EndDate,
-            tournament.TournamentSteps
-                .Where(tS => !tS.Step.IsDeleted)
-                .Select(tS => tS.StepId)
-                .ToList(),
-            tournament.Participations
-                .Where(p => !p.Team.IsDeleted)
-                .Select(p => p.Id)
-                .ToList()
+            tournament.StepsIds,
+            tournament.ParticipationsIds
         );
 
         public async Task<TournamentNavigation?> GetOneTournamentNavigationById(Guid id)
@@ -98,7 +92,20 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
                 tournamentStep.StepId,
                 tournamentStep.TournamentId,
                 tournamentStep.IsOptional,
-                tournamentStep.Order
+                tournamentStep.Order,
+                tournamentStep.Step.ProgrammingLanguage.Id,
+                tournamentStep.Step.Name,
+                tournamentStep.Step.Description,
+                tournamentStep.Step.MinFunctionsCount,
+                tournamentStep.Step.MaxFunctionsCount,
+                tournamentStep.Step.Score,
+                tournamentStep.Step.Difficulty,
+                tournamentStep.Step.HeaderCode,
+                tournamentStep.Step.IsPublished,
+                tournamentStep.Step.TestsIds,
+                tournamentStep.Step.ActiveParticipationsIds,
+                tournamentStep.Step.TournamentsIds
+                
             );
 
         public async Task<IPagedList<TournamentStepNavigation>> GetAllTournamentStepNavigationPaginated(
@@ -124,11 +131,17 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
             return _context.Tournaments.AnyAsync(t => !t.IsDeleted && t.Id == tournamentId);
         }
 
-        private IIncludableQueryable<TournamentStep, Step> GetTournamentStepIncludeQueryable()
+        private IIncludableQueryable<TournamentStep, IList<TournamentStep>> GetTournamentStepIncludeQueryable()
         {
             return _context.TournamentSteps
                 .Include(tS => tS.Tournament)
-                .Include(tS => tS.Step);
+                .Include(tS => tS.Step)
+                .ThenInclude(s => s.ProgrammingLanguage)
+                .Include(tS => tS.Step)
+                .ThenInclude(s=> s.Participations)
+                .ThenInclude(p =>p.Team )
+                .Include(tS => tS.Step)
+                .ThenInclude(s => s.TournamentSteps);
         }
     }
 }

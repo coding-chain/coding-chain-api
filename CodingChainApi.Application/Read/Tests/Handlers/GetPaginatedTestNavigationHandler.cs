@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Application.Common.Pagination;
@@ -6,7 +7,10 @@ using MediatR;
 
 namespace Application.Read.Tests.Handlers
 {
-    public record GetPaginatedTestNavigationQuery() : PaginationQueryBase, IRequest<IPagedList<TestNavigation>>;
+    public record GetPaginatedTestNavigationQuery : PaginationQueryBase, IRequest<IPagedList<TestNavigation>>
+    {
+        public Guid? StepId { get; set; }
+    }
     public class GetPaginatedTestNavigationHandler : IRequestHandler<GetPaginatedTestNavigationQuery, IPagedList<TestNavigation>>
     {
         private IReadTestRepository _readTestRepository;
