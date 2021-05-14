@@ -66,7 +66,7 @@ namespace CodingChainApi.Client
                 throw new System.ArgumentNullException("command");
     
             var urlBuilder_ = new System.Text.StringBuilder();
-            urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/api/v{version}/Code/Execute");
+            urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/api/v{version}/Code");
             urlBuilder_.Replace("{version}", System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
     
             var client_ = _httpClient;

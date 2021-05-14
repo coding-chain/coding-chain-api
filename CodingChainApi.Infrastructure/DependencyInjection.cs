@@ -7,7 +7,7 @@ using Application.Read.Contracts;
 using Application.Write.Contracts;
 using CodingChainApi.Infrastructure.Common.Exceptions;
 using CodingChainApi.Infrastructure.Contexts;
-using CodingChainApi.Infrastructure.MessageBroker.RabbitMQ;
+using CodingChainApi.Infrastructure.MessageBroker;
 using CodingChainApi.Infrastructure.Repositories.AggregateRepositories;
 using CodingChainApi.Infrastructure.Repositories.ReadRepositories;
 using CodingChainApi.Infrastructure.Services;

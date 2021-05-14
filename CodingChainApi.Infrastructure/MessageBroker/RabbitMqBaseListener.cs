@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
-namespace CodingChainApi.Infrastructure.MessageBroker.RabbitMQ
+namespace CodingChainApi.Infrastructure.MessageBroker
 {
     public abstract class RabbitMqBaseListener<TImplementation> : IHostedService
     {

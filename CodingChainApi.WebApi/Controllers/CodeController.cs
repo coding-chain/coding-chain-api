@@ -15,13 +15,13 @@ namespace NeosCodingApi.Controllers
         {
         }
 
-        [HttpPost(TemplateActionName, Name = nameof(Execute))]
+        [HttpPost(Name = nameof(Execute))]
         public async Task<IActionResult> Execute(RunParticipationTestsCommand command)
         {
             var res = await Mediator.Send(command);
             res.ProcessEnded += (sender, args) => Console.WriteLine($"output: {args.Output}, erros: {args.Error}");
             Console.WriteLine(command.ToString());
             return Ok();
-        }
+        }   
     }
 }

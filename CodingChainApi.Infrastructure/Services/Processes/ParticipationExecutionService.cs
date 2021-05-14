@@ -3,7 +3,7 @@ using Application.Common.Exceptions;
 using Application.Contracts.IService;
 using Application.Contracts.Processes;
 using Application.Write.Code.CodeExecution;
-using CodingChainApi.Infrastructure.MessageBroker.RabbitMQ;
+using CodingChainApi.Infrastructure.MessageBroker;
 using CodingChainApi.Infrastructure.Settings;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Extensions.Logging;

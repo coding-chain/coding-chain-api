@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 
-namespace CodingChainApi.Infrastructure.MessageBroker.RabbitMQ
+namespace CodingChainApi.Infrastructure.MessageBroker
 {
     public class RabbitMQPublisher : IRabbitMqPublisher
     {

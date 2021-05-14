@@ -1,4 +1,4 @@
-namespace CodingChainApi.Infrastructure.MessageBroker.RabbitMQ
+namespace CodingChainApi.Infrastructure.MessageBroker
 {
     public interface IRabbitMqPublisher
     {
