@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace CodingChainApi.Infrastructure.Models
 {
@@ -12,8 +13,18 @@ namespace CodingChainApi.Infrastructure.Models
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public bool IsDeleted { get; set; }
-        
+
         public IList<Participation> Participations = new List<Participation>();
         public IList<TournamentStep> TournamentSteps = new List<TournamentStep>();
+
+        public IList<Guid> StepsIds => TournamentSteps
+            .Where(tS => !tS.Step.IsDeleted)
+            .Select(tS => tS.StepId)
+            .ToList();
+
+        public IList<Guid> ParticipationsIds => Participations
+            .Where(p => !p.Team.IsDeleted)
+            .Select(p => p.Id)
+            .ToList();
     }
 }

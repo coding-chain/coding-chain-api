@@ -2,7 +2,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Application.Common.Pagination;
 using Application.Read.Contracts;
-using Application.Read.Languages;
 using MediatR;
 
 namespace Application.Read.Teams.Handlers

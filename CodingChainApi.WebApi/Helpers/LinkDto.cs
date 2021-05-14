@@ -21,9 +21,17 @@ namespace NeosCodingApi.Helpers
         {
             return new LinkDto(href, "self", HttpMethod.Get);
         }
+        public static LinkDto AllLink(string? href)
+        {
+            return new LinkDto(href, "all", HttpMethod.Get);
+        }
         public static LinkDto CreateLink(string? href)
         {
             return new LinkDto(href, "create", HttpMethod.Post);
+        }
+        public static LinkDto DeleteLink(string? href)
+        {
+            return new LinkDto(href, "delete", HttpMethod.Delete);
         }
         public static LinkDto CurrentPage(string? href)
         {
@@ -36,6 +44,11 @@ namespace NeosCodingApi.Helpers
         public static LinkDto PreviousPage(string? href)
         {
             return new LinkDto(href, "previousPage", HttpMethod.Get);
+        }
+
+        public static LinkDto UpdateLink(string? href)
+        {
+            return new LinkDto(href, "update", HttpMethod.Put);
         }
     }
 }

@@ -2,12 +2,12 @@ using System;
 
 namespace Application.Common.Exceptions
 {
-    public class NotFoundException<TId, TSearchedItem> : ApplicationException
+    public class NotFoundException: ApplicationException
     {
-        public NotFoundException(TId id)
+        public NotFoundException(string id, string searchedItem)
         {
             Id = id;
-            SearchedItemType = typeof(TSearchedItem);
+            SearchedItem = searchedItem;
         }
 
         public NotFoundException(string? message) : base(message)
@@ -18,9 +18,9 @@ namespace Application.Common.Exceptions
         {
         }
 
-        public TId Id { get; }
-        public Type SearchedItemType { get; }
+        public string Id { get; }
+        public string SearchedItem { get; }
 
-        public override string Message => $"Cannot find {SearchedItemType.FullName} with id {Id} ";
+        public override string Message => $"Cannot find {SearchedItem} with id {Id} ";
     }
 }

@@ -15,16 +15,6 @@ namespace Domain.Teams
         }
     }
 
-    public class MemberEntity : Entity<UserId>
-    {
-        public bool IsAdmin { get; set; }
-
-        public MemberEntity(UserId id, bool isAdmin) : base(id)
-        {
-            IsAdmin = isAdmin;
-        }
-    }
-
     public class TeamAggregate : Aggregate<TeamId>
     {
         public IReadOnlyList<MemberEntity> Members => _members.AsReadOnly();
@@ -74,7 +64,7 @@ namespace Domain.Teams
 
         public void AddMember(MemberEntity newMember)
         {
-            if (_members.Any(m => m.Id == newMember.Id))
+            if (_members.Contains(newMember))
             {
                 throw new DomainException(new List<string>() {$"Member with id {newMember.Id} already in team"});
             }

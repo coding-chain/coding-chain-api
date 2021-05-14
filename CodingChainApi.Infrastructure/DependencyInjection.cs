@@ -53,6 +53,9 @@ namespace CodingChainApi.Infrastructure
                 typeof(EventPublisherInterceptor));
             services.AddProxiedScoped<ITeamRepository, TeamRepository>(typeof(EventPublisherInterceptor));
             services.AddProxiedScoped<ITournamentRepository, TournamentRepository>(typeof(EventPublisherInterceptor));
+            services.AddProxiedScoped<IStepEditionRepository, StepEditionRepository>(typeof(EventPublisherInterceptor));
+            services.AddProxiedScoped<IParticipationRepository, ParticipationRepository>(
+                typeof(EventPublisherInterceptor));
         }
 
         private static void RegisterReadRepositories(IServiceCollection services)
@@ -61,6 +64,10 @@ namespace CodingChainApi.Infrastructure
             services.AddScoped<IReadUserRepository, ReadUserRepository>();
             services.AddScoped<IReadTeamRepository, ReadTeamRepository>();
             services.AddScoped<IReadTournamentRepository, ReadTournamentRepository>();
+            services.AddScoped<IReadStepRepository, ReadStepRepository>();
+            services.AddScoped<IReadTestRepository, ReadTestRepository>();
+            services.AddScoped<IReadParticipationRepository, ReadParticipationRepository>();
+            services.AddScoped<IReadRightRepository, ReadRightRepository>();
         }
 
         private static void ConfigureProcess(IServiceCollection services, IConfiguration configuration)
@@ -129,7 +136,10 @@ namespace CodingChainApi.Infrastructure
                 throw new InfrastructureException("Please provide connection string");
             }
 
-            services.AddDbContext<CodingChainContext>(o => o.UseSqlServer(dbSettings.ConnectionString));
+            services.AddDbContext<CodingChainContext>(options =>
+                options.UseSqlServer(dbSettings.ConnectionString,
+                    o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery))
+            );
         }
 
         private static void ConfigureRabbitMQ(IServiceCollection serviceCollection, IConfiguration configuration)

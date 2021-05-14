@@ -16,6 +16,7 @@ namespace Domain.Contracts
             return EqualityComparer<TId>.Default.Equals(Id, other.Id);
         }
 
+
         public sealed override bool Equals(object? obj)
         {
             if (ReferenceEquals(null, obj)) return false;

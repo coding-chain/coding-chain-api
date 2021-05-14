@@ -2,10 +2,9 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Application.Read.Contracts;
-using Domain.ProgrammingLanguages;
 using MediatR;
 
-namespace Application.Read.Languages.Handlers
+namespace Application.Read.ProgrammingLanguages.Handlers
 {
     public record GetLanguageNavigationByIdQuery(Guid LanguageId) : IRequest<ProgrammingLanguageNavigation>;
     public class GetLanguageNavigationByIdHandler: IRequestHandler<GetLanguageNavigationByIdQuery, ProgrammingLanguageNavigation>

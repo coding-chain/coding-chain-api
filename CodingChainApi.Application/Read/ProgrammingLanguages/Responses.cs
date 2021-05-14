@@ -1,7 +1,6 @@
 using System;
-using System.Collections.Generic;
 
-namespace Application.Read.Languages
+namespace Application.Read.ProgrammingLanguages
 {
     public record ProgrammingLanguageNavigation(Guid Id, string Name);
 

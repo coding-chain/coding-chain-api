@@ -3,7 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Application.Common.Pagination;
 using Application.Read.Contracts;
-using Application.Read.Languages;
+using Application.Read.ProgrammingLanguages;
 using CodingChainApi.Infrastructure.Common.Extensions;
 using CodingChainApi.Infrastructure.Contexts;
 using Domain.ProgrammingLanguages;

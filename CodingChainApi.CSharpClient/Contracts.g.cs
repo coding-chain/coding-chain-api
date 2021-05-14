@@ -31,11 +31,11 @@ namespace CodingChainApi.WebApi.Client.Contracts
     public partial interface ILanguagesClient
     {
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<HateoasResponseOfProgrammingLanguageNavigation> GetLanguageByIdAsync(System.Guid id, string version);
+        System.Threading.Tasks.Task<HateoasResponseOfProgrammingLanguageNavigation> GetLanguageByIdAsync(System.Guid languageId, string version);
     
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<HateoasResponseOfProgrammingLanguageNavigation> GetLanguageByIdAsync(System.Guid id, string version, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<HateoasResponseOfProgrammingLanguageNavigation> GetLanguageByIdAsync(System.Guid languageId, string version, System.Threading.CancellationToken cancellationToken);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         System.Threading.Tasks.Task<HateoasResponseOfIListOfHateoasResponseOfProgrammingLanguageNavigation> GetLanguagesAsync(int page, int size, string version);
@@ -44,12 +44,111 @@ namespace CodingChainApi.WebApi.Client.Contracts
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         System.Threading.Tasks.Task<HateoasResponseOfIListOfHateoasResponseOfProgrammingLanguageNavigation> GetLanguagesAsync(int page, int size, string version, System.Threading.CancellationToken cancellationToken);
     
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NSwag", "13.10.8.0 (NJsonSchema v10.3.11.0 (Newtonsoft.Json v12.0.0.0))")]
+    public partial interface IParticipationsClient
+    {
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task TestAsync(string version, TestCommand command);
+        System.Threading.Tasks.Task CreateParticipationAsync(string version, CreateParticipationCommand createParticipationCommand);
     
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task TestAsync(string version, TestCommand command, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task CreateParticipationAsync(string version, CreateParticipationCommand createParticipationCommand, System.Threading.CancellationToken cancellationToken);
+    
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<HateoasResponseOfIListOfHateoasResponseOfParticipationNavigation> GetParticipationsAsync(int page, int size, string version);
+    
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<HateoasResponseOfIListOfHateoasResponseOfParticipationNavigation> GetParticipationsAsync(int page, int size, string version, System.Threading.CancellationToken cancellationToken);
+    
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<HateoasResponseOfParticipationNavigation> GetParticipationByIdAsync(System.Guid participationId, string version);
+    
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<HateoasResponseOfParticipationNavigation> GetParticipationByIdAsync(System.Guid participationId, string version, System.Threading.CancellationToken cancellationToken);
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NSwag", "13.10.8.0 (NJsonSchema v10.3.11.0 (Newtonsoft.Json v12.0.0.0))")]
+    public partial interface IRightsClient
+    {
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<HateoasResponseOfRightNavigation> GetRightByIdAsync(System.Guid rightId, string version);
+    
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<HateoasResponseOfRightNavigation> GetRightByIdAsync(System.Guid rightId, string version, System.Threading.CancellationToken cancellationToken);
+    
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<HateoasResponseOfIListOfHateoasResponseOfRightNavigation> GetRightsAsync(int page, int size, string version);
+    
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<HateoasResponseOfIListOfHateoasResponseOfRightNavigation> GetRightsAsync(int page, int size, string version, System.Threading.CancellationToken cancellationToken);
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NSwag", "13.10.8.0 (NJsonSchema v10.3.11.0 (Newtonsoft.Json v12.0.0.0))")]
+    public partial interface IStepsClient
+    {
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task CreateStepAsync(string version, CreateStepCommand createStepCommand);
+    
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task CreateStepAsync(string version, CreateStepCommand createStepCommand, System.Threading.CancellationToken cancellationToken);
+    
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<HateoasResponseOfIListOfHateoasResponseOfStepNavigation> GetStepsAsync(bool? isPublished, int page, int size, string version);
+    
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<HateoasResponseOfIListOfHateoasResponseOfStepNavigation> GetStepsAsync(bool? isPublished, int page, int size, string version, System.Threading.CancellationToken cancellationToken);
+    
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<HateoasResponseOfStepNavigation> GetStepByIdAsync(System.Guid stepId, string version);
+    
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<HateoasResponseOfStepNavigation> GetStepByIdAsync(System.Guid stepId, string version, System.Threading.CancellationToken cancellationToken);
+    
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task DeleteStepAsync(System.Guid stepId, string version);
+    
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task DeleteStepAsync(System.Guid stepId, string version, System.Threading.CancellationToken cancellationToken);
+    
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task UpdateStepAsync(System.Guid stepId, string version, UpdateStepCommandBody command);
+    
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task UpdateStepAsync(System.Guid stepId, string version, UpdateStepCommandBody command, System.Threading.CancellationToken cancellationToken);
+    
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<HateoasResponseOfIListOfHateoasResponseOfTestNavigation> GetStepTestsAsync(System.Guid stepId, int page, int size, string version);
+    
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<HateoasResponseOfIListOfHateoasResponseOfTestNavigation> GetStepTestsAsync(System.Guid stepId, int page, int size, string version, System.Threading.CancellationToken cancellationToken);
+    
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task AddTestAsync(System.Guid stepId, string version, AddTestCommandBody addTestCommand);
+    
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task AddTestAsync(System.Guid stepId, string version, AddTestCommandBody addTestCommand, System.Threading.CancellationToken cancellationToken);
+    
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task DeleteTestAsync(System.Guid stepId, System.Guid testId, string version);
+    
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task DeleteTestAsync(System.Guid stepId, System.Guid testId, string version, System.Threading.CancellationToken cancellationToken);
     
     }
     
@@ -83,46 +182,72 @@ namespace CodingChainApi.WebApi.Client.Contracts
         System.Threading.Tasks.Task<HateoasResponseOfIListOfHateoasResponseOfTeamNavigation> GetTeamsAsync(int page, int size, string version, System.Threading.CancellationToken cancellationToken);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task AddMemberToTeamAsync(System.Guid id, string version, AddMemberToTeamBodyCommand addMemberToTeamBodyCommand);
+        System.Threading.Tasks.Task AddMemberToTeamAsync(System.Guid teamId, string version, AddMemberToTeamBodyCommand addMemberToTeamBodyCommand);
     
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task AddMemberToTeamAsync(System.Guid id, string version, AddMemberToTeamBodyCommand addMemberToTeamBodyCommand, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task AddMemberToTeamAsync(System.Guid teamId, string version, AddMemberToTeamBodyCommand addMemberToTeamBodyCommand, System.Threading.CancellationToken cancellationToken);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task ElevateTeamMemberAsync(System.Guid id, System.Guid memberId, string version);
-    
-        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task ElevateTeamMemberAsync(System.Guid id, System.Guid memberId, string version, System.Threading.CancellationToken cancellationToken);
-    
-        /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task RenameTeamAsync(System.Guid id, string version, RenameTeamCommandBody command);
+        System.Threading.Tasks.Task ElevateTeamMemberAsync(System.Guid teamId, System.Guid memberId, string version);
     
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task RenameTeamAsync(System.Guid id, string version, RenameTeamCommandBody command, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task ElevateTeamMemberAsync(System.Guid teamId, System.Guid memberId, string version, System.Threading.CancellationToken cancellationToken);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task DeleteTeamAsync(System.Guid id, string version);
-    
-        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task DeleteTeamAsync(System.Guid id, string version, System.Threading.CancellationToken cancellationToken);
-    
-        /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<HateoasResponseOfTeamNavigation> GetTeamByIdAsync(System.Guid id, string version);
+        System.Threading.Tasks.Task RenameTeamAsync(System.Guid teamId, string version, RenameTeamCommandBody command);
     
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<HateoasResponseOfTeamNavigation> GetTeamByIdAsync(System.Guid id, string version, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task RenameTeamAsync(System.Guid teamId, string version, RenameTeamCommandBody command, System.Threading.CancellationToken cancellationToken);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task RemoveMemberFromTeamAsync(System.Guid id, System.Guid memberId, string version);
+        System.Threading.Tasks.Task DeleteTeamAsync(System.Guid teamId, string version);
     
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task RemoveMemberFromTeamAsync(System.Guid id, System.Guid memberId, string version, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task DeleteTeamAsync(System.Guid teamId, string version, System.Threading.CancellationToken cancellationToken);
+    
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<HateoasResponseOfTeamNavigation> GetTeamByIdAsync(System.Guid teamId, string version);
+    
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<HateoasResponseOfTeamNavigation> GetTeamByIdAsync(System.Guid teamId, string version, System.Threading.CancellationToken cancellationToken);
+    
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task RemoveMemberFromTeamAsync(System.Guid teamId, System.Guid memberId, string version);
+    
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task RemoveMemberFromTeamAsync(System.Guid teamId, System.Guid memberId, string version, System.Threading.CancellationToken cancellationToken);
+    
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<HateoasResponseOfTeamNavigation> GetTeamMemberByIdAsync(System.Guid teamId, System.Guid memberId, string version);
+    
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<HateoasResponseOfTeamNavigation> GetTeamMemberByIdAsync(System.Guid teamId, System.Guid memberId, string version, System.Threading.CancellationToken cancellationToken);
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NSwag", "13.10.8.0 (NJsonSchema v10.3.11.0 (Newtonsoft.Json v12.0.0.0))")]
+    public partial interface ITestsClient
+    {
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<HateoasResponseOfTestNavigation> GetTestByIdAsync(System.Guid testId, string version);
+    
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<HateoasResponseOfTestNavigation> GetTestByIdAsync(System.Guid testId, string version, System.Threading.CancellationToken cancellationToken);
+    
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<HateoasResponseOfIListOfHateoasResponseOfTestNavigation> GetTestsAsync(int page, int size, string version);
+    
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<HateoasResponseOfIListOfHateoasResponseOfTestNavigation> GetTestsAsync(int page, int size, string version, System.Threading.CancellationToken cancellationToken);
     
     }
     
@@ -137,18 +262,60 @@ namespace CodingChainApi.WebApi.Client.Contracts
         System.Threading.Tasks.Task CreateTournamentAsync(string version, CreateTournamentCommand createTournamentCommand, System.Threading.CancellationToken cancellationToken);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<HateoasResponseOfIListOfHateoasResponseOfTournamentNavigation> GetTournamentsAsync(int page, int size, string version);
+        System.Threading.Tasks.Task<HateoasResponseOfIListOfHateoasResponseOfTournamentNavigation> GetTournamentsAsync(System.Guid? languageIdFilter, string nameFilter, OrderEnum? nameOrder, System.Guid? participantIdFilter, int page, int size, string version);
     
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<HateoasResponseOfIListOfHateoasResponseOfTournamentNavigation> GetTournamentsAsync(int page, int size, string version, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<HateoasResponseOfIListOfHateoasResponseOfTournamentNavigation> GetTournamentsAsync(System.Guid? languageIdFilter, string nameFilter, OrderEnum? nameOrder, System.Guid? participantIdFilter, int page, int size, string version, System.Threading.CancellationToken cancellationToken);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<HateoasResponseOfTournamentNavigation> GetTournamentByIdAsync(System.Guid id, string version);
+        System.Threading.Tasks.Task<HateoasResponseOfTournamentNavigation> GetTournamentByIdAsync(System.Guid tournamentId, string version);
     
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<HateoasResponseOfTournamentNavigation> GetTournamentByIdAsync(System.Guid id, string version, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<HateoasResponseOfTournamentNavigation> GetTournamentByIdAsync(System.Guid tournamentId, string version, System.Threading.CancellationToken cancellationToken);
+    
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task DeleteTournamentAsync(System.Guid tournamentId, string version);
+    
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task DeleteTournamentAsync(System.Guid tournamentId, string version, System.Threading.CancellationToken cancellationToken);
+    
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task UpdateTournamentAsync(System.Guid tournamentId, string version, UpdateTournamentCommandBody command);
+    
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task UpdateTournamentAsync(System.Guid tournamentId, string version, UpdateTournamentCommandBody command, System.Threading.CancellationToken cancellationToken);
+    
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task UpdateTournamentStepsAsync(System.Guid tournamentId, string version, SetTournamentStepsCommandBody command);
+    
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task UpdateTournamentStepsAsync(System.Guid tournamentId, string version, SetTournamentStepsCommandBody command, System.Threading.CancellationToken cancellationToken);
+    
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<HateoasResponseOfIListOfHateoasResponseOfTournamentStepNavigation> GetTournamentStepsAsync(System.Guid tournamentId, int page, int size, string version);
+    
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<HateoasResponseOfIListOfHateoasResponseOfTournamentStepNavigation> GetTournamentStepsAsync(System.Guid tournamentId, int page, int size, string version, System.Threading.CancellationToken cancellationToken);
+    
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task DeleteTournamentStepAsync(System.Guid tournamentId, System.Guid stepId, string version);
+    
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task DeleteTournamentStepAsync(System.Guid tournamentId, System.Guid stepId, string version, System.Threading.CancellationToken cancellationToken);
+    
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<HateoasResponseOfTournamentStepNavigation> GetTournamentStepByIdAsync(System.Guid tournamentId, System.Guid stepId, string version);
+    
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<HateoasResponseOfTournamentStepNavigation> GetTournamentStepByIdAsync(System.Guid tournamentId, System.Guid stepId, string version, System.Threading.CancellationToken cancellationToken);
     
     }
     
@@ -177,11 +344,11 @@ namespace CodingChainApi.WebApi.Client.Contracts
         System.Threading.Tasks.Task<PublicUser> MeAsync(string version, System.Threading.CancellationToken cancellationToken);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<HateoasResponseOfIListOfPublicUser> GetAllUsersAsync(int page, int size, string version);
+        System.Threading.Tasks.Task<HateoasResponseOfIListOfPublicUser> GetAllUsersAsync(string usernameFilter, string emailFilter, int page, int size, string version);
     
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<HateoasResponseOfIListOfPublicUser> GetAllUsersAsync(int page, int size, string version, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<HateoasResponseOfIListOfPublicUser> GetAllUsersAsync(string usernameFilter, string emailFilter, int page, int size, string version, System.Threading.CancellationToken cancellationToken);
     
     }
 
@@ -351,27 +518,6 @@ namespace CodingChainApi.WebApi.Client.Contracts
     }
     
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.3.11.0 (Newtonsoft.Json v12.0.0.0)")]
-    public partial class HateoasResponseOfIListOfHateoasResponseOfProgrammingLanguageNavigation 
-    {
-        [Newtonsoft.Json.JsonProperty("result", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public System.Collections.ObjectModel.ObservableCollection<HateoasResponseOfProgrammingLanguageNavigation> Result { get; set; }
-    
-        [Newtonsoft.Json.JsonProperty("links", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public System.Collections.ObjectModel.ObservableCollection<LinkDto> Links { get; set; }
-    
-        public string ToJson() 
-        {
-            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
-        }
-    
-        public static HateoasResponseOfIListOfHateoasResponseOfProgrammingLanguageNavigation FromJson(string data)
-        {
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<HateoasResponseOfIListOfHateoasResponseOfProgrammingLanguageNavigation>(data);
-        }
-    
-    }
-    
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.3.11.0 (Newtonsoft.Json v12.0.0.0)")]
     public partial class ProblemDetails 
     {
         [Newtonsoft.Json.JsonProperty("type", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
@@ -414,37 +560,468 @@ namespace CodingChainApi.WebApi.Client.Contracts
     }
     
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.3.11.0 (Newtonsoft.Json v12.0.0.0)")]
-    public partial class TestCommand 
+    public partial class HateoasResponseOfIListOfHateoasResponseOfProgrammingLanguageNavigation 
     {
-        [Newtonsoft.Json.JsonProperty("name", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public string Name { get; set; }
+        [Newtonsoft.Json.JsonProperty("result", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.ObjectModel.ObservableCollection<HateoasResponseOfProgrammingLanguageNavigation> Result { get; set; }
     
-        [Newtonsoft.Json.JsonProperty("runTestsProcess", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public string RunTestsProcess { get; set; }
-    
-        [Newtonsoft.Json.JsonProperty("runTestsCommand", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public string RunTestsCommand { get; set; }
-    
-        [Newtonsoft.Json.JsonProperty("installationProcess", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public string InstallationProcess { get; set; }
-    
-        [Newtonsoft.Json.JsonProperty("installationCommand", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public string InstallationCommand { get; set; }
-    
-        [Newtonsoft.Json.JsonProperty("testsFileRelativePath", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public string TestsFileRelativePath { get; set; }
-    
-        [Newtonsoft.Json.JsonProperty("sutFileRelativePath", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public string SutFileRelativePath { get; set; }
+        [Newtonsoft.Json.JsonProperty("links", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.ObjectModel.ObservableCollection<LinkDto> Links { get; set; }
     
         public string ToJson() 
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this);
         }
     
-        public static TestCommand FromJson(string data)
+        public static HateoasResponseOfIListOfHateoasResponseOfProgrammingLanguageNavigation FromJson(string data)
         {
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<TestCommand>(data);
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<HateoasResponseOfIListOfHateoasResponseOfProgrammingLanguageNavigation>(data);
+        }
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.3.11.0 (Newtonsoft.Json v12.0.0.0)")]
+    public partial class CreateParticipationCommand 
+    {
+        [Newtonsoft.Json.JsonProperty("tournamentId", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Guid TournamentId { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("stepId", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Guid StepId { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("teamId", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Guid TeamId { get; set; }
+    
+        public string ToJson() 
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
+        }
+    
+        public static CreateParticipationCommand FromJson(string data)
+        {
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<CreateParticipationCommand>(data);
+        }
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.3.11.0 (Newtonsoft.Json v12.0.0.0)")]
+    public partial class HateoasResponseOfParticipationNavigation 
+    {
+        [Newtonsoft.Json.JsonProperty("result", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public ParticipationNavigation Result { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("links", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.ObjectModel.ObservableCollection<LinkDto> Links { get; set; }
+    
+        public string ToJson() 
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
+        }
+    
+        public static HateoasResponseOfParticipationNavigation FromJson(string data)
+        {
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<HateoasResponseOfParticipationNavigation>(data);
+        }
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.3.11.0 (Newtonsoft.Json v12.0.0.0)")]
+    public partial class ParticipationNavigation 
+    {
+        [Newtonsoft.Json.JsonProperty("id", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Guid Id { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("teamId", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Guid TeamId { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("tournamentId", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Guid TournamentId { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("stepId", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Guid StepId { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("startDate", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.DateTime StartDate { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("endDate", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.DateTime? EndDate { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("calculatedScore", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public decimal CalculatedScore { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("functionsIds", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.ObjectModel.ObservableCollection<System.Guid> FunctionsIds { get; set; }
+    
+        public string ToJson() 
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
+        }
+    
+        public static ParticipationNavigation FromJson(string data)
+        {
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<ParticipationNavigation>(data);
+        }
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.3.11.0 (Newtonsoft.Json v12.0.0.0)")]
+    public partial class HateoasResponseOfIListOfHateoasResponseOfParticipationNavigation 
+    {
+        [Newtonsoft.Json.JsonProperty("result", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.ObjectModel.ObservableCollection<HateoasResponseOfParticipationNavigation> Result { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("links", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.ObjectModel.ObservableCollection<LinkDto> Links { get; set; }
+    
+        public string ToJson() 
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
+        }
+    
+        public static HateoasResponseOfIListOfHateoasResponseOfParticipationNavigation FromJson(string data)
+        {
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<HateoasResponseOfIListOfHateoasResponseOfParticipationNavigation>(data);
+        }
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.3.11.0 (Newtonsoft.Json v12.0.0.0)")]
+    public partial class HateoasResponseOfRightNavigation 
+    {
+        [Newtonsoft.Json.JsonProperty("result", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public RightNavigation Result { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("links", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.ObjectModel.ObservableCollection<LinkDto> Links { get; set; }
+    
+        public string ToJson() 
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
+        }
+    
+        public static HateoasResponseOfRightNavigation FromJson(string data)
+        {
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<HateoasResponseOfRightNavigation>(data);
+        }
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.3.11.0 (Newtonsoft.Json v12.0.0.0)")]
+    public partial class RightNavigation 
+    {
+        [Newtonsoft.Json.JsonProperty("id", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Guid Id { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("name", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public RightEnum Name { get; set; }
+    
+        public string ToJson() 
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
+        }
+    
+        public static RightNavigation FromJson(string data)
+        {
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<RightNavigation>(data);
+        }
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.3.11.0 (Newtonsoft.Json v12.0.0.0)")]
+    public enum RightEnum
+    {
+        User = 0,
+    
+        Admin = 1,
+    
+        Creator = 2,
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.3.11.0 (Newtonsoft.Json v12.0.0.0)")]
+    public partial class HateoasResponseOfIListOfHateoasResponseOfRightNavigation 
+    {
+        [Newtonsoft.Json.JsonProperty("result", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.ObjectModel.ObservableCollection<HateoasResponseOfRightNavigation> Result { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("links", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.ObjectModel.ObservableCollection<LinkDto> Links { get; set; }
+    
+        public string ToJson() 
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
+        }
+    
+        public static HateoasResponseOfIListOfHateoasResponseOfRightNavigation FromJson(string data)
+        {
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<HateoasResponseOfIListOfHateoasResponseOfRightNavigation>(data);
+        }
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.3.11.0 (Newtonsoft.Json v12.0.0.0)")]
+    public partial class CreateStepCommand 
+    {
+        [Newtonsoft.Json.JsonProperty("languageId", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Guid LanguageId { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("headerCode", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string HeaderCode { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("name", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string Name { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("description", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string Description { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("score", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public decimal Score { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("difficulty", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public int Difficulty { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("minFunctionsCount", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public int? MinFunctionsCount { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("maxFunctionsCount", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public int? MaxFunctionsCount { get; set; }
+    
+        public string ToJson() 
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
+        }
+    
+        public static CreateStepCommand FromJson(string data)
+        {
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<CreateStepCommand>(data);
+        }
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.3.11.0 (Newtonsoft.Json v12.0.0.0)")]
+    public partial class HateoasResponseOfStepNavigation 
+    {
+        [Newtonsoft.Json.JsonProperty("result", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public StepNavigation Result { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("links", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.ObjectModel.ObservableCollection<LinkDto> Links { get; set; }
+    
+        public string ToJson() 
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
+        }
+    
+        public static HateoasResponseOfStepNavigation FromJson(string data)
+        {
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<HateoasResponseOfStepNavigation>(data);
+        }
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.3.11.0 (Newtonsoft.Json v12.0.0.0)")]
+    public partial class StepNavigation 
+    {
+        [Newtonsoft.Json.JsonProperty("id", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Guid Id { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("languageId", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Guid LanguageId { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("name", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string Name { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("description", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string Description { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("minFunctionsCount", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public int? MinFunctionsCount { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("maxFunctionsCount", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public int? MaxFunctionsCount { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("score", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public decimal Score { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("difficulty", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public int Difficulty { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("headerCode", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string HeaderCode { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("testIds", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.ObjectModel.ObservableCollection<System.Guid> TestIds { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("tournamentsIds", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.ObjectModel.ObservableCollection<System.Guid> TournamentsIds { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("participationIds", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.ObjectModel.ObservableCollection<System.Guid> ParticipationIds { get; set; }
+    
+        public string ToJson() 
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
+        }
+    
+        public static StepNavigation FromJson(string data)
+        {
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<StepNavigation>(data);
+        }
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.3.11.0 (Newtonsoft.Json v12.0.0.0)")]
+    public partial class HateoasResponseOfIListOfHateoasResponseOfStepNavigation 
+    {
+        [Newtonsoft.Json.JsonProperty("result", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.ObjectModel.ObservableCollection<HateoasResponseOfStepNavigation> Result { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("links", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.ObjectModel.ObservableCollection<LinkDto> Links { get; set; }
+    
+        public string ToJson() 
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
+        }
+    
+        public static HateoasResponseOfIListOfHateoasResponseOfStepNavigation FromJson(string data)
+        {
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<HateoasResponseOfIListOfHateoasResponseOfStepNavigation>(data);
+        }
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.3.11.0 (Newtonsoft.Json v12.0.0.0)")]
+    public partial class HateoasResponseOfIListOfHateoasResponseOfTestNavigation 
+    {
+        [Newtonsoft.Json.JsonProperty("result", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.ObjectModel.ObservableCollection<HateoasResponseOfTestNavigation> Result { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("links", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.ObjectModel.ObservableCollection<LinkDto> Links { get; set; }
+    
+        public string ToJson() 
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
+        }
+    
+        public static HateoasResponseOfIListOfHateoasResponseOfTestNavigation FromJson(string data)
+        {
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<HateoasResponseOfIListOfHateoasResponseOfTestNavigation>(data);
+        }
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.3.11.0 (Newtonsoft.Json v12.0.0.0)")]
+    public partial class HateoasResponseOfTestNavigation 
+    {
+        [Newtonsoft.Json.JsonProperty("result", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public TestNavigation Result { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("links", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.ObjectModel.ObservableCollection<LinkDto> Links { get; set; }
+    
+        public string ToJson() 
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
+        }
+    
+        public static HateoasResponseOfTestNavigation FromJson(string data)
+        {
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<HateoasResponseOfTestNavigation>(data);
+        }
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.3.11.0 (Newtonsoft.Json v12.0.0.0)")]
+    public partial class TestNavigation 
+    {
+        [Newtonsoft.Json.JsonProperty("id", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Guid Id { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("stepId", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Guid StepId { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("outputValidator", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string OutputValidator { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("inputGenerator", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string InputGenerator { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("score", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public decimal Score { get; set; }
+    
+        public string ToJson() 
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
+        }
+    
+        public static TestNavigation FromJson(string data)
+        {
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<TestNavigation>(data);
+        }
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.3.11.0 (Newtonsoft.Json v12.0.0.0)")]
+    public partial class UpdateStepCommandBody 
+    {
+        [Newtonsoft.Json.JsonProperty("headerCode", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string HeaderCode { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("name", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string Name { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("description", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string Description { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("minFunctionsCount", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public int? MinFunctionsCount { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("maxFunctionsCount", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public int? MaxFunctionsCount { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("score", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public decimal Score { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("difficulty", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public int Difficulty { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("languageId", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Guid LanguageId { get; set; }
+    
+        public string ToJson() 
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
+        }
+    
+        public static UpdateStepCommandBody FromJson(string data)
+        {
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<UpdateStepCommandBody>(data);
+        }
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.3.11.0 (Newtonsoft.Json v12.0.0.0)")]
+    public partial class AddTestCommandBody 
+    {
+        [Newtonsoft.Json.JsonProperty("outputValidator", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string OutputValidator { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("inputGenerator", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string InputGenerator { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("score", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public decimal Score { get; set; }
+    
+        public string ToJson() 
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
+        }
+    
+        public static AddTestCommandBody FromJson(string data)
+        {
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<AddTestCommandBody>(data);
         }
     
     }
@@ -533,8 +1110,8 @@ namespace CodingChainApi.WebApi.Client.Contracts
         [Newtonsoft.Json.JsonProperty("name", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Name { get; set; }
     
-        [Newtonsoft.Json.JsonProperty("members", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public System.Collections.ObjectModel.ObservableCollection<MemberNavigation> Members { get; set; }
+        [Newtonsoft.Json.JsonProperty("membersIds", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.ObjectModel.ObservableCollection<System.Guid> MembersIds { get; set; }
     
         public string ToJson() 
         {
@@ -544,33 +1121,6 @@ namespace CodingChainApi.WebApi.Client.Contracts
         public static TeamNavigation FromJson(string data)
         {
             return Newtonsoft.Json.JsonConvert.DeserializeObject<TeamNavigation>(data);
-        }
-    
-    }
-    
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.3.11.0 (Newtonsoft.Json v12.0.0.0)")]
-    public partial class MemberNavigation 
-    {
-        [Newtonsoft.Json.JsonProperty("userId", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public System.Guid UserId { get; set; }
-    
-        [Newtonsoft.Json.JsonProperty("isAdmin", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public bool IsAdmin { get; set; }
-    
-        [Newtonsoft.Json.JsonProperty("joinDate", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public System.DateTime JoinDate { get; set; }
-    
-        [Newtonsoft.Json.JsonProperty("leaveDate", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public System.DateTime? LeaveDate { get; set; }
-    
-        public string ToJson() 
-        {
-            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
-        }
-    
-        public static MemberNavigation FromJson(string data)
-        {
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<MemberNavigation>(data);
         }
     
     }
@@ -659,8 +1209,11 @@ namespace CodingChainApi.WebApi.Client.Contracts
         [Newtonsoft.Json.JsonProperty("endDate", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTime? EndDate { get; set; }
     
-        [Newtonsoft.Json.JsonProperty("steps", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public System.Collections.ObjectModel.ObservableCollection<TournamentStepNavigation> Steps { get; set; }
+        [Newtonsoft.Json.JsonProperty("stepsIds", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.ObjectModel.ObservableCollection<System.Guid> StepsIds { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("participationsIds", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.ObjectModel.ObservableCollection<System.Guid> ParticipationsIds { get; set; }
     
         public string ToJson() 
         {
@@ -670,30 +1223,6 @@ namespace CodingChainApi.WebApi.Client.Contracts
         public static TournamentNavigation FromJson(string data)
         {
             return Newtonsoft.Json.JsonConvert.DeserializeObject<TournamentNavigation>(data);
-        }
-    
-    }
-    
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.3.11.0 (Newtonsoft.Json v12.0.0.0)")]
-    public partial class TournamentStepNavigation 
-    {
-        [Newtonsoft.Json.JsonProperty("stepId", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public System.Guid StepId { get; set; }
-    
-        [Newtonsoft.Json.JsonProperty("isOptional", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public bool IsOptional { get; set; }
-    
-        [Newtonsoft.Json.JsonProperty("order", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public int Order { get; set; }
-    
-        public string ToJson() 
-        {
-            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
-        }
-    
-        public static TournamentStepNavigation FromJson(string data)
-        {
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<TournamentStepNavigation>(data);
         }
     
     }
@@ -715,6 +1244,192 @@ namespace CodingChainApi.WebApi.Client.Contracts
         public static HateoasResponseOfIListOfHateoasResponseOfTournamentNavigation FromJson(string data)
         {
             return Newtonsoft.Json.JsonConvert.DeserializeObject<HateoasResponseOfIListOfHateoasResponseOfTournamentNavigation>(data);
+        }
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.3.11.0 (Newtonsoft.Json v12.0.0.0)")]
+    public enum OrderEnum
+    {
+        Asc = 0,
+    
+        Desc = 1,
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.3.11.0 (Newtonsoft.Json v12.0.0.0)")]
+    public partial class UpdateTournamentCommandBody 
+    {
+        [Newtonsoft.Json.JsonProperty("name", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string Name { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("description", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string Description { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("isPublished", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public bool IsPublished { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("startDate", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.DateTime? StartDate { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("endDate", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.DateTime? EndDate { get; set; }
+    
+        public string ToJson() 
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
+        }
+    
+        public static UpdateTournamentCommandBody FromJson(string data)
+        {
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<UpdateTournamentCommandBody>(data);
+        }
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.3.11.0 (Newtonsoft.Json v12.0.0.0)")]
+    public partial class SetTournamentStepsCommandBody 
+    {
+        [Newtonsoft.Json.JsonProperty("steps", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.ObjectModel.ObservableCollection<TournamentStep> Steps { get; set; }
+    
+        public string ToJson() 
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
+        }
+    
+        public static SetTournamentStepsCommandBody FromJson(string data)
+        {
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<SetTournamentStepsCommandBody>(data);
+        }
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.3.11.0 (Newtonsoft.Json v12.0.0.0)")]
+    public partial class TournamentStep 
+    {
+        [Newtonsoft.Json.JsonProperty("stepId", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Guid StepId { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("isOptional", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public bool IsOptional { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("order", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public int Order { get; set; }
+    
+        public string ToJson() 
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
+        }
+    
+        public static TournamentStep FromJson(string data)
+        {
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<TournamentStep>(data);
+        }
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.3.11.0 (Newtonsoft.Json v12.0.0.0)")]
+    public partial class HateoasResponseOfTournamentStepNavigation 
+    {
+        [Newtonsoft.Json.JsonProperty("result", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public TournamentStepNavigation Result { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("links", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.ObjectModel.ObservableCollection<LinkDto> Links { get; set; }
+    
+        public string ToJson() 
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
+        }
+    
+        public static HateoasResponseOfTournamentStepNavigation FromJson(string data)
+        {
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<HateoasResponseOfTournamentStepNavigation>(data);
+        }
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.3.11.0 (Newtonsoft.Json v12.0.0.0)")]
+    public partial class TournamentStepNavigation 
+    {
+        [Newtonsoft.Json.JsonProperty("stepId", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Guid StepId { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("tournamentId", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Guid TournamentId { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("isOptional", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public bool IsOptional { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("order", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public int Order { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("languageId", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Guid LanguageId { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("name", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string Name { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("description", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string Description { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("minFunctionsCount", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public int? MinFunctionsCount { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("maxFunctionsCount", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public int? MaxFunctionsCount { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("score", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public decimal Score { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("difficulty", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public int Difficulty { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("headerCode", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string HeaderCode { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("isPublished", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public bool IsPublished { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("testIds", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.ObjectModel.ObservableCollection<System.Guid> TestIds { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("participationIds", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.ObjectModel.ObservableCollection<System.Guid> ParticipationIds { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("tournamentIds", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.ObjectModel.ObservableCollection<System.Guid> TournamentIds { get; set; }
+    
+        public string ToJson() 
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
+        }
+    
+        public static TournamentStepNavigation FromJson(string data)
+        {
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<TournamentStepNavigation>(data);
+        }
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.3.11.0 (Newtonsoft.Json v12.0.0.0)")]
+    public partial class HateoasResponseOfIListOfHateoasResponseOfTournamentStepNavigation 
+    {
+        [Newtonsoft.Json.JsonProperty("result", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.ObjectModel.ObservableCollection<HateoasResponseOfTournamentStepNavigation> Result { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("links", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.ObjectModel.ObservableCollection<LinkDto> Links { get; set; }
+    
+        public string ToJson() 
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
+        }
+    
+        public static HateoasResponseOfIListOfHateoasResponseOfTournamentStepNavigation FromJson(string data)
+        {
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<HateoasResponseOfIListOfHateoasResponseOfTournamentStepNavigation>(data);
         }
     
     }
@@ -775,6 +1490,12 @@ namespace CodingChainApi.WebApi.Client.Contracts
     
         [Newtonsoft.Json.JsonProperty("email", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Email { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("rightIds", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.ObjectModel.ObservableCollection<System.Guid> RightIds { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("teamIds", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.ObjectModel.ObservableCollection<System.Guid> TeamIds { get; set; }
     
         public string ToJson() 
         {

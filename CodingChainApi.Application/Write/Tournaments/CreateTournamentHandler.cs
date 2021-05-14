@@ -7,9 +7,9 @@ using MediatR;
 
 namespace Application.Write.Tournaments
 {
-    public record CreateTournamentCommand(string Name, string Description): IRequest<string>;
-    
-    public class CreateTournamentHandler:IRequestHandler<CreateTournamentCommand, string>
+    public record CreateTournamentCommand(string Name, string Description) : IRequest<string>;
+
+    public class CreateTournamentHandler : IRequestHandler<CreateTournamentCommand, string>
     {
         private readonly ITournamentRepository _tournamentRepository;
 
@@ -20,9 +20,8 @@ namespace Application.Write.Tournaments
 
         public async Task<string> Handle(CreateTournamentCommand request, CancellationToken cancellationToken)
         {
-            var tournament = new TournamentAggregate(
-                await _tournamentRepository.NextIdAsync(),
-                request.Name, request.Description, false, null, null, new List<StepEntity>());
+            var tournament = TournamentAggregate.CreateNew(await _tournamentRepository.NextIdAsync(), request.Name,
+                request.Description);
             await _tournamentRepository.SetAsync(tournament);
             return tournament.Id.ToString();
         }

@@ -1,9 +1,12 @@
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Routing;
 
 namespace NeosCodingApi.Helpers
 {
+
     public static class HateoasResponseBuilder{
         public static  HateoasResponse<IList<T>> FromPagedList<T>(IUrlHelper urlHelper, PagedListResume page, IList<T> values,
             string routeName, object? routeValues = null) 
@@ -30,7 +33,7 @@ namespace NeosCodingApi.Helpers
                 links.Add(LinkDto.NextPage(urlHelper.Link(routeName, nextValues)));
             }
 
-            return new HateoasResponse<IList<T>>(values, links);
+            return new HateoasPageResponse<T>(values, links, page.TotalCount);
         }
     }
     public class HateoasResponse<TResult>
@@ -43,6 +46,16 @@ namespace NeosCodingApi.Helpers
 
         public TResult Result { get; set; }
         public IList<LinkDto> Links { get; set; }
+        
+    }
+
+    public class HateoasPageResponse<T>: HateoasResponse<IList<T>>
+    {
+        public long Total { get; set; }
+        public HateoasPageResponse(IList<T> result, IList<LinkDto> links, long total ) : base(result, links)
+        {
+            Total = total;
+        }
         
     }
 }
