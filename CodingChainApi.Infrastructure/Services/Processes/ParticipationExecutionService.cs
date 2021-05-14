@@ -18,6 +18,9 @@ namespace CodingChainApi.Infrastructure.Services.Processes
         private readonly IRabbitMqPublisher _rabbitMqPublisher;
 
         private ProcessEndHandler<Guid>? _processEndHandler;
+        protected sealed override string QueueName { get; set; }
+
+        protected sealed override string RouteKey { get; set; }
 
         public ParticipationExecutionService(IRabbitMQSettings settings, ILogger<ParticipationExecutionService> logger,
             IRabbitMqPublisher rabbitMqPublisher)
@@ -27,6 +30,7 @@ namespace CodingChainApi.Infrastructure.Services.Processes
             RouteKey = settings.RoutingKey;
             QueueName = settings.ExecutionCodeRoute;
         }
+
 
         public void StartExecution(RunParticipationTestsCommand command)
         {
@@ -49,7 +53,7 @@ namespace CodingChainApi.Infrastructure.Services.Processes
 
             try
             {
-                _logger.LogDebug($"Code executed: ${message}");
+                Logger.LogDebug("Code executed: ${Message}", message);
                 var json = JObject.Parse(message);
                 var result = JsonConvert.DeserializeObject<ProcessEndResult>(json.ToString());
 
@@ -68,8 +72,10 @@ namespace CodingChainApi.Infrastructure.Services.Processes
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Process fail,error:{ex.Message},stackTrace:{ex.StackTrace},message:{message}");
-                _logger.LogError(-1, ex, "Process fail");
+                Logger.LogError(
+                    "Process fail,error:{ExceptionMessage},stackTrace:{ExceptionStackTrace},message:{QueueMessage}",
+                    ex.Message, ex.StackTrace, message);
+                Logger.LogError(-1, ex, "Process fail");
                 return false;
             }
         }

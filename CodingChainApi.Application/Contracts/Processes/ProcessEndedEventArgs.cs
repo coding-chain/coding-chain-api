@@ -1,6 +1,6 @@
 using System;
 
-namespace Application.Write.Code.Contracts.Processes
+namespace Application.Contracts.Processes
 {
     public sealed class ProcessEndedEventArgs : EventArgs
     {
