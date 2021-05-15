@@ -7,6 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\CodingChainApi.CSharpClient\CodingChainApi.CSharpClient.csproj" />
       <ProjectReference Include="..\CodingChainApi.Domain\CodingChainApi.Domain.csproj" />
     </ItemGroup>
 

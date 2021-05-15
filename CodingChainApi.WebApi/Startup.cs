@@ -48,7 +48,6 @@ namespace NeosCodingApi
             services.AddScoped<IPropertyCheckerService, PropertyCheckerService>();
             services.AddHttpContextAccessor();
 
-
             services.AddSignalR();
 
             services.AddCors();
@@ -132,9 +131,7 @@ namespace NeosCodingApi
             }
 
 
-
             app.UseRouting();
-
 
 
             app.UseAuthentication();

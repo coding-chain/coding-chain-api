@@ -7,9 +7,11 @@ using Application.Read.Contracts;
 using Application.Write.Contracts;
 using CodingChainApi.Infrastructure.Common.Exceptions;
 using CodingChainApi.Infrastructure.Contexts;
+using CodingChainApi.Infrastructure.MessageBroker;
 using CodingChainApi.Infrastructure.Repositories.AggregateRepositories;
 using CodingChainApi.Infrastructure.Repositories.ReadRepositories;
 using CodingChainApi.Infrastructure.Services;
+using CodingChainApi.Infrastructure.Services.Processes;
 using CodingChainApi.Infrastructure.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -32,11 +34,12 @@ namespace CodingChainApi.Infrastructure
             ConfigureProcess(services, configuration);
             ConfigureAppData(services, configuration);
             ConfigureLanguages(services, configuration);
+            ConfigureRabbitMQ(services, configuration);
             //
-            services.AddScoped<IProcessService, ProcessService>();
             services.AddScoped<ISecurityService, SecurityService>();
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<ITimeService, TimeService>();
+            services.AddScoped<IParticipationExecutionService, ParticipationExecutionService>();
             RegisterAggregateRepositories(services);
             RegisterReadRepositories(services);
             return services;
@@ -136,6 +139,15 @@ namespace CodingChainApi.Infrastructure
                 options.UseSqlServer(dbSettings.ConnectionString,
                     o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery))
             );
+        }
+
+        private static void ConfigureRabbitMQ(IServiceCollection serviceCollection, IConfiguration configuration)
+        {
+            // RabbitMQ
+            serviceCollection.AddHostedService<ParticipationExecutionService>();
+            serviceCollection.AddSingleton<IRabbitMqPublisher, RabbitMQPublisher>();
+            ConfigureInjectableSettings<IRabbitMQSettings, RabbitMQSettings>(serviceCollection, configuration);
+            // End RabbitMQ Configuration
         }
     }
 }
