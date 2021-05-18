@@ -32,7 +32,7 @@ namespace NeosCodingApi.Controllers
         public async Task<IActionResult> CreateTeam(CreateTeamCommand createTeamCommand)
         {
             var teamId = await Mediator.Send(createTeamCommand);
-            return CreatedAtAction(nameof(GetTeamById), new {id = teamId}, null);
+            return CreatedAtAction(nameof(GetTeamById), new {teamId}, null);
         }
 
         public record AddMemberToTeamBodyCommand(Guid MemberId);
