@@ -65,17 +65,18 @@ namespace NeosCodingApi.Controllers
                 nameof(GetSteps))
             );
         }
-        
+
         public record GetPaginatedTestNavigationQueryParams() : PaginationQueryBase;
 
         [HttpGet("{stepId:guid}/tests", Name = nameof(GetStepTests))]
         [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasResponse<IList<HateoasResponse<TestNavigation>>>))]
-        public async Task<IActionResult> GetStepTests(Guid stepId, [FromQuery] GetPaginatedTestNavigationQueryParams query)
+        public async Task<IActionResult> GetStepTests(Guid stepId,
+            [FromQuery] GetPaginatedTestNavigationQueryParams query)
         {
             var tests = await Mediator.Send(new GetPaginatedTestNavigationQuery
                 {StepId = stepId, Page = query.Page, Size = query.Size});
             var testsWithLinks = tests.Select(test =>
-                new HateoasResponse<TestNavigation>(test, GetLinksForTest(stepId,test.Id)));
+                new HateoasResponse<TestNavigation>(test, GetLinksForTest(stepId, test.Id)));
             return Ok(HateoasResponseBuilder.FromPagedList(
                 Url,
                 tests.ToPagedListResume(),
@@ -152,9 +153,24 @@ namespace NeosCodingApi.Controllers
             return NoContent();
         }
 
+        public record SetStepsTestsCommandBody(IList<StepTest> Tests);
+
+        [HttpPut("{stepId:guid}/tests", Name = nameof(UpdateStepTests))]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        public async Task<IActionResult> UpdateStepTests(Guid stepId,
+            [FromBody] SetStepsTestsCommandBody command)
+        {
+            await Mediator.Send(new SetStepTestsCommand(stepId, command.Tests));
+            return NoContent();
+        }
+
         #endregion
 
         #region Links
+
         private IList<LinkDto> GetLinksForStep(Guid stepId)
         {
             return new List<LinkDto>()
@@ -164,22 +180,21 @@ namespace NeosCodingApi.Controllers
                 LinkDto.DeleteLink(Url.Link(nameof(DeleteStep), new {stepId})),
                 LinkDto.UpdateLink(Url.Link(nameof(UpdateStep), new {stepId})),
                 LinkDto.AllLink(Url.Link(nameof(GetSteps), null)),
+                new(Url.Link(nameof(UpdateStepTests), new {stepId}), "set tests", HttpMethod.Put),
                 new(Url.Link(nameof(AddTest), new {stepId}), "add test", HttpMethod.Post)
             };
         }
+
         private IList<LinkDto> GetLinksForTest(Guid stepId, Guid testId)
         {
             return new List<LinkDto>()
             {
                 LinkDto.SelfLink(Url.Link(nameof(TestsController.GetTestById), new {testId})),
                 LinkDto.CreateLink(Url.Link(nameof(AddTest), new {stepId, testId})),
-                LinkDto.AllLink(Url.Link(nameof(GetStepTests),new {stepId}))
+                LinkDto.AllLink(Url.Link(nameof(GetStepTests), new {stepId}))
             };
         }
 
         #endregion
-
-        
-
     }
 }

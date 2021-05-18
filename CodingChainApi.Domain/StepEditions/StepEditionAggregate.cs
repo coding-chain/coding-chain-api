@@ -87,19 +87,44 @@ namespace Domain.StepEditions
         {
             if (tests.Distinct().Count() != tests.Count)
                 throw new DomainException("Tests contains duplicates");
-            var errors = tests
-                .Where(t => t.Score < 0)
-                .Select(t => $"Test {t.Id} cannot have score {t.Score} bellow 0")
-                .ToList();
+            var errors = tests.SelectMany(t =>
+            {
+                try
+                {
+                    ValidateTest(t);
+                }
+                catch (DomainException e)
+                {
+                    return e.Errors;
+                }
+
+                return new List<string>();
+            }).ToList();
             if (errors.Any())
                 throw new DomainException(errors);
             this._tests = tests.ToHashSet();
         }
 
-        public void AddTest(TestEntity test)
+        public void ValidateTest(TestEntity test)
         {
             if (test.Score < 0)
                 throw new DomainException($"Test {test.Id} cannot have score {test.Score} bellow 0");
+        }
+
+        public void UpdateTest(TestEntity test)
+        {
+            if (!_tests.Contains(test))
+            {
+                throw new DomainException($"Test {test.Id} doesn't exists");
+            }
+            ValidateTest(test);
+            _tests.Remove(test);
+            _tests.Add(test);
+        }
+
+        public void AddTest(TestEntity test)
+        {
+            ValidateTest(test);
             if (_tests.Contains(test))
                 throw new DomainException($"Test {test.Id} already in step tests");
             this._tests.Add(test);

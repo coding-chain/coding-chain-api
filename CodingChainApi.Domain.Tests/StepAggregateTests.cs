@@ -230,6 +230,29 @@ namespace CodingChainApi.Domain.Tests
             var test = GetNewTest(123);
             Assert.Throws<DomainException>(() => step.SetTests(new List<TestEntity>() {test, failingTest}));
         }
+        
+        [Test]
+        public void update_not_found_test_should_throw()
+        {
+            var step = GetNewStep();
+            var test = GetNewTest(123);
+            Assert.Throws<DomainException>(() => step.UpdateTest(test));
+        }
+        
+        [Test]
+        public void update_test_should_work()
+        {
+            var step = GetNewStep();
+            var existingTest = GetNewTest(10);
+            step.AddTest(existingTest);
+            var modifications = new TestEntity(existingTest.Id, "TestOutput", "TestInput", existingTest.Score + 1);
+            step.UpdateTest(modifications);
+            var modifiedTest = step.Tests.First();
+            Assert.AreEqual(modifiedTest.Score, modifications.Score);
+            Assert.AreEqual(modifiedTest.OutputValidator, modifications.OutputValidator);
+            Assert.AreEqual(modifiedTest.InputGenerator, modifications.InputGenerator);
+        }
+
 
 
         [Test]

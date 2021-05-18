@@ -43,25 +43,49 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
         {
             return _context.Steps.AnyAsync(s => s.Id == stepId && !s.IsDeleted);
         }
-        
+
         public async Task<bool> StepExistsByIds(Guid[] stepIds)
         {
-            var res = await Task.WhenAll(stepIds.Select(async stepId => await _context.Steps.AnyAsync(s => !s.IsDeleted && s.Id == stepId)));
+            var res = await Task.WhenAll(stepIds.Select(async stepId =>
+                await _context.Steps.AnyAsync(s => !s.IsDeleted && s.Id == stepId)));
             return res.Length == stepIds.Length;
         }
-        
-        public static Expression<Func<Step,bool>> FromQuery(GetPaginatedStepNavigationQuery query)
+
+        public static Expression<Func<Step, bool>> IsPublishedFromQuery(GetPaginatedStepNavigationQuery query)
         {
-            return step => !step.IsDeleted && (query.IsPublished == null || step.IsPublished == query.IsPublished);
-        }   
+            return step => query.IsPublishedFilter == null || query.IsPublishedFilter.Value
+                ? step.TournamentSteps.Any(t => !t.Tournament.IsDeleted && t.Tournament.IsPublished)
+                : !step.TournamentSteps.Any(t => !t.Tournament.IsDeleted && t.Tournament.IsPublished);
+        }
+        public static Expression<Func<Step, bool>> FromQuery(GetPaginatedStepNavigationQuery query)
+        {
+            return step => !step.IsDeleted
+                           && (query.NameFilter == null || step.Name.ToLowerInvariant().Contains(query.NameFilter.ToLowerInvariant()))
+                           && (query.LanguageIdFilter == null || !step.ProgrammingLanguage.IsDeleted &&
+                               step.ProgrammingLanguage.Id == query.LanguageIdFilter)
+                           && (query.WithoutIdsFilter == null || query.WithoutIdsFilter.All(id => id != step.Id));
+        }
+
+        private static IQueryable<Step> GetOrderByQuery(IQueryable<Step> stepQuery,
+            GetPaginatedStepNavigationQuery paginationQuery)
+        {
+            if (paginationQuery.NameOrder == OrderEnum.Asc)
+                return stepQuery.OrderBy(t => t.Name);
+            return stepQuery.OrderByDescending(t => t.Name);
+        }
 
         public async Task<IPagedList<StepNavigation>> GetAllStepNavigationPaginated(
             GetPaginatedStepNavigationQuery paginationQuery)
         {
-            return await  GetStepIncludeQueryable()
+            var query = GetStepIncludeQueryable()
                 .ThenInclude(tS => tS.Tournament)
-                .Where(FromQuery(paginationQuery))
-                .Select(s => ToStepNavigation(s))
+                .Where(FromQuery(paginationQuery));
+            if (paginationQuery.IsPublishedFilter is not null)
+            {
+                query = query.Where(IsPublishedFromQuery(paginationQuery));
+            }
+            query = GetOrderByQuery(query, paginationQuery);
+            return await query.Select(s => ToStepNavigation(s))
                 .FromPaginationQueryAsync(paginationQuery);
         }
 
@@ -80,6 +104,5 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
                 .FirstOrDefaultAsync(s => !s.IsDeleted && s.Id == id);
             return step is null ? null : ToStepNavigation(step);
         }
-
     }
 }

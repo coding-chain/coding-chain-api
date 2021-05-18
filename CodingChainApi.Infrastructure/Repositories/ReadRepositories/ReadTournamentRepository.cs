@@ -105,7 +105,6 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
                 tournamentStep.Step.TestsIds,
                 tournamentStep.Step.ActiveParticipationsIds,
                 tournamentStep.Step.TournamentsIds
-                
             );
 
         public async Task<IPagedList<TournamentStepNavigation>> GetAllTournamentStepNavigationPaginated(
@@ -131,17 +130,20 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
             return _context.Tournaments.AnyAsync(t => !t.IsDeleted && t.Id == tournamentId);
         }
 
-        private IIncludableQueryable<TournamentStep, IList<TournamentStep>> GetTournamentStepIncludeQueryable()
+        private IIncludableQueryable<TournamentStep, Tournament> GetTournamentStepIncludeQueryable()
         {
             return _context.TournamentSteps
                 .Include(tS => tS.Tournament)
                 .Include(tS => tS.Step)
                 .ThenInclude(s => s.ProgrammingLanguage)
                 .Include(tS => tS.Step)
+                .ThenInclude(s => s.Tests)
+                .Include(tS => tS.Step)
                 .ThenInclude(s=> s.Participations)
                 .ThenInclude(p =>p.Team )
                 .Include(tS => tS.Step)
-                .ThenInclude(s => s.TournamentSteps);
+                .ThenInclude(s => s.TournamentSteps)
+                .ThenInclude(tS => tS.Tournament);
         }
     }
 }

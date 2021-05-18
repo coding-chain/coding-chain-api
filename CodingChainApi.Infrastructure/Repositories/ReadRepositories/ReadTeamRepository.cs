@@ -43,7 +43,7 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
         public async Task<TeamNavigation?> GetOneTeamNavigationByIdAsync(Guid id)
         {
             var team = await GetTeamIncludeQueryable()
-                .FirstOrDefaultAsync(t => !t.IsDeleted);
+                .FirstOrDefaultAsync(t => !t.IsDeleted && t.Id == id);
             if (team is null) return null;
             return ToTeamNavigation(team);
         }

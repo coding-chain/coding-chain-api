@@ -9,6 +9,7 @@ namespace Application.Read.Contracts
 {
     public interface IReadTestRepository
     {
+        public Task<bool> TestExists(Guid testId);
         public Task<TestNavigation?> GetOneTestNavigationByID( Guid testId);
         public Task<IPagedList<TestNavigation>> GetPaginatedTestNavigation(GetPaginatedTestNavigationQuery query);
     }
