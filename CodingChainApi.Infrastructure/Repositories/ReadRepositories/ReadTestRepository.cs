@@ -31,6 +31,11 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
             test.Score
         );
 
+        public async Task<bool> TestExists(Guid testId)
+        {
+            return (await _context.Tests.FirstOrDefaultAsync(t => t.Id == testId)) is not null;
+        }
+
         public async Task<TestNavigation?> GetOneTestNavigationByID(Guid testId)
         {
             var test = await GetTestIncludeQueryable()

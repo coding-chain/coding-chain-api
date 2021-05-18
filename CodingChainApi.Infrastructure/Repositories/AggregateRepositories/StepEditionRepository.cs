@@ -70,7 +70,7 @@ namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
                 step.Difficulty,
                 step.TournamentSteps.Any(tS => tS.Tournament.IsPublished),
                 new ProgrammingLanguageId(step.ProgrammingLanguage.Id),
-                step.Tests.Select(ToTestEntity).ToList()
+                step.Tests.Where(t => !t.IsDeleted).Select(ToTestEntity).ToList()
             );
 
         private TestEntity ToTestEntity(Test t) =>
@@ -112,7 +112,7 @@ namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
         private static List<Test> GetRemovedTests(StepEditionAggregate aggregate, Step step)
         {
             return step.Tests
-                .Where(test => aggregate.Tests.All(t => t.Id.Value != test.Id))
+                .Where(test => !test.IsDeleted && aggregate.Tests.All(t => t.Id.Value != test.Id))
                 .ToList();
         }
 
