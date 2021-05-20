@@ -269,11 +269,11 @@ namespace CodingChainApi.WebApi.Client.Contracts
         System.Threading.Tasks.Task CreateTournamentAsync(string version, CreateTournamentCommand createTournamentCommand, System.Threading.CancellationToken cancellationToken);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<HateoasResponseOfIListOfHateoasResponseOfTournamentNavigation> GetTournamentsAsync(System.Guid? languageIdFilter, string nameFilter, OrderEnum? nameOrder, System.Guid? participantIdFilter, int page, int size, string version);
+        System.Threading.Tasks.Task<HateoasResponseOfIListOfHateoasResponseOfTournamentNavigation> GetTournamentsAsync(System.Guid? languageIdFilter, string nameFilter, OrderEnum? nameOrder, System.Guid? participantIdFilter, bool? isPublishedFilter, int page, int size, string version);
     
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<HateoasResponseOfIListOfHateoasResponseOfTournamentNavigation> GetTournamentsAsync(System.Guid? languageIdFilter, string nameFilter, OrderEnum? nameOrder, System.Guid? participantIdFilter, int page, int size, string version, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<HateoasResponseOfIListOfHateoasResponseOfTournamentNavigation> GetTournamentsAsync(System.Guid? languageIdFilter, string nameFilter, OrderEnum? nameOrder, System.Guid? participantIdFilter, bool? isPublishedFilter, int page, int size, string version, System.Threading.CancellationToken cancellationToken);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         System.Threading.Tasks.Task<HateoasResponseOfTournamentNavigation> GetTournamentByIdAsync(System.Guid tournamentId, string version);
@@ -855,6 +855,9 @@ namespace CodingChainApi.WebApi.Client.Contracts
     
         [Newtonsoft.Json.JsonProperty("headerCode", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string HeaderCode { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("isPublished", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public bool IsPublished { get; set; }
     
         [Newtonsoft.Json.JsonProperty("testIds", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.ObjectModel.ObservableCollection<System.Guid> TestIds { get; set; }

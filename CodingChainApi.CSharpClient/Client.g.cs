@@ -3808,14 +3808,14 @@ namespace CodingChainApi.Client
         }
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<HateoasResponseOfIListOfHateoasResponseOfTournamentNavigation> GetTournamentsAsync(System.Guid? languageIdFilter, string nameFilter, OrderEnum? nameOrder, System.Guid? participantIdFilter, int page, int size, string version)
+        public System.Threading.Tasks.Task<HateoasResponseOfIListOfHateoasResponseOfTournamentNavigation> GetTournamentsAsync(System.Guid? languageIdFilter, string nameFilter, OrderEnum? nameOrder, System.Guid? participantIdFilter, bool? isPublishedFilter, int page, int size, string version)
         {
-            return GetTournamentsAsync(languageIdFilter, nameFilter, nameOrder, participantIdFilter, page, size, version, System.Threading.CancellationToken.None);
+            return GetTournamentsAsync(languageIdFilter, nameFilter, nameOrder, participantIdFilter, isPublishedFilter, page, size, version, System.Threading.CancellationToken.None);
         }
     
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<HateoasResponseOfIListOfHateoasResponseOfTournamentNavigation> GetTournamentsAsync(System.Guid? languageIdFilter, string nameFilter, OrderEnum? nameOrder, System.Guid? participantIdFilter, int page, int size, string version, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<HateoasResponseOfIListOfHateoasResponseOfTournamentNavigation> GetTournamentsAsync(System.Guid? languageIdFilter, string nameFilter, OrderEnum? nameOrder, System.Guid? participantIdFilter, bool? isPublishedFilter, int page, int size, string version, System.Threading.CancellationToken cancellationToken)
         {
             if (page == null)
                 throw new System.ArgumentNullException("page");
@@ -3830,6 +3830,7 @@ namespace CodingChainApi.Client
             urlBuilder_.Append(System.Uri.EscapeDataString("NameFilter") + "=").Append(System.Uri.EscapeDataString(nameFilter != null ? ConvertToString(nameFilter, System.Globalization.CultureInfo.InvariantCulture) : "")).Append("&");
             urlBuilder_.Append(System.Uri.EscapeDataString("NameOrder") + "=").Append(System.Uri.EscapeDataString(nameOrder != null ? ConvertToString(nameOrder, System.Globalization.CultureInfo.InvariantCulture) : "")).Append("&");
             urlBuilder_.Append(System.Uri.EscapeDataString("ParticipantIdFilter") + "=").Append(System.Uri.EscapeDataString(participantIdFilter != null ? ConvertToString(participantIdFilter, System.Globalization.CultureInfo.InvariantCulture) : "")).Append("&");
+            urlBuilder_.Append(System.Uri.EscapeDataString("IsPublishedFilter") + "=").Append(System.Uri.EscapeDataString(isPublishedFilter != null ? ConvertToString(isPublishedFilter, System.Globalization.CultureInfo.InvariantCulture) : "")).Append("&");
             urlBuilder_.Append(System.Uri.EscapeDataString("Page") + "=").Append(System.Uri.EscapeDataString(ConvertToString(page, System.Globalization.CultureInfo.InvariantCulture))).Append("&");
             urlBuilder_.Append(System.Uri.EscapeDataString("Size") + "=").Append(System.Uri.EscapeDataString(ConvertToString(size, System.Globalization.CultureInfo.InvariantCulture))).Append("&");
             urlBuilder_.Length--;

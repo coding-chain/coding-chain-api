@@ -35,6 +35,7 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
             step.Score,
             step.Difficulty,
             step.HeaderCode,
+            step.IsPublished,
             step.TestsIds,
             step.TournamentsIds,
             step.ActiveParticipationsIds);
@@ -54,13 +55,15 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
         public static Expression<Func<Step, bool>> IsPublishedFromQuery(GetPaginatedStepNavigationQuery query)
         {
             return step => query.IsPublishedFilter == null || query.IsPublishedFilter.Value
-                ? step.TournamentSteps.Any(t => !t.Tournament.IsDeleted && t.Tournament.IsPublished)
-                : !step.TournamentSteps.Any(t => !t.Tournament.IsDeleted && t.Tournament.IsPublished);
+                ? step.TournamentSteps.Any(tS => !tS.Tournament.IsDeleted && tS.Tournament.IsPublished)
+                : !step.TournamentSteps.Any(tS => !tS.Tournament.IsDeleted && tS.Tournament.IsPublished);
         }
+
         public static Expression<Func<Step, bool>> FromQuery(GetPaginatedStepNavigationQuery query)
         {
             return step => !step.IsDeleted
-                           && (query.NameFilter == null || step.Name.ToLowerInvariant().Contains(query.NameFilter.ToLowerInvariant()))
+                           && (query.NameFilter == null || step.Name.ToLowerInvariant()
+                               .Contains(query.NameFilter.ToLowerInvariant()))
                            && (query.LanguageIdFilter == null || !step.ProgrammingLanguage.IsDeleted &&
                                step.ProgrammingLanguage.Id == query.LanguageIdFilter)
                            && (query.WithoutIdsFilter == null || query.WithoutIdsFilter.All(id => id != step.Id));
@@ -84,6 +87,7 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
             {
                 query = query.Where(IsPublishedFromQuery(paginationQuery));
             }
+
             query = GetOrderByQuery(query, paginationQuery);
             return await query.Select(s => ToStepNavigation(s))
                 .FromPaginationQueryAsync(paginationQuery);

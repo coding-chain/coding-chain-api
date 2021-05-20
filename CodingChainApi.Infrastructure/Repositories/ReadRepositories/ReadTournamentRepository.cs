@@ -28,6 +28,7 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
         private static Expression<Func<Tournament, bool>> ToPredicate(GetTournamentNavigationPaginatedQuery query) =>
             tournament =>
                 !tournament.IsDeleted
+                && (query.IsPublishedFilter == null || tournament.IsPublished == query.IsPublishedFilter )
                 && (query.ParticipantIdFilter == null || tournament.Participations.Any(p => 
                     !p.Team.IsDeleted && p.Team.UserTeams.Any(uT => 
                         uT.LeaveDate == null && !uT.User.IsDeleted && uT.User.Id == query.ParticipantIdFilter)))

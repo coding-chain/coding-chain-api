@@ -17,6 +17,8 @@ namespace Application.Read.Tournaments.Handlers
         public OrderEnum? NameOrder { get; set; }
         
         public Guid? ParticipantIdFilter { get; set; }
+        
+        public bool? IsPublishedFilter { get; set; }
     }
     public class GetTournamentNavigationPaginatedHandler: IRequestHandler<GetTournamentNavigationPaginatedQuery, IPagedList<TournamentNavigation>>
     {
