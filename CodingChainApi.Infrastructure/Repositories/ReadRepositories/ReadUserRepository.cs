@@ -42,8 +42,8 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
         private static Expression<Func<User, bool>> ToPredicate(GetPaginatedPublicUsersQuery query) =>
             user =>
                 !user.IsDeleted
-                && (query.UsernameFilter == null || user.Username.Contains(query.UsernameFilter))
-                || (query.EmailFilter == null || user.Email.Contains(query.EmailFilter));
+                && (query.NameFilter == null || user.Username.Contains(query.NameFilter))
+                || (query.NameFilter == null || user.Email.Contains(query.NameFilter));
 
 
         public async Task<PublicUser?> FindPublicUserById(Guid id)
