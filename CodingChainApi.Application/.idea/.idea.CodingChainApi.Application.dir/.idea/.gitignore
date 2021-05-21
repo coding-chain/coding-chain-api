@@ -2,7 +2,7 @@
 /shelf/
 /workspace.xml
 # Rider ignored files
-/.idea.CodingChainApi.Application.iml
+/.idea
 /contentModel.xml
 /projectSettingsUpdater.xml
 /modules.xml

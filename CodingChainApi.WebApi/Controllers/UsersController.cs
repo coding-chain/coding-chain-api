@@ -87,5 +87,24 @@ namespace NeosCodingApi.Controllers
                 users,
                 nameof(GetAllUsers)));
         }
+
+        [HttpGet("{userId:guid}", Name = nameof(GetUserById))]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasResponse<PublicUser>))]
+        public async Task<IActionResult> GetUserById(Guid userId)
+        {
+            var user = await Mediator.Send(new GetPublicUserByIdQuery(userId));
+            var userWithLinks = new HateoasResponse<PublicUser>(user, GetLinksForUser(user.Id));
+            return Ok(userWithLinks);
+        }
+
+        private IList<LinkDto> GetLinksForUser(Guid userId)
+        {
+            return new List<LinkDto>()
+            {
+                LinkDto.SelfLink(Url.Link(nameof(GetUserById), new {userId})),
+            };
+        }
     }
 }
