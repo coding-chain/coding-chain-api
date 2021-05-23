@@ -57,11 +57,11 @@ namespace CodingChainApi.WebApi.Client.Contracts
         System.Threading.Tasks.Task CreateParticipationAsync(string version, CreateParticipationCommand createParticipationCommand, System.Threading.CancellationToken cancellationToken);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<HateoasResponseOfIListOfHateoasResponseOfParticipationNavigation> GetParticipationsAsync(int page, int size, string version);
+        System.Threading.Tasks.Task<HateoasPageResponseOfHateoasResponseOfParticipationNavigation> GetParticipationsAsync(int page, int size, string version);
     
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<HateoasResponseOfIListOfHateoasResponseOfParticipationNavigation> GetParticipationsAsync(int page, int size, string version, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<HateoasPageResponseOfHateoasResponseOfParticipationNavigation> GetParticipationsAsync(int page, int size, string version, System.Threading.CancellationToken cancellationToken);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         System.Threading.Tasks.Task<HateoasResponseOfParticipationNavigation> GetParticipationByIdAsync(System.Guid participationId, string version);
@@ -102,11 +102,11 @@ namespace CodingChainApi.WebApi.Client.Contracts
         System.Threading.Tasks.Task CreateStepAsync(string version, CreateStepCommand createStepCommand, System.Threading.CancellationToken cancellationToken);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<HateoasResponseOfIListOfHateoasResponseOfStepNavigation> GetStepsAsync(bool? isPublishedFilter, string nameFilter, OrderEnum? nameOrder, System.Guid? languageIdFilter, System.Collections.Generic.IEnumerable<System.Guid> withoutIdsFilter, int page, int size, string version);
+        System.Threading.Tasks.Task<HateoasPageResponseOfHateoasResponseOfStepNavigation> GetStepsAsync(bool? isPublishedFilter, string nameFilter, OrderEnum? nameOrder, System.Guid? languageIdFilter, System.Collections.Generic.IEnumerable<System.Guid> withoutIdsFilter, int page, int size, string version);
     
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<HateoasResponseOfIListOfHateoasResponseOfStepNavigation> GetStepsAsync(bool? isPublishedFilter, string nameFilter, OrderEnum? nameOrder, System.Guid? languageIdFilter, System.Collections.Generic.IEnumerable<System.Guid> withoutIdsFilter, int page, int size, string version, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<HateoasPageResponseOfHateoasResponseOfStepNavigation> GetStepsAsync(bool? isPublishedFilter, string nameFilter, OrderEnum? nameOrder, System.Guid? languageIdFilter, System.Collections.Generic.IEnumerable<System.Guid> withoutIdsFilter, int page, int size, string version, System.Threading.CancellationToken cancellationToken);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         System.Threading.Tasks.Task<HateoasResponseOfStepNavigation> GetStepByIdAsync(System.Guid stepId, string version);
@@ -130,11 +130,11 @@ namespace CodingChainApi.WebApi.Client.Contracts
         System.Threading.Tasks.Task UpdateStepAsync(System.Guid stepId, string version, UpdateStepCommandBody command, System.Threading.CancellationToken cancellationToken);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<HateoasResponseOfIListOfHateoasResponseOfTestNavigation> GetStepTestsAsync(System.Guid stepId, int page, int size, string version);
+        System.Threading.Tasks.Task<HateoasPageResponseOfHateoasResponseOfTestNavigation> GetStepTestsAsync(System.Guid stepId, int page, int size, string version);
     
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<HateoasResponseOfIListOfHateoasResponseOfTestNavigation> GetStepTestsAsync(System.Guid stepId, int page, int size, string version, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<HateoasPageResponseOfHateoasResponseOfTestNavigation> GetStepTestsAsync(System.Guid stepId, int page, int size, string version, System.Threading.CancellationToken cancellationToken);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         System.Threading.Tasks.Task AddTestAsync(System.Guid stepId, string version, AddTestCommandBody addTestCommand);
@@ -182,11 +182,11 @@ namespace CodingChainApi.WebApi.Client.Contracts
         System.Threading.Tasks.Task CreateTeamAsync(string version, CreateTeamCommand createTeamCommand, System.Threading.CancellationToken cancellationToken);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<HateoasResponseOfIListOfHateoasResponseOfTeamNavigation> GetTeamsAsync(int page, int size, string version);
+        System.Threading.Tasks.Task<HateoasPageResponseOfHateoasResponseOfTeamNavigation> GetTeamsAsync(string nameFilter, OrderEnum? nameOrder, System.Guid? memberIdFilter, int page, int size, string version);
     
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<HateoasResponseOfIListOfHateoasResponseOfTeamNavigation> GetTeamsAsync(int page, int size, string version, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<HateoasPageResponseOfHateoasResponseOfTeamNavigation> GetTeamsAsync(string nameFilter, OrderEnum? nameOrder, System.Guid? memberIdFilter, int page, int size, string version, System.Threading.CancellationToken cancellationToken);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         System.Threading.Tasks.Task AddMemberToTeamAsync(System.Guid teamId, string version, AddMemberToTeamBodyCommand addMemberToTeamBodyCommand);
@@ -194,6 +194,13 @@ namespace CodingChainApi.WebApi.Client.Contracts
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         System.Threading.Tasks.Task AddMemberToTeamAsync(System.Guid teamId, string version, AddMemberToTeamBodyCommand addMemberToTeamBodyCommand, System.Threading.CancellationToken cancellationToken);
+    
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<HateoasPageResponseOfHateoasResponseOfTeamNavigation> GetMembersAsync(System.Guid teamId, int page, int size, string version);
+    
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<HateoasPageResponseOfHateoasResponseOfTeamNavigation> GetMembersAsync(System.Guid teamId, int page, int size, string version, System.Threading.CancellationToken cancellationToken);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         System.Threading.Tasks.Task ElevateTeamMemberAsync(System.Guid teamId, System.Guid memberId, string version);
@@ -250,11 +257,11 @@ namespace CodingChainApi.WebApi.Client.Contracts
         System.Threading.Tasks.Task<HateoasResponseOfTestNavigation> GetTestByIdAsync(System.Guid testId, string version, System.Threading.CancellationToken cancellationToken);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<HateoasResponseOfIListOfHateoasResponseOfTestNavigation> GetTestsAsync(int page, int size, string version);
+        System.Threading.Tasks.Task<HateoasPageResponseOfHateoasResponseOfTestNavigation> GetTestsAsync(int page, int size, string version);
     
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<HateoasResponseOfIListOfHateoasResponseOfTestNavigation> GetTestsAsync(int page, int size, string version, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<HateoasPageResponseOfHateoasResponseOfTestNavigation> GetTestsAsync(int page, int size, string version, System.Threading.CancellationToken cancellationToken);
     
     }
     
@@ -269,11 +276,11 @@ namespace CodingChainApi.WebApi.Client.Contracts
         System.Threading.Tasks.Task CreateTournamentAsync(string version, CreateTournamentCommand createTournamentCommand, System.Threading.CancellationToken cancellationToken);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<HateoasResponseOfIListOfHateoasResponseOfTournamentNavigation> GetTournamentsAsync(System.Guid? languageIdFilter, string nameFilter, OrderEnum? nameOrder, System.Guid? participantIdFilter, bool? isPublishedFilter, int page, int size, string version);
+        System.Threading.Tasks.Task<HateoasPageResponseOfHateoasResponseOfTournamentNavigation> GetTournamentsAsync(System.Guid? languageIdFilter, string nameFilter, OrderEnum? nameOrder, System.Guid? participantIdFilter, bool? isPublishedFilter, int page, int size, string version);
     
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<HateoasResponseOfIListOfHateoasResponseOfTournamentNavigation> GetTournamentsAsync(System.Guid? languageIdFilter, string nameFilter, OrderEnum? nameOrder, System.Guid? participantIdFilter, bool? isPublishedFilter, int page, int size, string version, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<HateoasPageResponseOfHateoasResponseOfTournamentNavigation> GetTournamentsAsync(System.Guid? languageIdFilter, string nameFilter, OrderEnum? nameOrder, System.Guid? participantIdFilter, bool? isPublishedFilter, int page, int size, string version, System.Threading.CancellationToken cancellationToken);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         System.Threading.Tasks.Task<HateoasResponseOfTournamentNavigation> GetTournamentByIdAsync(System.Guid tournamentId, string version);
@@ -304,11 +311,11 @@ namespace CodingChainApi.WebApi.Client.Contracts
         System.Threading.Tasks.Task UpdateTournamentStepsAsync(System.Guid tournamentId, string version, SetTournamentStepsCommandBody command, System.Threading.CancellationToken cancellationToken);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<HateoasResponseOfIListOfHateoasResponseOfTournamentStepNavigation> GetTournamentStepsAsync(System.Guid tournamentId, int page, int size, string version);
+        System.Threading.Tasks.Task<HateoasPageResponseOfHateoasResponseOfTournamentStepNavigation> GetTournamentStepsAsync(System.Guid tournamentId, int page, int size, string version);
     
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<HateoasResponseOfIListOfHateoasResponseOfTournamentStepNavigation> GetTournamentStepsAsync(System.Guid tournamentId, int page, int size, string version, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<HateoasPageResponseOfHateoasResponseOfTournamentStepNavigation> GetTournamentStepsAsync(System.Guid tournamentId, int page, int size, string version, System.Threading.CancellationToken cancellationToken);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         System.Threading.Tasks.Task DeleteTournamentStepAsync(System.Guid tournamentId, System.Guid stepId, string version);
@@ -351,11 +358,11 @@ namespace CodingChainApi.WebApi.Client.Contracts
         System.Threading.Tasks.Task<PublicUser> MeAsync(string version, System.Threading.CancellationToken cancellationToken);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<HateoasResponseOfIListOfPublicUser> GetAllUsersAsync(string nameFilter, int page, int size, string version);
+        System.Threading.Tasks.Task<HateoasPageResponseOfHateoasResponseOfPublicUser> GetAllUsersAsync(string usernameFilter, string emailFilter, System.Collections.Generic.IEnumerable<System.Guid> withoutIdsFilter, int page, int size, string version);
     
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<HateoasResponseOfIListOfPublicUser> GetAllUsersAsync(string nameFilter, int page, int size, string version, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<HateoasPageResponseOfHateoasResponseOfPublicUser> GetAllUsersAsync(string usernameFilter, string emailFilter, System.Collections.Generic.IEnumerable<System.Guid> withoutIdsFilter, int page, int size, string version, System.Threading.CancellationToken cancellationToken);
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         System.Threading.Tasks.Task<HateoasResponseOfPublicUser> GetUserByIdAsync(System.Guid userId, string version);
@@ -679,6 +686,24 @@ namespace CodingChainApi.WebApi.Client.Contracts
     }
     
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.3.11.0 (Newtonsoft.Json v12.0.0.0)")]
+    public partial class HateoasPageResponseOfHateoasResponseOfParticipationNavigation : HateoasResponseOfIListOfHateoasResponseOfParticipationNavigation
+    {
+        [Newtonsoft.Json.JsonProperty("total", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public long Total { get; set; }
+    
+        public string ToJson() 
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
+        }
+    
+        public static HateoasPageResponseOfHateoasResponseOfParticipationNavigation FromJson(string data)
+        {
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<HateoasPageResponseOfHateoasResponseOfParticipationNavigation>(data);
+        }
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.3.11.0 (Newtonsoft.Json v12.0.0.0)")]
     public partial class HateoasResponseOfIListOfHateoasResponseOfParticipationNavigation 
     {
         [Newtonsoft.Json.JsonProperty("result", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
@@ -888,6 +913,24 @@ namespace CodingChainApi.WebApi.Client.Contracts
     }
     
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.3.11.0 (Newtonsoft.Json v12.0.0.0)")]
+    public partial class HateoasPageResponseOfHateoasResponseOfStepNavigation : HateoasResponseOfIListOfHateoasResponseOfStepNavigation
+    {
+        [Newtonsoft.Json.JsonProperty("total", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public long Total { get; set; }
+    
+        public string ToJson() 
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
+        }
+    
+        public static HateoasPageResponseOfHateoasResponseOfStepNavigation FromJson(string data)
+        {
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<HateoasPageResponseOfHateoasResponseOfStepNavigation>(data);
+        }
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.3.11.0 (Newtonsoft.Json v12.0.0.0)")]
     public partial class HateoasResponseOfIListOfHateoasResponseOfStepNavigation 
     {
         [Newtonsoft.Json.JsonProperty("result", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
@@ -914,6 +957,24 @@ namespace CodingChainApi.WebApi.Client.Contracts
         Asc = 0,
     
         Desc = 1,
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.3.11.0 (Newtonsoft.Json v12.0.0.0)")]
+    public partial class HateoasPageResponseOfHateoasResponseOfTestNavigation : HateoasResponseOfIListOfHateoasResponseOfTestNavigation
+    {
+        [Newtonsoft.Json.JsonProperty("total", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public long Total { get; set; }
+    
+        public string ToJson() 
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
+        }
+    
+        public static HateoasPageResponseOfHateoasResponseOfTestNavigation FromJson(string data)
+        {
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<HateoasPageResponseOfHateoasResponseOfTestNavigation>(data);
+        }
     
     }
     
@@ -1197,6 +1258,24 @@ namespace CodingChainApi.WebApi.Client.Contracts
     }
     
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.3.11.0 (Newtonsoft.Json v12.0.0.0)")]
+    public partial class HateoasPageResponseOfHateoasResponseOfTeamNavigation : HateoasResponseOfIListOfHateoasResponseOfTeamNavigation
+    {
+        [Newtonsoft.Json.JsonProperty("total", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public long Total { get; set; }
+    
+        public string ToJson() 
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
+        }
+    
+        public static HateoasPageResponseOfHateoasResponseOfTeamNavigation FromJson(string data)
+        {
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<HateoasPageResponseOfHateoasResponseOfTeamNavigation>(data);
+        }
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.3.11.0 (Newtonsoft.Json v12.0.0.0)")]
     public partial class HateoasResponseOfIListOfHateoasResponseOfTeamNavigation 
     {
         [Newtonsoft.Json.JsonProperty("result", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
@@ -1294,6 +1373,24 @@ namespace CodingChainApi.WebApi.Client.Contracts
         public static TournamentNavigation FromJson(string data)
         {
             return Newtonsoft.Json.JsonConvert.DeserializeObject<TournamentNavigation>(data);
+        }
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.3.11.0 (Newtonsoft.Json v12.0.0.0)")]
+    public partial class HateoasPageResponseOfHateoasResponseOfTournamentNavigation : HateoasResponseOfIListOfHateoasResponseOfTournamentNavigation
+    {
+        [Newtonsoft.Json.JsonProperty("total", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public long Total { get; set; }
+    
+        public string ToJson() 
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
+        }
+    
+        public static HateoasPageResponseOfHateoasResponseOfTournamentNavigation FromJson(string data)
+        {
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<HateoasPageResponseOfHateoasResponseOfTournamentNavigation>(data);
         }
     
     }
@@ -1476,6 +1573,24 @@ namespace CodingChainApi.WebApi.Client.Contracts
     }
     
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.3.11.0 (Newtonsoft.Json v12.0.0.0)")]
+    public partial class HateoasPageResponseOfHateoasResponseOfTournamentStepNavigation : HateoasResponseOfIListOfHateoasResponseOfTournamentStepNavigation
+    {
+        [Newtonsoft.Json.JsonProperty("total", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public long Total { get; set; }
+    
+        public string ToJson() 
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
+        }
+    
+        public static HateoasPageResponseOfHateoasResponseOfTournamentStepNavigation FromJson(string data)
+        {
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<HateoasPageResponseOfHateoasResponseOfTournamentStepNavigation>(data);
+        }
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.3.11.0 (Newtonsoft.Json v12.0.0.0)")]
     public partial class HateoasResponseOfIListOfHateoasResponseOfTournamentStepNavigation 
     {
         [Newtonsoft.Json.JsonProperty("result", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
@@ -1572,10 +1687,28 @@ namespace CodingChainApi.WebApi.Client.Contracts
     }
     
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.3.11.0 (Newtonsoft.Json v12.0.0.0)")]
-    public partial class HateoasResponseOfIListOfPublicUser 
+    public partial class HateoasPageResponseOfHateoasResponseOfPublicUser : HateoasResponseOfIListOfHateoasResponseOfPublicUser
+    {
+        [Newtonsoft.Json.JsonProperty("total", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public long Total { get; set; }
+    
+        public string ToJson() 
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
+        }
+    
+        public static HateoasPageResponseOfHateoasResponseOfPublicUser FromJson(string data)
+        {
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<HateoasPageResponseOfHateoasResponseOfPublicUser>(data);
+        }
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.3.11.0 (Newtonsoft.Json v12.0.0.0)")]
+    public partial class HateoasResponseOfIListOfHateoasResponseOfPublicUser 
     {
         [Newtonsoft.Json.JsonProperty("result", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public System.Collections.ObjectModel.ObservableCollection<PublicUser> Result { get; set; }
+        public System.Collections.ObjectModel.ObservableCollection<HateoasResponseOfPublicUser> Result { get; set; }
     
         [Newtonsoft.Json.JsonProperty("links", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.ObjectModel.ObservableCollection<LinkDto> Links { get; set; }
@@ -1585,9 +1718,9 @@ namespace CodingChainApi.WebApi.Client.Contracts
             return Newtonsoft.Json.JsonConvert.SerializeObject(this);
         }
     
-        public static HateoasResponseOfIListOfPublicUser FromJson(string data)
+        public static HateoasResponseOfIListOfHateoasResponseOfPublicUser FromJson(string data)
         {
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<HateoasResponseOfIListOfPublicUser>(data);
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<HateoasResponseOfIListOfHateoasResponseOfPublicUser>(data);
         }
     
     }

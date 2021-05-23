@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Application.Common.Pagination;
@@ -8,7 +10,9 @@ namespace Application.Read.Users.Handlers
 {
     public record GetPaginatedPublicUsersQuery : PaginationQueryBase, IRequest<IPagedList<PublicUser>>
     {
-        public string? NameFilter { get; set; }
+        public string? UsernameFilter { get; set; }
+        public string? EmailFilter { get; set; }
+        public IList<Guid>? WithoutIdsFilter { get; set; } 
     }
     public class GetPaginatedPublicUsersHandler: IRequestHandler<GetPaginatedPublicUsersQuery, IPagedList<PublicUser>>
     {

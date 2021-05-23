@@ -46,7 +46,7 @@ namespace NeosCodingApi.Controllers
         }
         
         [HttpGet(Name = nameof(GetParticipations))]
-        [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasResponse<IList<HateoasResponse<ParticipationNavigation>>>))]
+        [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasPageResponse<HateoasResponse<ParticipationNavigation>>))]
         public async Task<IActionResult> GetParticipations([FromQuery] GetAllParticipationNavigationPaginatedQuery query)
         {
             var participations = await Mediator.Send(query);

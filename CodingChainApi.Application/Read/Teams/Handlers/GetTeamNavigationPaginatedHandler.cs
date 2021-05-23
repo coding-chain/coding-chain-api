@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Application.Common.Pagination;
@@ -8,6 +9,9 @@ namespace Application.Read.Teams.Handlers
 {
     public record GetTeamNavigationPaginatedQuery: PaginationQueryBase, IRequest<IPagedList<TeamNavigation>>
     {
+        public string? NameFilter { get; set; }
+        public OrderEnum? NameOrder { get; set; }
+        public Guid? MemberIdFilter { get; set; }
     }
 
     public class GetTeamNavigationPaginatedHandler: IRequestHandler<GetTeamNavigationPaginatedQuery, IPagedList<TeamNavigation>>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Application.Read.Users;
@@ -77,14 +78,16 @@ namespace NeosCodingApi.Controllers
         }
 
         [HttpGet(Name = nameof(GetAllUsers))]
-        [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasResponse<IList<PublicUser>>))]
+        [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasPageResponse<HateoasResponse<PublicUser>>))]
         public async Task<IActionResult> GetAllUsers([FromQuery] GetPaginatedPublicUsersQuery query)
         {
             var users = await Mediator.Send(query);
+            var usersWithLinks = users.Select(user =>
+                new HateoasResponse<PublicUser>(user, GetLinksForUser(user.Id)));
             return Ok(HateoasResponseBuilder.FromPagedList(
                 Url,
                 users.ToPagedListResume(),
-                users,
+                usersWithLinks.ToList(),
                 nameof(GetAllUsers)));
         }
 

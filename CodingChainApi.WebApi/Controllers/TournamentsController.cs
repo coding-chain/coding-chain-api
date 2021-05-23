@@ -60,7 +60,7 @@ namespace NeosCodingApi.Controllers
         }
 
         [HttpGet(Name = nameof(GetTournaments))]
-        [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasResponse<IList<HateoasResponse<TournamentNavigation>>>))]
+        [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasPageResponse<HateoasResponse<TournamentNavigation>>))]
         public async Task<IActionResult> GetTournaments([FromQuery] GetTournamentNavigationPaginatedQuery query)
         {
             var tournaments = await Mediator.Send(query);
@@ -139,7 +139,7 @@ namespace NeosCodingApi.Controllers
         public record GetTournamentNavigationPaginatedQueryParameters : PaginationQueryBase;
 
         [HttpGet("{tournamentId:guid}/steps", Name = nameof(GetTournamentSteps))]
-        [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasResponse<IList<HateoasResponse<TournamentStepNavigation>>>))]
+        [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasPageResponse<HateoasResponse<TournamentStepNavigation>>))]
         public async Task<IActionResult> GetTournamentSteps(Guid tournamentId,
             [FromQuery] GetTournamentNavigationPaginatedQueryParameters query)
         {

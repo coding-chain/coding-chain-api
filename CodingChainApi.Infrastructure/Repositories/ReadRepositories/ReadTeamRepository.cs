@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Application.Common.Pagination;
 using Application.Read.Contracts;
 using Application.Read.Teams;
+using Application.Read.Teams.Handlers;
 using CodingChainApi.Infrastructure.Common.Extensions;
 using CodingChainApi.Infrastructure.Contexts;
 using CodingChainApi.Infrastructure.Models;
@@ -30,14 +32,33 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
                 .Select(uT => uT.Id).ToList()
         );
 
-        public async Task<IPagedList<TeamNavigation>> GetAllTeamNavigationPaginated(PaginationQueryBase paginationQuery)
+        private static Expression<Func<Team, bool>> ToPredicate(GetTeamNavigationPaginatedQuery query) =>
+            team =>
+                !team.IsDeleted
+                && (query.MemberIdFilter == null || team.UserTeams.Any(uT =>
+                    uT.LeaveDate == null && !uT.User.IsDeleted && uT.User.Id == query.MemberIdFilter))
+                && (query.NameFilter == null || team.Name.Contains(query.NameFilter));
+
+        private static IQueryable<Team> GetOrderByQuery(IQueryable<Team> teamQuery,
+            GetTeamNavigationPaginatedQuery paginationQuery)
         {
-            return await GetTeamIncludeQueryable()
-                .Where(t => !t.IsDeleted)
-                .Select(t => ToTeamNavigation(t))
-                .FromPaginationQueryAsync(paginationQuery);
+            if (paginationQuery.NameOrder == OrderEnum.Asc)
+                return teamQuery.OrderBy(t => t.Name);
+            return teamQuery.OrderByDescending(t => t.Name);
         }
 
+        public async Task<IPagedList<TeamNavigation>> GetAllTeamNavigationPaginated(
+            GetTeamNavigationPaginatedQuery paginationQuery)
+        {
+            var query = GetTeamIncludeQueryable()
+                .Where(ToPredicate(paginationQuery));
+            if (paginationQuery.NameOrder != null)
+            {
+                query = GetOrderByQuery(query, paginationQuery);
+            }
+            return await query.Select(t => ToTeamNavigation(t))
+                .FromPaginationQueryAsync(paginationQuery);
+        }
 
 
         public async Task<TeamNavigation?> GetOneTeamNavigationByIdAsync(Guid id)
@@ -47,12 +68,14 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
             if (team is null) return null;
             return ToTeamNavigation(team);
         }
+
         private IIncludableQueryable<Team, User> GetTeamIncludeQueryable()
         {
             return _context.Teams
                 .Include(t => t.UserTeams)
                 .ThenInclude(uT => uT.User);
         }
+
         public async Task<MemberNavigation?> GetOneMemberNavigationByIdAsync(Guid teamId, Guid userId)
         {
             var member = await GetUserTeamIncludeQueryable()
@@ -73,6 +96,16 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
         public Task<bool> TeamExistsById(Guid id)
         {
             return _context.Teams.AnyAsync(t => !t.IsDeleted && t.Id == id);
+        }
+
+        public async Task<IPagedList<MemberNavigation>> GetAllMembersNavigationPaginated(
+            GetPaginatedTeamMembersQuery query)
+        {
+            return await GetUserTeamIncludeQueryable()
+                .Where(uT =>
+                    uT.TeamId == query.TeamId && !uT.Team.IsDeleted && !uT.User.IsDeleted && uT.LeaveDate == null)
+                .Select(uT => ToMemberNavigation(uT))
+                .FromPaginationQueryAsync(query);
         }
 
         private IIncludableQueryable<UserTeam, User> GetUserTeamIncludeQueryable()

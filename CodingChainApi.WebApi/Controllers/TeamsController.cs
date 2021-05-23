@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using Application.Common.Pagination;
 using Application.Read.Teams;
 using Application.Read.Teams;
 using Application.Read.Teams.Handlers;
@@ -12,6 +13,7 @@ using CodingChainApi.Infrastructure.Common.Pagination;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http;
 using NeosCodingApi.Helpers;
 using NeosCodingApi.Services;
 using NSwag.Annotations;
@@ -120,8 +122,27 @@ namespace NeosCodingApi.Controllers
             return Ok(memberWithLinks);
         }
 
+        public record GetPaginatedTeamMembersQueryParameters : PaginationQueryBase;
+
+        [HttpGet("{teamId:guid}/members", Name = nameof(GetMembers))]
+        [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasPageResponse<HateoasResponse<TeamNavigation>>))]
+        public async Task<IActionResult> GetMembers(Guid teamId,
+            [FromQuery] GetPaginatedTeamMembersQueryParameters query)
+        {
+            var members = await Mediator.Send(new GetPaginatedTeamMembersQuery
+                {TeamId = teamId, Page = query.Page, Size = query.Size});
+            var teamsWithLinks = members.Select(member =>
+                new HateoasResponse<MemberNavigation>(member, GetLinksForMember(member.UserId, member.TeamId)));
+            return Ok(HateoasResponseBuilder.FromPagedList(
+                Url,
+                members.ToPagedListResume(),
+                teamsWithLinks.ToList(),
+                nameof(GetMembers))
+            );
+        }
+
         [HttpGet(Name = nameof(GetTeams))]
-        [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasResponse<IList<HateoasResponse<TeamNavigation>>>))]
+        [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasPageResponse<HateoasResponse<TeamNavigation>>))]
         public async Task<IActionResult> GetTeams([FromQuery] GetTeamNavigationPaginatedQuery query)
         {
             var teams = await Mediator.Send(query);
@@ -150,7 +171,8 @@ namespace NeosCodingApi.Controllers
             {
                 LinkDto.CreateLink(Url.Link(nameof(AddMemberToTeam), new {teamId})),
                 LinkDto.DeleteLink(Url.Link(nameof(RemoveMemberFromTeam), new {teamId, memberId})),
-                LinkDto.SelfLink(Url.Link(nameof(GetTeamMemberById), new {teamId, memberId}))
+                LinkDto.SelfLink(Url.Link(nameof(GetTeamMemberById), new {teamId, memberId})),
+                new(Url.Link(nameof(GetMembers), new {teamId}), "all", HttpMethod.Get)
             };
         }
     }

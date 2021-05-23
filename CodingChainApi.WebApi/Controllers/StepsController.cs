@@ -52,7 +52,7 @@ namespace NeosCodingApi.Controllers
         }
 
         [HttpGet(Name = nameof(GetSteps))]
-        [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasResponse<IList<HateoasResponse<StepNavigation>>>))]
+        [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasPageResponse<HateoasResponse<StepNavigation>>))]
         public async Task<IActionResult> GetSteps([FromQuery] GetPaginatedStepNavigationQuery query)
         {
             var steps = await Mediator.Send(query);
@@ -69,7 +69,7 @@ namespace NeosCodingApi.Controllers
         public record GetPaginatedTestNavigationQueryParams() : PaginationQueryBase;
 
         [HttpGet("{stepId:guid}/tests", Name = nameof(GetStepTests))]
-        [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasResponse<IList<HateoasResponse<TestNavigation>>>))]
+        [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasPageResponse<HateoasResponse<TestNavigation>>))]
         public async Task<IActionResult> GetStepTests(Guid stepId,
             [FromQuery] GetPaginatedTestNavigationQueryParams query)
         {

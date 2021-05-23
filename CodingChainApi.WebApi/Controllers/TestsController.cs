@@ -40,7 +40,7 @@ namespace NeosCodingApi.Controllers
 
         public record GetPaginatedTestNavigationQueryParams() : PaginationQueryBase;
         [HttpGet(Name = nameof(GetTests))]
-        [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasResponse<IList<HateoasResponse<TestNavigation>>>))]
+        [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasPageResponse<HateoasResponse<TestNavigation>>))]
         public async Task<IActionResult> GetTests([FromQuery] GetPaginatedTestNavigationQueryParams query)
         {
             var test = await Mediator.Send(new GetPaginatedTestNavigationQuery(){Page = query.Page,Size = query.Size});
