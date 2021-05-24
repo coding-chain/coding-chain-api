@@ -1,11 +1,7 @@
 ﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
 	<s:String x:Key="/Default/Environment/Hierarchy/Build/BuildTool/DotNetCliExePath/@EntryValue">C:\Program Files\dotnet\dotnet.exe</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=712b00bb_002D2368_002D4e6d_002Da282_002Ddd70c911a03f/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="TeamAggregateTests #2" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
-  &lt;TestAncestor&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::9A248A17-39EF-467E-B736-429BCD05DB83::net5.0::CodingChainApi.Domain.Tests.TeamAggregateTests&lt;/TestId&gt;&#xD;
-  &lt;/TestAncestor&gt;&#xD;
-&lt;/SessionState&gt;</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=7d8e1a76_002Dc38f_002D4d12_002D963f_002Dc39fc8e94a09/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="TeamAggregateTests" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+	
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=7d8e1a76_002Dc38f_002D4d12_002D963f_002Dc39fc8e94a09/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="TeamAggregateTests" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
   &lt;TestAncestor&gt;&#xD;
     &lt;TestId&gt;NUnit3x::9A248A17-39EF-467E-B736-429BCD05DB83::net5.0::CodingChainApi.Domain.Tests.TeamAggregateTests&lt;/TestId&gt;&#xD;
     &lt;TestId&gt;NUnit3x::9A248A17-39EF-467E-B736-429BCD05DB83::net5.0::CodingChainApi.Domain.Tests.TournamentAggregateTests.create_new_tournament_should_work&lt;/TestId&gt;&#xD;
@@ -45,7 +41,7 @@
     &lt;TestId&gt;NUnit3x::9A248A17-39EF-467E-B736-429BCD05DB83::net5.0::CodingChainApi.Domain.Tests.ParticipationAggregateTests.set_functions_should_throw_on_function_with_last_modification_date_lower_than_its_previous_version&lt;/TestId&gt;&#xD;
   &lt;/TestAncestor&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=97daa334_002D2f2d_002D4a27_002Da9e4_002Dbf0ab9f15cef/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="TeamAggregateTests #3" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=97daa334_002D2f2d_002D4a27_002Da9e4_002Dbf0ab9f15cef/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="TeamAggregateTests #3" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
   &lt;TestAncestor&gt;&#xD;
     &lt;TestId&gt;NUnit3x::9A248A17-39EF-467E-B736-429BCD05DB83::net5.0::CodingChainApi.Domain.Tests.TeamAggregateTests&lt;/TestId&gt;&#xD;
     &lt;TestId&gt;NUnit3x::9A248A17-39EF-467E-B736-429BCD05DB83::net5.0::CodingChainApi.Domain.Tests.StepAggregateTests.set_difficulty_bellow_0_should_throw&lt;/TestId&gt;&#xD;

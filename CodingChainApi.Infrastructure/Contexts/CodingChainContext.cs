@@ -80,10 +80,19 @@ namespace CodingChainApi.Infrastructure.Contexts
             modelBuilder.Entity<User>()
                 .HasMany(s => s.Rights)
                 .WithMany(c => c.Users);
+            
 
             modelBuilder.Entity<Tournament>()
                 .HasMany(t => t.Participations)
                 .WithOne(p => p.Tournament);
+            modelBuilder.Entity<Team>()
+                .Ignore(t => t.ActiveParticipations)
+                .Ignore(t => t.ActiveMembers)
+                .HasMany(t => t.Participations)
+                .WithOne(p => p.Team);
+            modelBuilder.Entity<Step>()
+                .HasMany(t => t.Participations)
+                .WithOne(p => p.Step);
 
             modelBuilder.Entity<UserTeam>()
                 .HasOne(bc => bc.User)

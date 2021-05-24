@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Domain.Exceptions;
 using Domain.Teams;
+using Domain.Tournaments;
 using Domain.Users;
 using NUnit.Framework;
 
@@ -22,18 +23,17 @@ namespace CodingChainApi.Domain.Tests
         }
 
         private MemberEntity GetCommonMember() => new(new UserId(Guid.NewGuid()), false);
+        private TournamentId GetTournamentId() => new(Guid.NewGuid());
 
         private TeamAggregate GetValidTeam() =>
-            new(_teamId, _teamName, new List<MemberEntity>() {_adminMember});
+            TeamAggregate.Restore(_teamId, _teamName, new List<MemberEntity>() {_adminMember},
+                new List<TournamentId>());
 
 
         [Test]
         public void create_team_without_admin_should_throw()
         {
-            Assert.Throws<DomainException>(() =>
-            {
-                new TeamAggregate(_teamId, _teamName, new List<MemberEntity>() {GetCommonMember()});
-            });
+            Assert.Throws<DomainException>(() => { TeamAggregate.CreateNew(_teamId, _teamName, GetCommonMember()); });
         }
 
         [Test]
@@ -48,8 +48,8 @@ namespace CodingChainApi.Domain.Tests
         {
             var noRightsMember = GetCommonMember();
             var targetedMember = GetCommonMember();
-            var team = new TeamAggregate(_teamId, _teamName,
-                new List<MemberEntity>() {_adminMember, noRightsMember, targetedMember});
+            var team = TeamAggregate.Restore(_teamId, _teamName,
+                new List<MemberEntity>() {_adminMember, noRightsMember, targetedMember}, new List<TournamentId>());
             Assert.Throws<DomainException>(() =>
             {
                 team.ValidateMemberDeletionByMember(noRightsMember.Id, targetedMember.Id);
@@ -60,7 +60,8 @@ namespace CodingChainApi.Domain.Tests
         public void validate_member_deletion_should_work_if_admin()
         {
             var targetedMember = GetCommonMember();
-            var team = new TeamAggregate(_teamId, _teamName, new List<MemberEntity>() {_adminMember, targetedMember});
+            var team = TeamAggregate.Restore(_teamId, _teamName,
+                new List<MemberEntity>() {_adminMember, targetedMember}, new List<TournamentId>());
             team.ValidateMemberDeletionByMember(_adminMember.Id, targetedMember.Id);
         }
 
@@ -68,7 +69,8 @@ namespace CodingChainApi.Domain.Tests
         public void validate_member_deletion_should_work_if_same_user()
         {
             var targetedMember = GetCommonMember();
-            var team = new TeamAggregate(_teamId, _teamName, new List<MemberEntity>() {_adminMember, targetedMember});
+            var team = TeamAggregate.Restore(_teamId, _teamName,
+                new List<MemberEntity>() {_adminMember, targetedMember}, new List<TournamentId>());
             team.ValidateMemberDeletionByMember(targetedMember.Id, targetedMember.Id);
         }
 
@@ -76,7 +78,8 @@ namespace CodingChainApi.Domain.Tests
         public void remove_member_should_work()
         {
             var targetedMember = GetCommonMember();
-            var team = new TeamAggregate(_teamId, _teamName, new List<MemberEntity>() {_adminMember, targetedMember});
+            var team = TeamAggregate.Restore(_teamId, _teamName,
+                new List<MemberEntity>() {_adminMember, targetedMember}, new List<TournamentId>());
             team.RemoveMember(targetedMember.Id);
             Assert.AreEqual(1, team.Members.Count);
             CollectionAssert.DoesNotContain(team.Members, targetedMember);
@@ -139,7 +142,8 @@ namespace CodingChainApi.Domain.Tests
         public void add_member_should_throw_if_user_already_exists()
         {
             var existingUser = GetCommonMember();
-            var team = new TeamAggregate(_teamId, _teamName, new List<MemberEntity>() {_adminMember, existingUser});
+            var team = TeamAggregate.Restore(_teamId, _teamName, new List<MemberEntity>() {_adminMember, existingUser},
+                new List<TournamentId>());
             Assert.Throws<DomainException>(() => team.AddMember(existingUser));
         }
 
@@ -171,10 +175,38 @@ namespace CodingChainApi.Domain.Tests
         public void elevate_member_should_work()
         {
             var targetMember = GetCommonMember();
-            var team = new TeamAggregate(_teamId, _teamName, new List<MemberEntity>() {_adminMember, targetMember});
+            var team = TeamAggregate.Restore(_teamId, _teamName, new List<MemberEntity>() {_adminMember, targetMember},
+                new List<TournamentId>());
             team.ElevateMember(targetMember.Id);
             Assert.AreEqual(true, targetMember.IsAdmin);
             Assert.AreEqual(false, _adminMember.IsAdmin);
+        }
+
+        [Test]
+        public void leave_not_joined_tournament_should_throw()
+        {
+            var team = TeamAggregate.Restore(_teamId, _teamName, new List<MemberEntity>() {_adminMember},
+                new List<TournamentId>(){GetTournamentId()});
+            Assert.Throws<DomainException>(() => team.LeaveTournament(GetTournamentId(), _adminMember.Id));
+        }
+        [Test]
+        public void leave_tournament_without_admin_account_should_throw()
+        {
+            var commonMember = GetCommonMember();
+            var existingTournamentId =GetTournamentId();
+            var team = TeamAggregate.Restore(_teamId, _teamName, new List<MemberEntity>() {_adminMember, commonMember },
+                new List<TournamentId>(){existingTournamentId});
+            Assert.Throws<DomainException>(() => team.LeaveTournament(existingTournamentId, commonMember.Id));
+        }
+        
+        [Test]
+        public void leave_tournament_should_work()
+        {
+            var existingTournamentId =GetTournamentId();
+            var team = TeamAggregate.Restore(_teamId, _teamName, new List<MemberEntity>() {_adminMember },
+                new List<TournamentId>(){existingTournamentId});
+            team.LeaveTournament(existingTournamentId, _adminMember.Id);
+            CollectionAssert.DoesNotContain(team.TournamentIds, existingTournamentId);
         }
     }
 }

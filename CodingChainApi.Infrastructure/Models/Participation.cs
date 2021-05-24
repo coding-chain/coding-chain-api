@@ -10,6 +10,7 @@ namespace CodingChainApi.Infrastructure.Models
         public DateTime? EndDate { get; set; }
         public decimal CalculatedScore { get; set; }
 
+        public bool Deactivated { get; set; }
         public Team Team { get; set; }
         public Step Step { get; set; }
         public Tournament Tournament { get; set; }

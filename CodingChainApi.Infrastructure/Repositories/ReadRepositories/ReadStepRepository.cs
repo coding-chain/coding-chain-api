@@ -81,7 +81,6 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
             GetPaginatedStepNavigationQuery paginationQuery)
         {
             var query = GetStepIncludeQueryable()
-                .ThenInclude(tS => tS.Tournament)
                 .Where(FromQuery(paginationQuery));
             if (paginationQuery.IsPublishedFilter is not null)
             {
@@ -93,13 +92,15 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
                 .FromPaginationQueryAsync(paginationQuery);
         }
 
-        private IIncludableQueryable<Step, IList<TournamentStep>> GetStepIncludeQueryable()
+        private IQueryable<Step> GetStepIncludeQueryable()
         {
             return _context.Steps
                 .Include(s => s.Tests)
                 .Include(s => s.ProgrammingLanguage)
                 .Include(s => s.Participations)
-                .Include(s => s.TournamentSteps);
+                .ThenInclude(p => p.Team)
+                .Include(s => s.TournamentSteps)
+                .ThenInclude(tS => tS.Tournament);
         }
 
         public async Task<StepNavigation?> GetOneStepNavigationById(Guid id)

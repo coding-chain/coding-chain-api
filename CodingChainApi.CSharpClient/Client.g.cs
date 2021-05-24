@@ -668,14 +668,14 @@ namespace CodingChainApi.Client
         }
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<HateoasPageResponseOfHateoasResponseOfParticipationNavigation> GetParticipationsAsync(int page, int size, string version)
+        public System.Threading.Tasks.Task<HateoasPageResponseOfHateoasResponseOfParticipationNavigation> GetParticipationsAsync(System.Guid? teamId, System.Guid? tournamentId, int page, int size, string version)
         {
-            return GetParticipationsAsync(page, size, version, System.Threading.CancellationToken.None);
+            return GetParticipationsAsync(teamId, tournamentId, page, size, version, System.Threading.CancellationToken.None);
         }
     
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<HateoasPageResponseOfHateoasResponseOfParticipationNavigation> GetParticipationsAsync(int page, int size, string version, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<HateoasPageResponseOfHateoasResponseOfParticipationNavigation> GetParticipationsAsync(System.Guid? teamId, System.Guid? tournamentId, int page, int size, string version, System.Threading.CancellationToken cancellationToken)
         {
             if (page == null)
                 throw new System.ArgumentNullException("page");
@@ -686,6 +686,8 @@ namespace CodingChainApi.Client
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/api/v{version}/Participations?");
             urlBuilder_.Replace("{version}", System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
+            urlBuilder_.Append(System.Uri.EscapeDataString("TeamId") + "=").Append(System.Uri.EscapeDataString(teamId != null ? ConvertToString(teamId, System.Globalization.CultureInfo.InvariantCulture) : "")).Append("&");
+            urlBuilder_.Append(System.Uri.EscapeDataString("TournamentId") + "=").Append(System.Uri.EscapeDataString(tournamentId != null ? ConvertToString(tournamentId, System.Globalization.CultureInfo.InvariantCulture) : "")).Append("&");
             urlBuilder_.Append(System.Uri.EscapeDataString("Page") + "=").Append(System.Uri.EscapeDataString(ConvertToString(page, System.Globalization.CultureInfo.InvariantCulture))).Append("&");
             urlBuilder_.Append(System.Uri.EscapeDataString("Size") + "=").Append(System.Uri.EscapeDataString(ConvertToString(size, System.Globalization.CultureInfo.InvariantCulture))).Append("&");
             urlBuilder_.Length--;
@@ -3288,14 +3290,14 @@ namespace CodingChainApi.Client
         }
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<HateoasResponseOfTeamNavigation> GetTeamMemberByIdAsync(System.Guid teamId, System.Guid memberId, string version)
+        public System.Threading.Tasks.Task<HateoasResponseOfMemberNavigation> GetTeamMemberByIdAsync(System.Guid teamId, System.Guid memberId, string version)
         {
             return GetTeamMemberByIdAsync(teamId, memberId, version, System.Threading.CancellationToken.None);
         }
     
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<HateoasResponseOfTeamNavigation> GetTeamMemberByIdAsync(System.Guid teamId, System.Guid memberId, string version, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<HateoasResponseOfMemberNavigation> GetTeamMemberByIdAsync(System.Guid teamId, System.Guid memberId, string version, System.Threading.CancellationToken cancellationToken)
         {
             if (teamId == null)
                 throw new System.ArgumentNullException("teamId");
@@ -3341,7 +3343,264 @@ namespace CodingChainApi.Client
                         var status_ = (int)response_.StatusCode;
                         if (status_ == 200)
                         {
+                            var objectResponse_ = await ReadObjectResponseAsync<HateoasResponseOfMemberNavigation>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new SwaggerException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            return objectResponse_.Object;
+                        }
+                        else
+                        {
+                            var responseData_ = response_.Content == null ? null : await response_.Content.ReadAsStringAsync().ConfigureAwait(false);
+                            throw new SwaggerException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
+                        }
+                    }
+                    finally
+                    {
+                        if (disposeResponse_)
+                            response_.Dispose();
+                    }
+                }
+            }
+            finally
+            {
+                if (disposeClient_)
+                    client_.Dispose();
+            }
+        }
+    
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        public System.Threading.Tasks.Task<HateoasResponseOfTeamNavigation> LeaveTournamentAsync(System.Guid teamId, System.Guid tournamentId, string version)
+        {
+            return LeaveTournamentAsync(teamId, tournamentId, version, System.Threading.CancellationToken.None);
+        }
+    
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        public async System.Threading.Tasks.Task<HateoasResponseOfTeamNavigation> LeaveTournamentAsync(System.Guid teamId, System.Guid tournamentId, string version, System.Threading.CancellationToken cancellationToken)
+        {
+            if (teamId == null)
+                throw new System.ArgumentNullException("teamId");
+    
+            if (tournamentId == null)
+                throw new System.ArgumentNullException("tournamentId");
+    
+            var urlBuilder_ = new System.Text.StringBuilder();
+            urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/api/v{version}/Teams/{teamId}/tournaments/{tournamentId}");
+            urlBuilder_.Replace("{teamId}", System.Uri.EscapeDataString(ConvertToString(teamId, System.Globalization.CultureInfo.InvariantCulture)));
+            urlBuilder_.Replace("{tournamentId}", System.Uri.EscapeDataString(ConvertToString(tournamentId, System.Globalization.CultureInfo.InvariantCulture)));
+            urlBuilder_.Replace("{version}", System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
+    
+            var client_ = _httpClient;
+            var disposeClient_ = false;
+            try
+            {
+                using (var request_ = new System.Net.Http.HttpRequestMessage())
+                {
+                    request_.Method = new System.Net.Http.HttpMethod("DELETE");
+                    request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
+    
+                    PrepareRequest(client_, request_, urlBuilder_);
+    
+                    var url_ = urlBuilder_.ToString();
+                    request_.RequestUri = new System.Uri(url_, System.UriKind.RelativeOrAbsolute);
+    
+                    PrepareRequest(client_, request_, url_);
+    
+                    var response_ = await client_.SendAsync(request_, System.Net.Http.HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
+                    var disposeResponse_ = true;
+                    try
+                    {
+                        var headers_ = System.Linq.Enumerable.ToDictionary(response_.Headers, h_ => h_.Key, h_ => h_.Value);
+                        if (response_.Content != null && response_.Content.Headers != null)
+                        {
+                            foreach (var item_ in response_.Content.Headers)
+                                headers_[item_.Key] = item_.Value;
+                        }
+    
+                        ProcessResponse(client_, response_);
+    
+                        var status_ = (int)response_.StatusCode;
+                        if (status_ == 200)
+                        {
                             var objectResponse_ = await ReadObjectResponseAsync<HateoasResponseOfTeamNavigation>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new SwaggerException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            return objectResponse_.Object;
+                        }
+                        else
+                        {
+                            var responseData_ = response_.Content == null ? null : await response_.Content.ReadAsStringAsync().ConfigureAwait(false);
+                            throw new SwaggerException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
+                        }
+                    }
+                    finally
+                    {
+                        if (disposeResponse_)
+                            response_.Dispose();
+                    }
+                }
+            }
+            finally
+            {
+                if (disposeClient_)
+                    client_.Dispose();
+            }
+        }
+    
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        public System.Threading.Tasks.Task<HateoasPageResponseOfHateoasResponseOfTournamentNavigation> GetTeamTournamentsAsync(System.Guid teamId, int page, int size, string version)
+        {
+            return GetTeamTournamentsAsync(teamId, page, size, version, System.Threading.CancellationToken.None);
+        }
+    
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        public async System.Threading.Tasks.Task<HateoasPageResponseOfHateoasResponseOfTournamentNavigation> GetTeamTournamentsAsync(System.Guid teamId, int page, int size, string version, System.Threading.CancellationToken cancellationToken)
+        {
+            if (teamId == null)
+                throw new System.ArgumentNullException("teamId");
+    
+            if (page == null)
+                throw new System.ArgumentNullException("page");
+    
+            if (size == null)
+                throw new System.ArgumentNullException("size");
+    
+            var urlBuilder_ = new System.Text.StringBuilder();
+            urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/api/v{version}/Teams/{teamId}/tournaments?");
+            urlBuilder_.Replace("{teamId}", System.Uri.EscapeDataString(ConvertToString(teamId, System.Globalization.CultureInfo.InvariantCulture)));
+            urlBuilder_.Replace("{version}", System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
+            urlBuilder_.Append(System.Uri.EscapeDataString("Page") + "=").Append(System.Uri.EscapeDataString(ConvertToString(page, System.Globalization.CultureInfo.InvariantCulture))).Append("&");
+            urlBuilder_.Append(System.Uri.EscapeDataString("Size") + "=").Append(System.Uri.EscapeDataString(ConvertToString(size, System.Globalization.CultureInfo.InvariantCulture))).Append("&");
+            urlBuilder_.Length--;
+    
+            var client_ = _httpClient;
+            var disposeClient_ = false;
+            try
+            {
+                using (var request_ = new System.Net.Http.HttpRequestMessage())
+                {
+                    request_.Method = new System.Net.Http.HttpMethod("GET");
+                    request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
+    
+                    PrepareRequest(client_, request_, urlBuilder_);
+    
+                    var url_ = urlBuilder_.ToString();
+                    request_.RequestUri = new System.Uri(url_, System.UriKind.RelativeOrAbsolute);
+    
+                    PrepareRequest(client_, request_, url_);
+    
+                    var response_ = await client_.SendAsync(request_, System.Net.Http.HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
+                    var disposeResponse_ = true;
+                    try
+                    {
+                        var headers_ = System.Linq.Enumerable.ToDictionary(response_.Headers, h_ => h_.Key, h_ => h_.Value);
+                        if (response_.Content != null && response_.Content.Headers != null)
+                        {
+                            foreach (var item_ in response_.Content.Headers)
+                                headers_[item_.Key] = item_.Value;
+                        }
+    
+                        ProcessResponse(client_, response_);
+    
+                        var status_ = (int)response_.StatusCode;
+                        if (status_ == 200)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<HateoasPageResponseOfHateoasResponseOfTournamentNavigation>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new SwaggerException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            return objectResponse_.Object;
+                        }
+                        else
+                        {
+                            var responseData_ = response_.Content == null ? null : await response_.Content.ReadAsStringAsync().ConfigureAwait(false);
+                            throw new SwaggerException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
+                        }
+                    }
+                    finally
+                    {
+                        if (disposeResponse_)
+                            response_.Dispose();
+                    }
+                }
+            }
+            finally
+            {
+                if (disposeClient_)
+                    client_.Dispose();
+            }
+        }
+    
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        public System.Threading.Tasks.Task<HateoasPageResponseOfHateoasResponseOfParticipationNavigation> GetTeamParticipationsByTournamentAsync(System.Guid teamId, System.Guid tournamentId, int page, int size, string version)
+        {
+            return GetTeamParticipationsByTournamentAsync(teamId, tournamentId, page, size, version, System.Threading.CancellationToken.None);
+        }
+    
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        public async System.Threading.Tasks.Task<HateoasPageResponseOfHateoasResponseOfParticipationNavigation> GetTeamParticipationsByTournamentAsync(System.Guid teamId, System.Guid tournamentId, int page, int size, string version, System.Threading.CancellationToken cancellationToken)
+        {
+            if (teamId == null)
+                throw new System.ArgumentNullException("teamId");
+    
+            if (tournamentId == null)
+                throw new System.ArgumentNullException("tournamentId");
+    
+            if (page == null)
+                throw new System.ArgumentNullException("page");
+    
+            if (size == null)
+                throw new System.ArgumentNullException("size");
+    
+            var urlBuilder_ = new System.Text.StringBuilder();
+            urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/api/v{version}/Teams/{teamId}/tournaments/{tournamentId}/participations?");
+            urlBuilder_.Replace("{teamId}", System.Uri.EscapeDataString(ConvertToString(teamId, System.Globalization.CultureInfo.InvariantCulture)));
+            urlBuilder_.Replace("{tournamentId}", System.Uri.EscapeDataString(ConvertToString(tournamentId, System.Globalization.CultureInfo.InvariantCulture)));
+            urlBuilder_.Replace("{version}", System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
+            urlBuilder_.Append(System.Uri.EscapeDataString("Page") + "=").Append(System.Uri.EscapeDataString(ConvertToString(page, System.Globalization.CultureInfo.InvariantCulture))).Append("&");
+            urlBuilder_.Append(System.Uri.EscapeDataString("Size") + "=").Append(System.Uri.EscapeDataString(ConvertToString(size, System.Globalization.CultureInfo.InvariantCulture))).Append("&");
+            urlBuilder_.Length--;
+    
+            var client_ = _httpClient;
+            var disposeClient_ = false;
+            try
+            {
+                using (var request_ = new System.Net.Http.HttpRequestMessage())
+                {
+                    request_.Method = new System.Net.Http.HttpMethod("GET");
+                    request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
+    
+                    PrepareRequest(client_, request_, urlBuilder_);
+    
+                    var url_ = urlBuilder_.ToString();
+                    request_.RequestUri = new System.Uri(url_, System.UriKind.RelativeOrAbsolute);
+    
+                    PrepareRequest(client_, request_, url_);
+    
+                    var response_ = await client_.SendAsync(request_, System.Net.Http.HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
+                    var disposeResponse_ = true;
+                    try
+                    {
+                        var headers_ = System.Linq.Enumerable.ToDictionary(response_.Headers, h_ => h_.Key, h_ => h_.Value);
+                        if (response_.Content != null && response_.Content.Headers != null)
+                        {
+                            foreach (var item_ in response_.Content.Headers)
+                                headers_[item_.Key] = item_.Value;
+                        }
+    
+                        ProcessResponse(client_, response_);
+    
+                        var status_ = (int)response_.StatusCode;
+                        if (status_ == 200)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<HateoasPageResponseOfHateoasResponseOfParticipationNavigation>(response_, headers_, cancellationToken).ConfigureAwait(false);
                             if (objectResponse_.Object == null)
                             {
                                 throw new SwaggerException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
@@ -3897,14 +4156,14 @@ namespace CodingChainApi.Client
         }
     
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<HateoasPageResponseOfHateoasResponseOfTournamentNavigation> GetTournamentsAsync(System.Guid? languageIdFilter, string nameFilter, OrderEnum? nameOrder, System.Guid? participantIdFilter, bool? isPublishedFilter, int page, int size, string version)
+        public System.Threading.Tasks.Task<HateoasPageResponseOfHateoasResponseOfTournamentNavigation> GetTournamentsAsync(System.Guid? languageIdFilter, string nameFilter, OrderEnum? nameOrder, System.Guid? participantIdFilter, bool? isPublishedFilter, System.Guid? teamId, int page, int size, string version)
         {
-            return GetTournamentsAsync(languageIdFilter, nameFilter, nameOrder, participantIdFilter, isPublishedFilter, page, size, version, System.Threading.CancellationToken.None);
+            return GetTournamentsAsync(languageIdFilter, nameFilter, nameOrder, participantIdFilter, isPublishedFilter, teamId, page, size, version, System.Threading.CancellationToken.None);
         }
     
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<HateoasPageResponseOfHateoasResponseOfTournamentNavigation> GetTournamentsAsync(System.Guid? languageIdFilter, string nameFilter, OrderEnum? nameOrder, System.Guid? participantIdFilter, bool? isPublishedFilter, int page, int size, string version, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<HateoasPageResponseOfHateoasResponseOfTournamentNavigation> GetTournamentsAsync(System.Guid? languageIdFilter, string nameFilter, OrderEnum? nameOrder, System.Guid? participantIdFilter, bool? isPublishedFilter, System.Guid? teamId, int page, int size, string version, System.Threading.CancellationToken cancellationToken)
         {
             if (page == null)
                 throw new System.ArgumentNullException("page");
@@ -3920,6 +4179,7 @@ namespace CodingChainApi.Client
             urlBuilder_.Append(System.Uri.EscapeDataString("NameOrder") + "=").Append(System.Uri.EscapeDataString(nameOrder != null ? ConvertToString(nameOrder, System.Globalization.CultureInfo.InvariantCulture) : "")).Append("&");
             urlBuilder_.Append(System.Uri.EscapeDataString("ParticipantIdFilter") + "=").Append(System.Uri.EscapeDataString(participantIdFilter != null ? ConvertToString(participantIdFilter, System.Globalization.CultureInfo.InvariantCulture) : "")).Append("&");
             urlBuilder_.Append(System.Uri.EscapeDataString("IsPublishedFilter") + "=").Append(System.Uri.EscapeDataString(isPublishedFilter != null ? ConvertToString(isPublishedFilter, System.Globalization.CultureInfo.InvariantCulture) : "")).Append("&");
+            urlBuilder_.Append(System.Uri.EscapeDataString("TeamId") + "=").Append(System.Uri.EscapeDataString(teamId != null ? ConvertToString(teamId, System.Globalization.CultureInfo.InvariantCulture) : "")).Append("&");
             urlBuilder_.Append(System.Uri.EscapeDataString("Page") + "=").Append(System.Uri.EscapeDataString(ConvertToString(page, System.Globalization.CultureInfo.InvariantCulture))).Append("&");
             urlBuilder_.Append(System.Uri.EscapeDataString("Size") + "=").Append(System.Uri.EscapeDataString(ConvertToString(size, System.Globalization.CultureInfo.InvariantCulture))).Append("&");
             urlBuilder_.Length--;
@@ -4581,6 +4841,92 @@ namespace CodingChainApi.Client
                         if (status_ == 200)
                         {
                             var objectResponse_ = await ReadObjectResponseAsync<HateoasResponseOfTournamentStepNavigation>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new SwaggerException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            return objectResponse_.Object;
+                        }
+                        else
+                        {
+                            var responseData_ = response_.Content == null ? null : await response_.Content.ReadAsStringAsync().ConfigureAwait(false);
+                            throw new SwaggerException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
+                        }
+                    }
+                    finally
+                    {
+                        if (disposeResponse_)
+                            response_.Dispose();
+                    }
+                }
+            }
+            finally
+            {
+                if (disposeClient_)
+                    client_.Dispose();
+            }
+        }
+    
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        public System.Threading.Tasks.Task<HateoasPageResponseOfHateoasResponseOfParticipationNavigation> GetTournamentParticipationsAsync(System.Guid tournamentId, int page, int size, string version)
+        {
+            return GetTournamentParticipationsAsync(tournamentId, page, size, version, System.Threading.CancellationToken.None);
+        }
+    
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        public async System.Threading.Tasks.Task<HateoasPageResponseOfHateoasResponseOfParticipationNavigation> GetTournamentParticipationsAsync(System.Guid tournamentId, int page, int size, string version, System.Threading.CancellationToken cancellationToken)
+        {
+            if (tournamentId == null)
+                throw new System.ArgumentNullException("tournamentId");
+    
+            if (page == null)
+                throw new System.ArgumentNullException("page");
+    
+            if (size == null)
+                throw new System.ArgumentNullException("size");
+    
+            var urlBuilder_ = new System.Text.StringBuilder();
+            urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/api/v{version}/Tournaments/{tournamentId}/participations?");
+            urlBuilder_.Replace("{tournamentId}", System.Uri.EscapeDataString(ConvertToString(tournamentId, System.Globalization.CultureInfo.InvariantCulture)));
+            urlBuilder_.Replace("{version}", System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
+            urlBuilder_.Append(System.Uri.EscapeDataString("Page") + "=").Append(System.Uri.EscapeDataString(ConvertToString(page, System.Globalization.CultureInfo.InvariantCulture))).Append("&");
+            urlBuilder_.Append(System.Uri.EscapeDataString("Size") + "=").Append(System.Uri.EscapeDataString(ConvertToString(size, System.Globalization.CultureInfo.InvariantCulture))).Append("&");
+            urlBuilder_.Length--;
+    
+            var client_ = _httpClient;
+            var disposeClient_ = false;
+            try
+            {
+                using (var request_ = new System.Net.Http.HttpRequestMessage())
+                {
+                    request_.Method = new System.Net.Http.HttpMethod("GET");
+                    request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
+    
+                    PrepareRequest(client_, request_, urlBuilder_);
+    
+                    var url_ = urlBuilder_.ToString();
+                    request_.RequestUri = new System.Uri(url_, System.UriKind.RelativeOrAbsolute);
+    
+                    PrepareRequest(client_, request_, url_);
+    
+                    var response_ = await client_.SendAsync(request_, System.Net.Http.HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
+                    var disposeResponse_ = true;
+                    try
+                    {
+                        var headers_ = System.Linq.Enumerable.ToDictionary(response_.Headers, h_ => h_.Key, h_ => h_.Value);
+                        if (response_.Content != null && response_.Content.Headers != null)
+                        {
+                            foreach (var item_ in response_.Content.Headers)
+                                headers_[item_.Key] = item_.Value;
+                        }
+    
+                        ProcessResponse(client_, response_);
+    
+                        var status_ = (int)response_.StatusCode;
+                        if (status_ == 200)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<HateoasPageResponseOfHateoasResponseOfParticipationNavigation>(response_, headers_, cancellationToken).ConfigureAwait(false);
                             if (objectResponse_.Object == null)
                             {
                                 throw new SwaggerException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);

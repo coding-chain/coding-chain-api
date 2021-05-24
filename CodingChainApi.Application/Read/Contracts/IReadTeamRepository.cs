@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Application.Common.Pagination;
+using Application.Read.Participations;
 using Application.Read.Teams;
 using Application.Read.Teams.Handlers;
+using Application.Read.Tournaments;
 
 namespace Application.Read.Contracts
 {
@@ -19,5 +21,6 @@ namespace Application.Read.Contracts
          public Task<bool> TeamExistsById(Guid id);
 
          public Task<IPagedList<MemberNavigation>> GetAllMembersNavigationPaginated(GetPaginatedTeamMembersQuery query);
+
     }
 }

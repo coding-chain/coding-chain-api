@@ -7,6 +7,7 @@ using Application.Common.Pagination;
 using Application.Read.Contracts;
 using Application.Read.Teams;
 using Application.Read.Teams.Handlers;
+using Application.Read.Tournaments;
 using CodingChainApi.Infrastructure.Common.Extensions;
 using CodingChainApi.Infrastructure.Contexts;
 using CodingChainApi.Infrastructure.Models;
@@ -27,9 +28,8 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
         private static TeamNavigation ToTeamNavigation(Team team) => new(
             team.Id,
             team.Name,
-            team.UserTeams
-                .Where(uT => uT.LeaveDate == null && !uT.User.IsDeleted)
-                .Select(uT => uT.Id).ToList()
+            team.ActiveMembersIds,
+            team.ActiveParticipationsIds
         );
 
         private static Expression<Func<Team, bool>> ToPredicate(GetTeamNavigationPaginatedQuery query) =>
@@ -56,6 +56,7 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
             {
                 query = GetOrderByQuery(query, paginationQuery);
             }
+
             return await query.Select(t => ToTeamNavigation(t))
                 .FromPaginationQueryAsync(paginationQuery);
         }
@@ -72,6 +73,11 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
         private IIncludableQueryable<Team, User> GetTeamIncludeQueryable()
         {
             return _context.Teams
+                .Include(t => t.UserTeams)
+                .Include(t => t.Participations)
+                .ThenInclude(p => p.Tournament)
+                .Include(t => t.Participations)
+                .ThenInclude(p => p.Step)
                 .Include(t => t.UserTeams)
                 .ThenInclude(uT => uT.User);
         }
@@ -108,6 +114,7 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
                 .FromPaginationQueryAsync(query);
         }
 
+      
         private IIncludableQueryable<UserTeam, User> GetUserTeamIncludeQueryable()
         {
             return _context.UserTeams

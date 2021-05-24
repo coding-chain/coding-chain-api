@@ -24,7 +24,7 @@ namespace CodingChainApi.Infrastructure.Models
 
         public bool IsPublished => TournamentSteps.Any(tS => !tS.Tournament.IsDeleted && tS.Tournament.IsPublished);
         public IList<Guid> TestsIds => Tests.Where(t => !t.IsDeleted).Select(t => t.Id).ToList(); 
-        public IList<Guid> TournamentsIds => TournamentSteps.Where(tS => !tS.Tournament.IsDeleted).Select(t => t.Id).ToList(); 
+        public IList<Guid> TournamentsIds => TournamentSteps.Where(tS => !tS.Tournament.IsDeleted).Select(t => t.TournamentId).ToList(); 
         public IList<Guid> ActiveParticipationsIds => Participations.Where(p => !p.Team.IsDeleted).Select(p => p.Id).ToList(); 
     }
 }

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Application.Common.Pagination;
 using Application.Read.Contracts;
 using Application.Read.Teams;
+using Application.Read.Teams.Handlers;
 using Application.Read.Tournaments;
 using Application.Read.Tournaments.Handlers;
 using CodingChainApi.Infrastructure.Common.Extensions;
@@ -28,23 +29,25 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
         private static Expression<Func<Tournament, bool>> ToPredicate(GetTournamentNavigationPaginatedQuery query) =>
             tournament =>
                 !tournament.IsDeleted
-                && (query.IsPublishedFilter == null || tournament.IsPublished == query.IsPublishedFilter )
-                && (query.ParticipantIdFilter == null || tournament.Participations.Any(p => 
-                    !p.Team.IsDeleted && p.Team.UserTeams.Any(uT => 
+                && (query.TeamId == null || tournament.Participations.Any(p =>
+                        !p.Deactivated && p.Team.Id == query.TeamId && !p.Team.IsDeleted && !p.Step.IsDeleted))
+                && (query.IsPublishedFilter == null || tournament.IsPublished == query.IsPublishedFilter)
+                && (query.ParticipantIdFilter == null || tournament.Participations.Any(p =>
+                    !p.Deactivated && !p.Team.IsDeleted && p.Team.UserTeams.Any(uT =>
                         uT.LeaveDate == null && !uT.User.IsDeleted && uT.User.Id == query.ParticipantIdFilter)))
                 && (query.LanguageIdFilter == null || tournament.TournamentSteps.Any(tS =>
                     !tS.Step.IsDeleted && tS.Step.ProgrammingLanguage.Id == query.LanguageIdFilter))
                 && (query.NameFilter == null || tournament.Name.Contains(query.NameFilter));
 
-        private static IQueryable<Tournament> GetOrderByQuery(IQueryable<Tournament> tournamentQuery, GetTournamentNavigationPaginatedQuery paginationQuery)
+        private static IQueryable<Tournament> GetOrderByQuery(IQueryable<Tournament> tournamentQuery,
+            GetTournamentNavigationPaginatedQuery paginationQuery)
         {
             if (paginationQuery.NameOrder == OrderEnum.Asc)
                 return tournamentQuery.OrderBy(t => t.Name);
             return tournamentQuery.OrderByDescending(t => t.Name);
         }
-        
-        
-            
+
+
         public async Task<IPagedList<TournamentNavigation>> GetAllTournamentNavigationPaginated(
             GetTournamentNavigationPaginatedQuery paginationQuery)
         {
@@ -62,7 +65,7 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
         }
 
 
-        private static TournamentNavigation ToTournamentNavigation(Tournament tournament) => new TournamentNavigation(
+        public static TournamentNavigation ToTournamentNavigation(Tournament tournament) => new TournamentNavigation(
             tournament.Id,
             tournament.Name,
             tournament.Description,
@@ -83,7 +86,6 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
         private IIncludableQueryable<Tournament, Step> GetTournamentIncludeQueryable()
         {
             return _context.Tournaments
-                .Include(t => t.Participations)
                 .Include(t => t.TournamentSteps)
                 .ThenInclude(uT => uT.Step);
         }
@@ -107,6 +109,7 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
                 tournamentStep.Step.ActiveParticipationsIds,
                 tournamentStep.Step.TournamentsIds
             );
+
 
         public async Task<IPagedList<TournamentStepNavigation>> GetAllTournamentStepNavigationPaginated(
             GetPaginatedTournamentStepNavigationQuery paginationQuery)
@@ -140,8 +143,8 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
                 .Include(tS => tS.Step)
                 .ThenInclude(s => s.Tests)
                 .Include(tS => tS.Step)
-                .ThenInclude(s=> s.Participations)
-                .ThenInclude(p =>p.Team )
+                .ThenInclude(s => s.Participations)
+                .ThenInclude(p => p.Team)
                 .Include(tS => tS.Step)
                 .ThenInclude(s => s.TournamentSteps)
                 .ThenInclude(tS => tS.Tournament);

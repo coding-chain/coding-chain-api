@@ -4,12 +4,17 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Application.Common.Pagination;
+using Application.Read.Participations;
+using Application.Read.Participations.Handlers;
 using Application.Read.Teams;
 using Application.Read.Teams;
 using Application.Read.Teams.Handlers;
+using Application.Read.Tournaments;
+using Application.Read.Tournaments.Handlers;
 using Application.Write.Teams;
 using AutoMapper;
 using CodingChainApi.Infrastructure.Common.Pagination;
+using CodingChainApi.Infrastructure.Models;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -109,11 +114,20 @@ namespace NeosCodingApi.Controllers
             return Ok(teamWithLinks);
         }
 
+        [HttpDelete("{teamId:guid}/tournaments/{tournamentId:guid}", Name = nameof(LeaveTournament))]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasResponse<TeamNavigation>))]
+        public async Task<IActionResult> LeaveTournament(Guid teamId, Guid tournamentId)
+        {
+            await Mediator.Send(new LeaveTournamentCommand(tournamentId, teamId));
+            return NoContent();
+        }
 
         [HttpGet("{teamId:guid}/members/{memberId:guid}", Name = nameof(GetTeamMemberById))]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasResponse<TeamNavigation>))]
+        [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasResponse<MemberNavigation>))]
         public async Task<IActionResult> GetTeamMemberById(Guid teamId, Guid memberId)
         {
             var member = await Mediator.Send(new GetMemberNavigationByIdQuery(teamId, memberId));
@@ -139,6 +153,57 @@ namespace NeosCodingApi.Controllers
                 teamsWithLinks.ToList(),
                 nameof(GetMembers))
             );
+        }
+
+        [HttpGet("{teamId:guid}/tournaments", Name = nameof(GetTeamTournaments))]
+        [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasPageResponse<HateoasResponse<TournamentNavigation>>))]
+        public async Task<IActionResult> GetTeamTournaments(Guid teamId,
+            [FromQuery] PaginationQueryBase query)
+        {
+            var tournaments = await Mediator.Send(new GetTournamentNavigationPaginatedQuery()
+                {TeamId = teamId, Page = query.Page, Size = query.Size});
+            var tournamentsWithLinks = tournaments.Select(tournament =>
+                new HateoasResponse<TournamentNavigation>(tournament, GetLinksForTournament(tournament.Id, teamId)));
+            return Ok(HateoasResponseBuilder.FromPagedList(
+                Url,
+                tournaments.ToPagedListResume(),
+                tournamentsWithLinks.ToList(),
+                nameof(GetTeamTournaments))
+            );
+        }
+        
+        [HttpGet("{teamId:guid}/tournaments/{tournamentId:guid}/participations", Name = nameof(GetTeamParticipationsByTournament))]
+        [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasPageResponse<HateoasResponse<ParticipationNavigation>>))]
+        public async Task<IActionResult> GetTeamParticipationsByTournament(Guid teamId, Guid tournamentId,
+            [FromQuery] PaginationQueryBase query)
+        {
+            var participations = await Mediator.Send(new GetAllParticipationNavigationPaginatedQuery()
+                {TeamId = teamId,TournamentId = tournamentId, Page = query.Page, Size = query.Size});
+            var participationsWithLinks = participations.Select(participation =>
+                new HateoasResponse<ParticipationNavigation>(participation, GetLinksForParticipation(tournamentId, teamId)));
+            return Ok(HateoasResponseBuilder.FromPagedList(
+                Url,
+                participations.ToPagedListResume(),
+                participationsWithLinks.ToList(),
+                nameof(GetTeamParticipationsByTournament))
+            );
+        }
+
+        private IList<LinkDto> GetLinksForTournament(Guid tournamentId, Guid teamId)
+        {
+            return new List<LinkDto>()
+            {
+                LinkDto.DeleteLink(Url.Link(nameof(LeaveTournament), new{teamId, tournamentId})),
+                LinkDto.AllLink(Url.Link(nameof(GetTeamTournaments), new {teamId}))
+            };
+        }
+
+        private IList<LinkDto> GetLinksForParticipation(Guid tournamentId, Guid teamId)
+        {
+            return new List<LinkDto>()
+            {
+                LinkDto.AllLink(Url.Link(nameof(GetTeamParticipationsByTournament), new {teamId, tournamentId}))
+            };
         }
 
         [HttpGet(Name = nameof(GetTeams))]

@@ -34,10 +34,9 @@ namespace Application.Write.Teams
         public async Task<string> Handle(CreateTeamCommand request, CancellationToken cancellationToken)
         {
             var adminMember = new MemberEntity(_currentUserService.ConnectedUserId, true);
-            var team = new TeamAggregate(await _teamRepository.NextIdAsync(), request.Name,
-                new List<MemberEntity>() {adminMember});
+            var team = TeamAggregate.CreateNew(await _teamRepository.NextIdAsync(), request.Name, adminMember);
             await _teamRepository.SetAsync(team);
             return team.Id.ToString();
-        }   
+        }
     }
 }
