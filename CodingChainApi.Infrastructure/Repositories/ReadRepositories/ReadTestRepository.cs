@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -51,6 +52,14 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
                 .Where(ToExpression(query))
                 .Select(t => ToTestNavigation(t))
                 .FromPaginationQueryAsync(query);
+        }
+        
+        public async Task<IList<TestNavigation>> GetAllTestNavigationByStepId(Guid stepId)
+        {
+            return await GetTestIncludeQueryable()
+                .Where(t => !t.Step.IsDeleted && t.Step.Id == stepId  )
+                .Select(t => ToTestNavigation(t))
+                .ToListAsync();
         }
 
         private IIncludableQueryable<Test, Step> GetTestIncludeQueryable()

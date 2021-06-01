@@ -171,16 +171,18 @@ namespace NeosCodingApi.Controllers
                 nameof(GetTeamTournaments))
             );
         }
-        
-        [HttpGet("{teamId:guid}/tournaments/{tournamentId:guid}/participations", Name = nameof(GetTeamParticipationsByTournament))]
+
+        [HttpGet("{teamId:guid}/tournaments/{tournamentId:guid}/participations",
+            Name = nameof(GetTeamParticipationsByTournament))]
         [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasPageResponse<HateoasResponse<ParticipationNavigation>>))]
         public async Task<IActionResult> GetTeamParticipationsByTournament(Guid teamId, Guid tournamentId,
             [FromQuery] PaginationQueryBase query)
         {
             var participations = await Mediator.Send(new GetAllParticipationNavigationPaginatedQuery()
-                {TeamId = teamId,TournamentId = tournamentId, Page = query.Page, Size = query.Size});
+                {TeamId = teamId, TournamentId = tournamentId, Page = query.Page, Size = query.Size});
             var participationsWithLinks = participations.Select(participation =>
-                new HateoasResponse<ParticipationNavigation>(participation, GetLinksForParticipation(tournamentId, teamId)));
+                new HateoasResponse<ParticipationNavigation>(participation,
+                    GetLinksForParticipation(tournamentId, teamId, participation.StepId)));
             return Ok(HateoasResponseBuilder.FromPagedList(
                 Url,
                 participations.ToPagedListResume(),
@@ -189,20 +191,34 @@ namespace NeosCodingApi.Controllers
             );
         }
 
+        [HttpGet("{teamId:guid}/tournaments/{tournamentId:guid}/steps/{stepId:guid}",
+            Name = nameof(GetTeamParticipationsByTournamentAndStep))]
+        [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasResponse<ParticipationNavigation>))]
+        public async Task<IActionResult> GetTeamParticipationsByTournamentAndStep(Guid teamId, Guid tournamentId,
+            Guid stepId)
+        {
+            var participation =
+                await Mediator.Send(new GetOneParticipationByTeamTournamentAndStepQuery(teamId, tournamentId, stepId));
+            return Ok(new HateoasResponse<ParticipationNavigation>(participation,
+                GetLinksForParticipation(tournamentId, teamId, participation.StepId)));
+        }
+
         private IList<LinkDto> GetLinksForTournament(Guid tournamentId, Guid teamId)
         {
             return new List<LinkDto>()
             {
-                LinkDto.DeleteLink(Url.Link(nameof(LeaveTournament), new{teamId, tournamentId})),
+                LinkDto.DeleteLink(Url.Link(nameof(LeaveTournament), new {teamId, tournamentId})),
                 LinkDto.AllLink(Url.Link(nameof(GetTeamTournaments), new {teamId}))
             };
         }
 
-        private IList<LinkDto> GetLinksForParticipation(Guid tournamentId, Guid teamId)
+        private IList<LinkDto> GetLinksForParticipation(Guid tournamentId, Guid teamId, Guid stepId)
         {
             return new List<LinkDto>()
             {
-                LinkDto.AllLink(Url.Link(nameof(GetTeamParticipationsByTournament), new {teamId, tournamentId}))
+                LinkDto.AllLink(Url.Link(nameof(GetTeamParticipationsByTournament), new {teamId, tournamentId})),
+                LinkDto.SelfLink(Url.Link(nameof(GetTeamParticipationsByTournamentAndStep),
+                    new {teamId, tournamentId, stepId}))
             };
         }
 

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Application.Common.Pagination;
 using Application.Read.Steps;
@@ -12,5 +13,6 @@ namespace Application.Read.Contracts
         public Task<bool> TestExists(Guid testId);
         public Task<TestNavigation?> GetOneTestNavigationByID( Guid testId);
         public Task<IPagedList<TestNavigation>> GetPaginatedTestNavigation(GetPaginatedTestNavigationQuery query);
+        public Task<IList<TestNavigation>> GetAllTestNavigationByStepId(Guid stepId);
     }
 }

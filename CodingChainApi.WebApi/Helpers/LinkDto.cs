@@ -21,6 +21,10 @@ namespace NeosCodingApi.Helpers
         {
             return new LinkDto(href, "self", HttpMethod.Get);
         }
+        public static LinkDto AuthLink(string? href)
+        {
+            return new LinkDto(href, "auth", HttpMethod.Get);
+        }
         public static LinkDto AllLink(string? href)
         {
             return new LinkDto(href, "all", HttpMethod.Get);

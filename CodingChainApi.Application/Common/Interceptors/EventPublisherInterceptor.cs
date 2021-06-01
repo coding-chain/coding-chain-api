@@ -31,11 +31,11 @@ namespace Application.Common.Interceptors
             if (!IsSetAsyncMethod(invocation.Method))
                 return;
             var aggregate = invocation.Arguments.First() as IAggregate;
-            foreach (var aggregateEvent in aggregate.Events)
+            foreach (var aggregateEvent in aggregate.Events.ToList())
             {
                 _dispatcher.Dispatch(aggregateEvent);
             }
-            aggregate?.ClearEvents();
+            aggregate.ClearEvents();
         }
 
         private bool IsAggregateRepository(Type invocationType)

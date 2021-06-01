@@ -21,6 +21,7 @@ namespace CodingChainApi.Domain.Tests
         private StepId GetNewStepId() => new StepId(Guid.NewGuid());
         private UserId GetNewUserId() => new UserId(Guid.NewGuid());
 
+        private UserId _teamUser;
 
         private IList<FunctionEntity> GetValidFunctions(UserId userId) => new List<FunctionEntity>()
         {
@@ -30,7 +31,7 @@ namespace CodingChainApi.Domain.Tests
         };
 
         private TeamEntity GetValidTeam(IList<UserId> userIds = null) => new(GetNewTeamId(),
-            userIds ?? new List<UserId>() {GetNewUserId(), GetNewUserId()});
+            userIds ?? new List<UserId>() {_teamUser, GetNewUserId()});
 
         private StepEntity GetValidStep(TournamentId tournamentId) =>
             new(GetNewStepId(), new List<TournamentId>() {tournamentId, GetNewTournamentId()});
@@ -47,6 +48,12 @@ namespace CodingChainApi.Domain.Tests
             return ParticipationAggregate.Restore(
                 GetNewParticipationId(), team, tournament, step,
                 endDate?.AddDays(-3) ?? DateTime.Now, endDate, 0, functions);
+        }
+
+        [SetUp]
+        public void Setup()
+        {
+            _teamUser = GetNewUserId();
         }
 
         [Test]
@@ -93,7 +100,8 @@ namespace CodingChainApi.Domain.Tests
         public void add_function_should_throw_if_function_already_contained()
         {
             var participation = GetValidParticipation();
-            Assert.Throws<DomainException>(() => participation.AddFunction(participation.Functions.First()));
+            Assert.Throws<DomainException>(() =>
+                participation.AddFunction(participation.Functions.First(), participation.Team.UserIds.First()));
         }
 
         [Test]
@@ -101,7 +109,7 @@ namespace CodingChainApi.Domain.Tests
         {
             var participation = GetValidParticipation();
             var newFunction = new FunctionEntity(GetNewFunctionId(), GetNewUserId(), "", DateTime.Now, null);
-            Assert.Throws<DomainException>(() => participation.AddFunction(newFunction));
+            Assert.Throws<DomainException>(() => participation.AddFunction(newFunction, _teamUser));
         }
 
         [Test]
@@ -110,7 +118,7 @@ namespace CodingChainApi.Domain.Tests
             var participation = GetValidParticipation();
             var userId = participation.Team.UserIds.First();
             var expectedFunction = new FunctionEntity(GetNewFunctionId(), userId, "", DateTime.Now, null);
-            participation.AddFunction(expectedFunction);
+            participation.AddFunction(expectedFunction, _teamUser);
             CollectionAssert.Contains(participation.Functions, expectedFunction);
         }
 
@@ -118,7 +126,7 @@ namespace CodingChainApi.Domain.Tests
         public void remove_function_should_throw_if_function_is_not_found()
         {
             var participation = GetValidParticipation();
-            Assert.Throws<DomainException>(() => participation.RemoveFunction(GetNewFunctionId()));
+            Assert.Throws<DomainException>(() => participation.RemoveFunction(GetNewFunctionId(), _teamUser));
         }
 
 
@@ -127,7 +135,7 @@ namespace CodingChainApi.Domain.Tests
         {
             var participation = GetValidParticipation();
             var function = participation.Functions.First();
-            participation.RemoveFunction(function.Id);
+            participation.RemoveFunction(function.Id, _teamUser);
             CollectionAssert.DoesNotContain(participation.Functions, function);
         }
 
@@ -180,7 +188,7 @@ namespace CodingChainApi.Domain.Tests
             var failingFunction = new FunctionEntity(validFunction.Id, validFunction.UserId, validFunction.Code,
                 validFunction.LastModificationDate.AddDays(-1), null);
             Assert.Throws<DomainException>(() =>
-                participation.SetFunctions(new List<FunctionEntity>{failingFunction}));
+                participation.SetFunctions(new List<FunctionEntity> {failingFunction}));
         }
     }
 }

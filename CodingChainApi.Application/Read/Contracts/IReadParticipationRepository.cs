@@ -7,9 +7,13 @@ using Application.Read.Teams.Handlers;
 
 namespace Application.Read.Contracts
 {
-    public interface  IReadParticipationRepository
+    public interface IReadParticipationRepository
     {
-        public Task<IPagedList<ParticipationNavigation>> GetAllParticipationNavigationPaginated(GetAllParticipationNavigationPaginatedQuery paginationQuery);
+        public Task<IPagedList<ParticipationNavigation>> GetAllParticipationNavigationPaginated(
+            GetAllParticipationNavigationPaginatedQuery paginationQuery);
+
         public Task<ParticipationNavigation?> GetOneParticipationNavigationById(Guid id);
+        public Task<bool> ExistsById(Guid id);
+        public Task<bool> ParticipationExistsByTournamentStepTeamIds(Guid tournamentId, Guid stepId, Guid teamId);
     }
 }

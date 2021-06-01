@@ -7,21 +7,25 @@ using System.Threading.Tasks;
 using Application.Read.Participations;
 using Application.Read.Participations.Handlers;
 using Application.Write.Participations;
+using Application.Write.ParticipationsSessions;
 using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http;
 using NeosCodingApi.Helpers;
 using NeosCodingApi.Services;
 using NSwag.Annotations;
 
 namespace NeosCodingApi.Controllers
 {
-    public class ParticipationsController: ApiControllerBase
+    public class ParticipationsController : ApiControllerBase
     {
-        public ParticipationsController(ISender mediator, IMapper mapper, IPropertyCheckerService propertyCheckerService) : base(mediator, mapper, propertyCheckerService)
+        public ParticipationsController(ISender mediator, IMapper mapper,
+            IPropertyCheckerService propertyCheckerService) : base(mediator, mapper, propertyCheckerService)
         {
         }
+
         #region Participations
 
         [HttpPost(Name = nameof(CreateParticipation))]
@@ -33,7 +37,9 @@ namespace NeosCodingApi.Controllers
             var participationId = await Mediator.Send(createParticipationCommand);
             return CreatedAtAction(nameof(GetParticipationById), new {participationId}, null);
         }
-        
+
+
+
         [HttpGet("{participationId:guid}", Name = nameof(GetParticipationById))]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -41,17 +47,20 @@ namespace NeosCodingApi.Controllers
         public async Task<IActionResult> GetParticipationById(Guid participationId)
         {
             var participation = await Mediator.Send(new GetOneParticipationNavigationByIdQuery(participationId));
-            var participationWithLinks = new HateoasResponse<ParticipationNavigation>(participation, GetLinksForParticipation(participation.Id));
+            var participationWithLinks =
+                new HateoasResponse<ParticipationNavigation>(participation, GetLinksForParticipation(participation.Id));
             return Ok(participationWithLinks);
         }
-        
+
         [HttpGet(Name = nameof(GetParticipations))]
         [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasPageResponse<HateoasResponse<ParticipationNavigation>>))]
-        public async Task<IActionResult> GetParticipations([FromQuery] GetAllParticipationNavigationPaginatedQuery query)
+        public async Task<IActionResult> GetParticipations(
+            [FromQuery] GetAllParticipationNavigationPaginatedQuery query)
         {
             var participations = await Mediator.Send(query);
             var participationsWithLinks = participations.Select(participation =>
-                new HateoasResponse<ParticipationNavigation>(participation, GetLinksForParticipation(participation.Id)));
+                new HateoasResponse<ParticipationNavigation>(participation,
+                    GetLinksForParticipation(participation.Id)));
             return Ok(HateoasResponseBuilder.FromPagedList(
                 Url,
                 participations.ToPagedListResume(),
@@ -74,12 +83,10 @@ namespace NeosCodingApi.Controllers
             {
                 LinkDto.CreateLink(Url.Link(nameof(CreateParticipation), null)),
                 LinkDto.SelfLink(Url.Link(nameof(GetParticipationById), new {participationId})),
-                LinkDto.AllLink(Url.Link(nameof(GetParticipations), null)),
+                LinkDto.AllLink(Url.Link(nameof(GetParticipations), null))
             };
         }
 
         #endregion
-
-
     }
 }

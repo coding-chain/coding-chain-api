@@ -85,6 +85,8 @@ namespace Domain.StepEditions
 
         public void SetTests(IList<TestEntity> tests)
         {
+            if (tests.Count < 1)
+                throw new DomainException("Step should have at least one test");
             if (tests.Distinct().Count() != tests.Count)
                 throw new DomainException("Tests contains duplicates");
             var errors = tests.SelectMany(t =>
@@ -135,6 +137,8 @@ namespace Domain.StepEditions
             var test = _tests.FirstOrDefault(t => t.Id == id);
             if (test is null)
                 throw new DomainException($"Test {id} not found");
+            if (_tests.Count <= 1)
+                throw new DomainException("Step should have at least one test");
             _tests.Remove(test);
         }
 

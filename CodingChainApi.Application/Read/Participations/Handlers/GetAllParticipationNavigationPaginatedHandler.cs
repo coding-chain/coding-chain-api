@@ -12,7 +12,9 @@ namespace Application.Read.Participations.Handlers
     {
         public Guid? TeamId { get; set; }
         public Guid? TournamentId { get; set; }
+        public Guid? StepId { get; set; }
     }
+
 
     public class GetAllParticipationNavigationPaginatedHandler : IRequestHandler<
         GetAllParticipationNavigationPaginatedQuery, IPagedList<ParticipationNavigation>>
@@ -30,4 +32,6 @@ namespace Application.Read.Participations.Handlers
             return _readParticipationRepository.GetAllParticipationNavigationPaginated(request);
         }
     }
+
+   
 }

@@ -1,12 +1,17 @@
 using System.Linq;
 using System.Net.Http.Headers;
 using System.Reflection;
+using System.Threading.Tasks;
 using Application;
 using Application.Contracts.IService;
 using CodingChainApi.Infrastructure;
+using CodingChainApi.Infrastructure.Hubs;
+using CodingChainApi.Infrastructure.Settings;
 using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
@@ -47,19 +52,30 @@ namespace NeosCodingApi
             services.AddSingleton<ICurrentUserService, CurrentUserService>();
             services.AddScoped<IPropertyCheckerService, PropertyCheckerService>();
             services.AddHttpContextAccessor();
+            ConfigureAuthentication(services);
 
             services.AddSignalR();
 
             services.AddCors();
-            // services.Configure<ApiBehaviorOptions>(options => { options.SuppressModelStateInvalidFilter = true; });
 
-            services.Configure<FormOptions>(options =>
+            ConfigureControllers(services);
+            
+            services.AddSingleton<FluentValidationSchemaProcessor>();
+            services.AddVersionedApiExplorer(setupAction => { setupAction.GroupNameFormat = "'v'VV"; });
+
+            var apiVersionDescriptionProvider = ConfigureVersioning(services);
+
+            ConfigureSwagger(services, apiVersionDescriptionProvider);
+
+            services.AddResponseCompression(opts =>
             {
-                options.ValueCountLimit = 10;
-                options.MemoryBufferThreshold = int.MaxValue;
-                options.ValueLengthLimit = int.MaxValue; //TODO Change value
-                options.MultipartBodyLengthLimit = long.MaxValue;
+                opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
+                    new[] {"application/octet-stream"});
             });
+        }
+
+        private static void ConfigureControllers(IServiceCollection services)
+        {
             services.AddControllers()
                 .AddNewtonsoftJson(options =>
                 {
@@ -78,10 +94,10 @@ namespace NeosCodingApi
                     options.ModelMetadataDetailsProviders.Clear();
                     options.ModelValidatorProviders.Clear();
                 });
-            ;
-            services.AddSingleton<FluentValidationSchemaProcessor>();
-            services.AddVersionedApiExplorer(setupAction => { setupAction.GroupNameFormat = "'v'VV"; });
+        }
 
+        private static IApiVersionDescriptionProvider? ConfigureVersioning(IServiceCollection services)
+        {
             services.AddApiVersioning(setupAction =>
             {
                 setupAction.AssumeDefaultVersionWhenUnspecified = true;
@@ -91,7 +107,12 @@ namespace NeosCodingApi
 
             var apiVersionDescriptionProvider =
                 services.BuildServiceProvider().GetService<IApiVersionDescriptionProvider>();
+            return apiVersionDescriptionProvider;
+        }
 
+        private static void ConfigureSwagger(IServiceCollection services,
+            IApiVersionDescriptionProvider? apiVersionDescriptionProvider)
+        {
             foreach (var apiVersionDescription in apiVersionDescriptionProvider.ApiVersionDescriptions)
             {
                 services.AddSwaggerDocument((settings, serviceProvider) =>
@@ -107,18 +128,50 @@ namespace NeosCodingApi
                     };
                 });
             }
+        }
 
-            services.AddResponseCompression(opts =>
-            {
-                opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
-                    new[] {"application/octet-stream"});
-            });
+        private void ConfigureAuthentication(IServiceCollection services)
+        {
+            // var settingsName = nameof(JwtSettings);
+            // var jwtSettings = Configuration.GetSection(settingsName).Get<JwtSettings>();
+            // services.AddAuthentication(opt =>
+            // {
+            //     opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            //     opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            // }).AddJwtBearer(opt =>
+            // {
+            //     opt.Authority = jwtSettings.Issuer;
+            //     opt.Events = new JwtBearerEvents
+            //     {
+            //         OnMessageReceived = context =>
+            //         {
+            //             var accessToken = context.Request.Query["access_token"];
+            //
+            //             // If the request is for our hub...
+            //             var path = context.HttpContext.Request.Path;
+            //             if (!string.IsNullOrEmpty(accessToken) &&
+            //                 (path.StartsWithSegments("/hubs/chat")))
+            //             {
+            //                 // Read the token out of the query string
+            //                 context.Token = accessToken;
+            //             }
+            //
+            //             return Task.CompletedTask;
+            //         }
+            //     };
+            // });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader().WithExposedHeaders(new []{"Location"}));
+            app.UseCors(builder => builder
+                .WithOrigins("http://localhost:4200")
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials()
+                .WithExposedHeaders(new []{"Location"})
+            );
 
             app.UseResponseCompression();
             if (env.IsDevelopment())
@@ -141,7 +194,10 @@ namespace NeosCodingApi
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapHub<SutHub>("/sut");
+                endpoints.MapHub<ParticipationSessionsHub>(ParticipationSessionsHub.Route, options =>
+                {
+                    options.Transports = HttpTransportType.ServerSentEvents;
+                });
             });
 
             app.UseOpenApi();

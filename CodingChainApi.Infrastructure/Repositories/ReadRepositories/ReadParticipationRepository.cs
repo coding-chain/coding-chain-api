@@ -42,13 +42,38 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
             return participation is null ? null : ToParticipationNavigation(participation);
         }
 
-        private static Expression<Func<Participation, bool>> ToPredicate(GetAllParticipationNavigationPaginatedQuery query) =>
+        public async Task<bool> ExistsById(Guid id)
+        {
+            return await this.GetParticipationIncludeQueryable()
+                .AnyAsync(p => !p.Deactivated 
+                               && !p.Tournament.IsDeleted 
+                               && p.Tournament.IsPublished 
+                               && !p.Step.IsDeleted
+                               && !p.Team.IsDeleted);
+        }
+
+        public async Task<bool> ParticipationExistsByTournamentStepTeamIds(Guid tournamentId, Guid stepId, Guid teamId)
+        {
+            return await this.GetParticipationIncludeQueryable()
+                .AnyAsync(p => !p.Deactivated 
+                               && !p.Tournament.IsDeleted 
+                               && p.Tournament.IsPublished 
+                               && !p.Step.IsDeleted
+                               && !p.Team.IsDeleted
+                               && p.Tournament.Id == tournamentId
+                               && p.Step.Id == stepId
+                               && p.Team.Id == teamId);
+        }
+
+        private static Expression<Func<Participation, bool>> ToPredicate(
+            GetAllParticipationNavigationPaginatedQuery query) =>
             participation =>
                 !participation.Deactivated
-                && (query.TeamId == null || query.TeamId == participation.Team.Id)
-                && (query.TournamentId == null || query.TournamentId == participation.Tournament.Id);
-      
-        private IIncludableQueryable<Participation, IList<Function>> GetParticipationIncludeQueryable()
+                && (query.TeamId == null || !participation.Team.IsDeleted && query.TeamId == participation.Team.Id)
+                && (query.TournamentId == null || !participation.Tournament.IsDeleted && participation.Tournament.IsPublished && query.TournamentId == participation.Tournament.Id)
+                && (query.StepId == null || !participation.Step.IsDeleted && query.StepId == participation.Step.Id);
+
+        private IQueryable<Participation> GetParticipationIncludeQueryable()
         {
             return _context.Participations
                 .Include(p => p.Team)

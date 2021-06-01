@@ -1,18 +1,23 @@
 ﻿using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 using Application;
+using Application.Common.Events;
 using Application.Common.Interceptors;
 using Application.Contracts.IService;
 using Application.Read.Contracts;
 using Application.Write.Contracts;
 using CodingChainApi.Infrastructure.Common.Exceptions;
 using CodingChainApi.Infrastructure.Contexts;
+using CodingChainApi.Infrastructure.Hubs;
 using CodingChainApi.Infrastructure.MessageBroker;
 using CodingChainApi.Infrastructure.Repositories.AggregateRepositories;
 using CodingChainApi.Infrastructure.Repositories.ReadRepositories;
 using CodingChainApi.Infrastructure.Services;
+using CodingChainApi.Infrastructure.Services.Cache;
 using CodingChainApi.Infrastructure.Services.Processes;
 using CodingChainApi.Infrastructure.Settings;
+using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -27,7 +32,9 @@ namespace CodingChainApi.Infrastructure
         public static IServiceCollection AddInfrastructure(this IServiceCollection services,
             IConfiguration configuration)
         {
+            services.AddMediatR(typeof(DependencyInjection).GetTypeInfo().Assembly);
             services.AddAutoMapper(Assembly.GetExecutingAssembly());
+            ConfigureCache(services, configuration);
             ConfigureSqlServer(services, configuration);
             ConfigureJwt(services, configuration);
             ConfigureBcrypt(services, configuration);
@@ -40,6 +47,8 @@ namespace CodingChainApi.Infrastructure
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<ITimeService, TimeService>();
             services.AddScoped<IParticipationExecutionService, ParticipationExecutionService>();
+            services.AddScoped<IParticipationsSessionsRepository, ParticipationsSessionRepository>();
+            services.AddScoped<ICache, Cache>();
             RegisterAggregateRepositories(services);
             RegisterReadRepositories(services);
             return services;
@@ -55,6 +64,8 @@ namespace CodingChainApi.Infrastructure
             services.AddProxiedScoped<IStepEditionRepository, StepEditionRepository>(typeof(EventPublisherInterceptor));
             services.AddProxiedScoped<IParticipationRepository, ParticipationRepository>(
                 typeof(EventPublisherInterceptor));
+            services.AddProxiedScoped<IParticipationsSessionsRepository, ParticipationsSessionRepository>(
+                typeof(EventPublisherInterceptor));
         }
 
         private static void RegisterReadRepositories(IServiceCollection services)
@@ -67,11 +78,19 @@ namespace CodingChainApi.Infrastructure
             services.AddScoped<IReadTestRepository, ReadTestRepository>();
             services.AddScoped<IReadParticipationRepository, ReadParticipationRepository>();
             services.AddScoped<IReadRightRepository, ReadRightRepository>();
+            services.AddScoped<IReadParticipationSessionRepository, ReadParticipationSessionRepository>();
+            services.AddScoped<IReadFunctionSessionRepository, ReadFunctionSessionRepository>();
+            services.AddScoped<IReadUserSessionRepository, ReadUserSessionRepository>();
         }
 
+        private static void ConfigureCache(IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddMemoryCache();
+            ConfigureInjectableSettings<ICacheSettings, CacheSettings>(services, configuration);
+        }
         private static void ConfigureProcess(IServiceCollection services, IConfiguration configuration)
         {
-            ConfigureInjectableSettings<IProcessSettings, IProcessSettings>(services, configuration);
+            ConfigureInjectableSettings<IProcessSettings, ProcessSettings>(services, configuration);
         }
 
         private static void ConfigureAppData(IServiceCollection services, IConfiguration configuration)
@@ -104,9 +123,30 @@ namespace CodingChainApi.Infrastructure
             if (jwtSettings.MinutesDuration is null)
                 throw new InfrastructureException("JWt MinutesDuration is null please check your JwtSettings");
 
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            services.AddAuthentication(opt =>
+                {
+                    opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                })
                 .AddJwtBearer(options =>
                 {
+                    options.Events = new JwtBearerEvents
+                    {
+                        OnMessageReceived = context =>
+                        {
+                            var accessToken = context.Request.Query["access_token"];
+
+                            // If the request is for our hub...
+                            var path = context.HttpContext.Request.Path;
+                            if (!string.IsNullOrEmpty(accessToken) &&
+                                (path.StartsWithSegments(ParticipationSessionsHub.Route)))
+                            {
+                                // Read the token out of the query string
+                                context.Token = accessToken;
+                            }
+                            return Task.CompletedTask;
+                        }
+                    };
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidateIssuer = true,

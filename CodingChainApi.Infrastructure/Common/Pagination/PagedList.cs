@@ -23,6 +23,11 @@ namespace CodingChainApi.Infrastructure.Common.Pagination
             AddRange(items);
         }
 
+        public static PagedList<T> Empty(long pageNumber, long pageSize)
+        {
+            return new(new List<T>(), 0, pageNumber, pageSize);
+        }
+
 
     }
 }

@@ -2,9 +2,10 @@ using System;
 using Application.Common.Exceptions;
 using Application.Contracts.IService;
 using Application.Contracts.Processes;
-using Application.Write.Code.CodeExecution;
+using Application.Write.ParticipationsSessions;
 using CodingChainApi.Infrastructure.MessageBroker;
 using CodingChainApi.Infrastructure.Settings;
+using MediatR;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -12,36 +13,34 @@ using Newtonsoft.Json.Linq;
 
 namespace CodingChainApi.Infrastructure.Services.Processes
 {
+    public record ProcessEndResult(Guid ParticipationId, string? Errors, string? Output);
+
     public class ParticipationExecutionService : RabbitMqBaseListener<ParticipationExecutionService>,
         IParticipationExecutionService
     {
         private readonly IRabbitMqPublisher _rabbitMqPublisher;
 
-        private ProcessEndHandler<Guid>? _processEndHandler;
+        private readonly IMediator _mediator;
+        
         protected sealed override string QueueName { get; set; }
-
         protected sealed override string RouteKey { get; set; }
 
         public ParticipationExecutionService(IRabbitMQSettings settings, ILogger<ParticipationExecutionService> logger,
-            IRabbitMqPublisher rabbitMqPublisher)
+            IRabbitMqPublisher rabbitMqPublisher, IMediator mediator)
             : base(settings, logger)
         {
             _rabbitMqPublisher = rabbitMqPublisher;
+            _mediator = mediator;
             RouteKey = settings.RoutingKey;
             QueueName = settings.ExecutionCodeRoute;
         }
 
 
-        public void StartExecution(RunParticipationTestsCommand command)
+        public void StartExecution(RunParticipationTestsDto command)
         {
             _rabbitMqPublisher.PushMessage(QueueName, command);
-            _processEndHandler = new ProcessEndHandler<Guid>(command.ParticipationId);
         }
 
-        public IProcessEndHandler? FollowExecution(Guid participationId)
-        {
-            return _processEndHandler;
-        }
 
         public override bool Process(string? message)
         {
@@ -56,18 +55,15 @@ namespace CodingChainApi.Infrastructure.Services.Processes
                 Logger.LogDebug("Code executed: ${Message}", message);
                 var json = JObject.Parse(message);
                 var result = JsonConvert.DeserializeObject<ProcessEndResult>(json.ToString());
-
-                if (_processEndHandler == null)
+                if (result is null)
                 {
-                    if (result is not null) _processEndHandler = new ProcessEndHandler<Guid>(result.ParticipationId);
-                    else throw new InputFormatterException("Message in queue doesn't have any participation ID ! ");
+                    Logger.LogError("Cannot deserialize process end message {Message}", json.ToString());
                 }
-
-                _processEndHandler?.AddError(result?.Errors);
-                _processEndHandler?.AddOutput(result?.Output);
-                _processEndHandler?.End();
-
-
+                else
+                {
+                    _mediator.Publish(new UpdateParticipationProcessNotification(result.ParticipationId, result.Errors,
+                        result.Output));
+                }
                 return true;
             }
             catch (Exception ex)

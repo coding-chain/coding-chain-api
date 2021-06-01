@@ -25,4 +25,5 @@ namespace Application.Read.Participations.Handlers
             return participation;
         }
     }
+    
 }

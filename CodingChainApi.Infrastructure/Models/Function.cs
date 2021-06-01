@@ -9,6 +9,8 @@ namespace CodingChainApi.Infrastructure.Models
         public string Code { get; set; }
         public int? Order { get; set; }
         public bool IsDeleted { get; set; }
+
+        public Participation Participation { get; set; }
         public IList<UserFunction> UserFunctions { get; set; } = new List<UserFunction>();
 
     }
