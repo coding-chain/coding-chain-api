@@ -87,3 +87,6 @@ fabric.properties
 /.idea/
 /templates/
 
+/coding_api_typescript_client/
+/CodingChainApi.CSharpClient/
+
