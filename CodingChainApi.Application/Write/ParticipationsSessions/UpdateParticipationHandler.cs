@@ -6,7 +6,6 @@ using Application.Common.Events;
 using Application.Common.Exceptions;
 using Application.Read.Contracts;
 using Application.Write.Contracts;
-using CodingChainApi.WebApi.Client.Contracts;
 using Domain.Participations;
 using Domain.ParticipationStates;
 using Domain.Users;

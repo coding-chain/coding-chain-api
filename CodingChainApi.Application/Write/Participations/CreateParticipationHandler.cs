@@ -58,11 +58,12 @@ namespace Application.Write.Participations
                 throw new NotFoundException(request.TeamId.ToString(), "Team");
             if (await _readParticipationRepository.ParticipationExistsByTournamentStepTeamIds(request.TournamentId,
                 request.StepId, request.TeamId))
-            {
                 throw new ApplicationException(
                     $"Participation for team : {request.TeamId} on tournament : {request.TournamentId} on step : {request.StepId} already exists");
-            }
 
+            if (!await CanAddParticipation(request.TeamId, request.TournamentId, request.StepId))
+                throw new ApplicationException($"Participation cannot be created, finish previous first");
+            
             var team = new TeamEntity(new TeamId(request.TeamId),
                 teamNavigation.MembersIds.Select(memberId => new UserId(memberId)).ToList());
             var step = new StepEntity(new StepId(request.StepId),
@@ -74,6 +75,28 @@ namespace Application.Write.Participations
 
             await _participationRepository.SetAsync(participation);
             return participation.Id.ToString();
+        }
+
+        private async Task<bool> CanAddParticipation(Guid teamId, Guid tournamentId, Guid stepId)
+        {
+            var teamParticipations =
+                await _readParticipationRepository.GetAllParticipationsByTeamAndTournamentId(teamId, tournamentId);
+            var tournamentSteps =
+                (await _readTournamentRepository.GetAllTournamentStepNavigationByTournamentId(tournamentId)).ToList();
+            tournamentSteps.Sort((s1, s2) => s1.Order - s2.Order);
+            var stepIdx = tournamentSteps.FindIndex(tS => tS.StepId == stepId);
+            if (stepIdx == 0)
+                return true;
+            for (var i = stepIdx - 1; i >= 0; i--)
+            {
+                if (tournamentSteps[i].IsOptional)
+                    continue;
+                var previousParticipation =
+                    teamParticipations.FirstOrDefault(s => s.StepId == tournamentSteps[i].StepId);
+                if (previousParticipation?.EndDate is null)
+                    return false;
+            }
+            return true;
         }
     }
 }

@@ -60,10 +60,10 @@ namespace Application.Write.ParticipationsSessions
                 participation.Id.Value,
                 language.Name,
                 step.HeaderCode ,
-                tests.Select(t => new RunParticipationTestsDto.Test(t.OutputValidator, t.InputGenerator)).ToList(),
+                tests.Select(t => new RunParticipationTestsDto.Test(t.Id, t.Name, t.OutputValidator, t.InputGenerator)).ToList(),
                 participation.Functions
                     .Where(f => f.Order is not null)
-                    .Select(f => new RunParticipationTestsDto.Function(f.Code, f.Order!.Value))
+                    .Select(f => new RunParticipationTestsDto.Function(f.Id.Value, f.Code, f.Order!.Value))
                     .ToList()
             );
             participation.StartProcess(_timeService.Now());

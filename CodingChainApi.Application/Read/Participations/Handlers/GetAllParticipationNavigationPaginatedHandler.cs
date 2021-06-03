@@ -10,9 +10,12 @@ namespace Application.Read.Participations.Handlers
     public record GetAllParticipationNavigationPaginatedQuery : PaginationQueryBase,
         IRequest<IPagedList<ParticipationNavigation>>
     {
-        public Guid? TeamId { get; set; }
-        public Guid? TournamentId { get; set; }
-        public Guid? StepId { get; set; }
+        public Guid? TeamIdFilter { get; set; }
+        public Guid? TournamentIdFilter { get; set; }
+        public Guid? StepIdFilter { get; set; }
+        
+        public bool? EndTournamentStepFilter { get; set; }
+        public OrderEnum? EndDateOrder { get; set; }
     }
 
 

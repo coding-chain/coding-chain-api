@@ -15,6 +15,7 @@ using CodingChainApi.Infrastructure.Repositories.AggregateRepositories;
 using CodingChainApi.Infrastructure.Repositories.ReadRepositories;
 using CodingChainApi.Infrastructure.Services;
 using CodingChainApi.Infrastructure.Services.Cache;
+using CodingChainApi.Infrastructure.Services.Parser;
 using CodingChainApi.Infrastructure.Services.Processes;
 using CodingChainApi.Infrastructure.Settings;
 using MediatR;
@@ -40,7 +41,6 @@ namespace CodingChainApi.Infrastructure
             ConfigureBcrypt(services, configuration);
             ConfigureProcess(services, configuration);
             ConfigureAppData(services, configuration);
-            ConfigureLanguages(services, configuration);
             ConfigureRabbitMQ(services, configuration);
             //
             services.AddScoped<ISecurityService, SecurityService>();
@@ -48,6 +48,7 @@ namespace CodingChainApi.Infrastructure
             services.AddScoped<ITimeService, TimeService>();
             services.AddScoped<IParticipationExecutionService, ParticipationExecutionService>();
             services.AddScoped<IParticipationsSessionsRepository, ParticipationsSessionRepository>();
+            services.AddScoped<IFunctionTypeParserService, FunctionTypeParserService>();
             services.AddScoped<ICache, Cache>();
             RegisterAggregateRepositories(services);
             RegisterReadRepositories(services);
@@ -98,10 +99,7 @@ namespace CodingChainApi.Infrastructure
             ConfigureInjectableSettings<IAppDataSettings, AppDataSettings>(services, configuration);
         }
 
-        private static void ConfigureLanguages(IServiceCollection services, IConfiguration configuration)
-        {
-            ConfigureInjectableSettings<ILanguagesSettings, LanguagesSettings>(services, configuration);
-        }
+
 
         private static TImplementation ConfigureInjectableSettings<TInterface, TImplementation>(
             IServiceCollection services,

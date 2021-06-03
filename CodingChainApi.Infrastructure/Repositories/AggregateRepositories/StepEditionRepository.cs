@@ -45,6 +45,7 @@ namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
                 currentTest.Score = test.Score;
                 currentTest.InputGenerator = test.InputGenerator;
                 currentTest.OutputValidator = test.OutputValidator;
+                currentTest.Name = test.Name;
             });
             newTests.ForEach(test => step.Tests.Add(test));
             step.MinFunctionsCount = aggregate.MinFunctionsCount;
@@ -74,7 +75,7 @@ namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
             );
 
         private TestEntity ToTestEntity(Test t) =>
-            new TestEntity(new TestId(t.Id), t.OutputValidator, t.InputGenerator, t.Score);
+            new TestEntity(new TestId(t.Id), t.Name,t.OutputValidator, t.InputGenerator, t.Score);
 
         public async Task<StepId> SetAsync(StepEditionAggregate aggregate)
         {
@@ -98,7 +99,7 @@ namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
             return aggregate.Tests
                 .Where(test => currentTests.All(t => t.Id != test.Id.Value))
                 .Select(test => new Test
-                    {Id = test.Id.Value ,Score = test.Score, InputGenerator = test.InputGenerator, OutputValidator = test.OutputValidator})
+                    {Id = test.Id.Value , Name = test.Name, Score = test.Score, InputGenerator = test.InputGenerator, OutputValidator = test.OutputValidator})
                 .ToList();
         }
 

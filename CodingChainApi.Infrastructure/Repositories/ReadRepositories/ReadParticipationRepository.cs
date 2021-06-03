@@ -25,14 +25,36 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
         {
             _context = context;
         }
-
+        private static IQueryable<Participation> GetOrderByQuery(IQueryable<Participation> participationQuery,
+            GetAllParticipationNavigationPaginatedQuery paginationQuery)
+        {
+            if (paginationQuery.EndDateOrder == OrderEnum.Asc)
+                return participationQuery.OrderBy(t => t.EndDate);
+            return participationQuery.OrderByDescending(t => t.EndDate);
+        }
         public async Task<IPagedList<ParticipationNavigation>> GetAllParticipationNavigationPaginated(
             GetAllParticipationNavigationPaginatedQuery paginationQuery)
         {
-            return await GetParticipationIncludeQueryable()
-                .Where(ToPredicate(paginationQuery))
+            var query = GetParticipationIncludeQueryable()
+                .Where(ToPredicate(paginationQuery));
+            if (paginationQuery.EndDateOrder is not null)
+            {
+                query = GetOrderByQuery(query, paginationQuery);
+            }
+            return await query
                 .Select(p => ToParticipationNavigation(p))
                 .FromPaginationQueryAsync(paginationQuery);
+        }
+
+        public async Task<IList<ParticipationNavigation>> GetAllParticipationsByTeamAndTournamentId(Guid teamId, Guid tournamentId)
+        {
+            return await GetParticipationIncludeQueryable()
+                .Where(p => !p.Deactivated 
+                       && !p.Tournament.IsDeleted && p.Tournament.IsPublished && p.Tournament.Id == tournamentId 
+                       && !p.Step.IsDeleted
+                       && !p.Team.IsDeleted && p.Team.Id == teamId)
+                .Select(p => ToParticipationNavigation(p))
+                .ToListAsync();
         }
 
         public async Task<ParticipationNavigation?> GetOneParticipationNavigationById(Guid id)
@@ -69,9 +91,21 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
             GetAllParticipationNavigationPaginatedQuery query) =>
             participation =>
                 !participation.Deactivated
-                && (query.TeamId == null || !participation.Team.IsDeleted && query.TeamId == participation.Team.Id)
-                && (query.TournamentId == null || !participation.Tournament.IsDeleted && participation.Tournament.IsPublished && query.TournamentId == participation.Tournament.Id)
-                && (query.StepId == null || !participation.Step.IsDeleted && query.StepId == participation.Step.Id);
+                && (query.EndTournamentStepFilter == null 
+                    || !participation.Step.IsDeleted 
+                    && participation.EndDate != null
+                    && participation.Tournament.IsPublished 
+                    && !participation.Tournament.IsDeleted 
+                    && participation.Step.TournamentSteps
+                        .Any(tournamentStep => tournamentStep.TournamentId == participation.Tournament.Id 
+                                               && tournamentStep.Step.Id == participation.Step.Id
+                                               && tournamentStep.Order == participation.Tournament.TournamentSteps
+                                                   .Max(tS => tS.Order)
+                                               )
+                    )
+                && (query.TeamIdFilter == null || !participation.Team.IsDeleted && query.TeamIdFilter == participation.Team.Id)
+                && (query.TournamentIdFilter == null || !participation.Tournament.IsDeleted && participation.Tournament.IsPublished && query.TournamentIdFilter == participation.Tournament.Id)
+                && (query.StepIdFilter == null || !participation.Step.IsDeleted && query.StepIdFilter == participation.Step.Id);
 
         private IQueryable<Participation> GetParticipationIncludeQueryable()
         {

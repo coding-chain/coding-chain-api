@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace Application.Read.ParticipationSessions
@@ -14,6 +15,7 @@ namespace Application.Read.ParticipationSessions
         IList<Guid> FunctionsIds,
         string? LastError,
         string? LastOutput,
-        DateTime? ProcessStartTime
+        DateTime? ProcessStartTime,
+        IList<Guid> PassedTestsIds
         );
 }

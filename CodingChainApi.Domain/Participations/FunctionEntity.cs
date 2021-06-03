@@ -30,8 +30,8 @@ namespace Domain.Participations
         public int CompareTo(FunctionEntity? other)
         {
             if (other?.Id == Id) return 0;
-            if (other?.Order is null) return -1;
-            if (Order is null) return 1;
+            if (other?.Order is null) return 1;
+            if (Order is null) return -1;
             return Order.Value - other.Order.Value ;
         }
     }

@@ -179,7 +179,7 @@ namespace NeosCodingApi.Controllers
             [FromQuery] PaginationQueryBase query)
         {
             var participations = await Mediator.Send(new GetAllParticipationNavigationPaginatedQuery()
-                {TeamId = teamId, TournamentId = tournamentId, Page = query.Page, Size = query.Size});
+                {TeamIdFilter = teamId, TournamentIdFilter = tournamentId, Page = query.Page, Size = query.Size});
             var participationsWithLinks = participations.Select(participation =>
                 new HateoasResponse<ParticipationNavigation>(participation,
                     GetLinksForParticipation(tournamentId, teamId, participation.StepId)));

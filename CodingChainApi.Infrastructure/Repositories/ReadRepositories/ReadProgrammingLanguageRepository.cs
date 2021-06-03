@@ -44,7 +44,7 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
                 l => !l.IsDeleted && l.Id == programmingLanguageId);
         }
 
-        public async Task<bool> LanguageExistsByName(string name)
+        public async Task<bool> LanguageExistsByName(LanguageEnum name)
         {
             return await _context.ProgrammingLanguages.AnyAsync(
                 l => !l.IsDeleted && l.Name == name);

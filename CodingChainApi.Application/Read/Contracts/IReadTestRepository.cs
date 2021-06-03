@@ -13,6 +13,7 @@ namespace Application.Read.Contracts
         public Task<bool> TestExists(Guid testId);
         public Task<TestNavigation?> GetOneTestNavigationByID( Guid testId);
         public Task<IPagedList<TestNavigation>> GetPaginatedTestNavigation(GetPaginatedTestNavigationQuery query);
+        public Task<IPagedList<PublicTestNavigation>> GetPaginatedPublicTestNavigation(GetPaginatedPublicTestNavigationQuery query);
         public Task<IList<TestNavigation>> GetAllTestNavigationByStepId(Guid stepId);
     }
 }

@@ -171,7 +171,7 @@ namespace NeosCodingApi.Controllers
             {
                 Page = query.Page,
                 Size = query.Size,
-                TournamentId = tournamentId
+                TournamentIdFilter = tournamentId
             });
             var participationsWithLinks = participations.Select(participation =>
                 new HateoasResponse<ParticipationNavigation>(participation, GetLinksForTournamentParticipation(tournamentId)));

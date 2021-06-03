@@ -11,6 +11,8 @@ namespace Application.Read.Teams.Handlers
     {
         public string? NameFilter { get; set; }
         public OrderEnum? NameOrder { get; set; }
+        
+        public Guid? TournamentFilter { get; set; }
         public Guid? MemberIdFilter { get; set; }
     }
 

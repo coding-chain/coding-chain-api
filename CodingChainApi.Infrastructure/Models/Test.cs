@@ -5,6 +5,7 @@ namespace CodingChainApi.Infrastructure.Models
     public class Test
     {
         public Guid Id { get; set; }
+        public string Name { get; set; }
         public string OutputValidator { get; set; }
         public string InputGenerator { get; set; }
         public decimal Score { get; set; }

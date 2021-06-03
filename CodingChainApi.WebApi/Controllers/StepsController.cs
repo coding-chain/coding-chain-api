@@ -84,6 +84,24 @@ namespace NeosCodingApi.Controllers
                 nameof(GetStepTests))
             );
         }
+        public record GetPaginatedPublicTestNavigationQueryParams() : PaginationQueryBase;
+        [HttpGet("{stepId:guid}/publictests", Name = nameof(GetPublicStepTests))]
+        [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasPageResponse<HateoasResponse<PublicTestNavigation>>))]
+        public async Task<IActionResult> GetPublicStepTests(Guid stepId,
+            [FromQuery] GetPaginatedPublicTestNavigationQueryParams query)
+        {
+            var tests = await Mediator.Send(new GetPaginatedPublicTestNavigationQuery()
+                {StepId = stepId, Page = query.Page, Size = query.Size});
+            var testsWithLinks = tests.Select(test =>
+                new HateoasResponse<PublicTestNavigation>(test, GetLinksForTest(stepId, test.Id)));
+            return Ok(HateoasResponseBuilder.FromPagedList(
+                Url,
+                tests.ToPagedListResume(),
+                testsWithLinks.ToList(),
+                nameof(GetPublicStepTests))
+            );
+        }
+
 
         [HttpDelete("{stepId:guid}", Name = nameof(DeleteStep))]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -129,7 +147,7 @@ namespace NeosCodingApi.Controllers
 
         #region Tests
 
-        public record AddTestCommandBody(string OutputValidator, string InputGenerator, decimal Score);
+        public record AddTestCommandBody(string Name, string OutputValidator, string InputGenerator, decimal Score);
 
         [HttpPost("{stepId:guid}/tests", Name = nameof(AddTest))]
         [ProducesResponseType(StatusCodes.Status201Created)]
@@ -137,8 +155,9 @@ namespace NeosCodingApi.Controllers
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         public async Task<IActionResult> AddTest(Guid stepId, [FromBody] AddTestCommandBody addTestCommand)
         {
-            var (outputValidator, inputGenerator, score) = addTestCommand;
-            var testId = await Mediator.Send(new AddTestCommand(stepId, outputValidator, inputGenerator, score));
+            var (name, outputValidator, inputGenerator, score) = addTestCommand;
+            var testId = await Mediator.Send(new AddTestCommand(stepId, name, outputValidator,
+                inputGenerator, score));
             return CreatedAtRoute(
                 nameof(TestsController.GetTestById),
                 new {controller = nameof(TestsController).ControllerName(), testId}, null);
@@ -191,7 +210,8 @@ namespace NeosCodingApi.Controllers
             {
                 LinkDto.SelfLink(Url.Link(nameof(TestsController.GetTestById), new {testId})),
                 LinkDto.CreateLink(Url.Link(nameof(AddTest), new {stepId, testId})),
-                LinkDto.AllLink(Url.Link(nameof(GetStepTests), new {stepId}))
+                LinkDto.AllLink(Url.Link(nameof(GetStepTests), new {stepId})),
+                LinkDto.AllLink(Url.Link(nameof(GetPublicStepTests), new {stepId}))
             };
         }
 

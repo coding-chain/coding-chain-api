@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Application.Common.Exceptions;
 using Application.Contracts.IService;
 using Application.Contracts.Processes;
@@ -13,8 +14,7 @@ using Newtonsoft.Json.Linq;
 
 namespace CodingChainApi.Infrastructure.Services.Processes
 {
-    public record ProcessEndResult(Guid ParticipationId, string? Errors, string? Output);
-
+    public record ProcessEndResult(Guid ParticipationId, string? Errors, string? Output,  IList<Guid> TestsPassedIds);
     public class ParticipationExecutionService : RabbitMqBaseListener<ParticipationExecutionService>,
         IParticipationExecutionService
     {
@@ -62,7 +62,7 @@ namespace CodingChainApi.Infrastructure.Services.Processes
                 else
                 {
                     _mediator.Publish(new UpdateParticipationProcessNotification(result.ParticipationId, result.Errors,
-                        result.Output));
+                        result.Output, result.TestsPassedIds));
                 }
                 return true;
             }

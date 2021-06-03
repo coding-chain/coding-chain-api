@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Domain.Contracts;
 using Domain.Exceptions;
 using Domain.Participations;
+using Domain.StepEditions;
 using Domain.Users;
+using TestEntity = Domain.Participations.TestEntity;
 
 namespace Domain.ParticipationStates
 {
@@ -20,30 +23,45 @@ namespace Domain.ParticipationStates
 
     public class ParticipationSessionAggregate : ParticipationAggregate
     {
+        public IReadOnlyCollection<TestId> PassedTestsIds => _passedTestsIds.AsReadOnly();
+        private List<TestId> _passedTestsIds = new List<TestId>();
         public TeamStateEntity ConnectedTeam { get; private init; }
         public override TeamEntity Team => ConnectedTeam;
+        public StepSessionEntity StepSessionEntity { get; private init; }
+
+        public override StepEntity StepEntity => StepSessionEntity;
 
         public string? LastError { get; private set; }
         public string? LastOutput { get; private set; }
 
         public DateTime? ProcessStartTime { get; private set; }
 
-        public static ParticipationSessionAggregate FromParticipationAggregate(ParticipationAggregate participation)
+        public static ParticipationSessionAggregate FromParticipationAggregate(ParticipationAggregate participation,
+            IList<TestEntity> testEntities)
         {
             var team = new TeamStateEntity(participation.Team.Id, participation.Team.UserIds,
                 new List<ConnectedUserEntity>());
-            return new ParticipationSessionAggregate(participation.Id, team, participation.TournamentEntity,
-                participation.StepEntity,
-                participation.StartDate, participation.EndDate, participation.CalculatedScore,
+            return new ParticipationSessionAggregate(
+                participation.Id,
+                team,
+                participation.TournamentEntity,
+                new StepSessionEntity(participation.StepEntity.Id, participation.StepEntity.TournamentIds,
+                    testEntities),
+                participation.StartDate,
+                participation.EndDate,
+                participation.CalculatedScore,
                 participation.Functions.ToList());
         }
 
         protected ParticipationSessionAggregate(ParticipationId id, TeamStateEntity team,
-            TournamentEntity tournamentEntity, StepEntity stepEntity, DateTime startDate, DateTime? endDate,
-            decimal calculatedScore, IList<FunctionEntity> functions) : base(id, team, tournamentEntity, stepEntity,
+            TournamentEntity tournamentEntity, StepSessionEntity stepSessionEntity, DateTime startDate,
+            DateTime? endDate,
+            decimal calculatedScore, IList<FunctionEntity> functions) : base(id, team, tournamentEntity,
+            stepSessionEntity,
             startDate, endDate, calculatedScore, functions)
         {
             ConnectedTeam = team;
+            StepSessionEntity = stepSessionEntity;
         }
 
         public int AddConnectedUser(UserId userId)
@@ -100,11 +118,20 @@ namespace Domain.ParticipationStates
             return existingUser.ConnectionCount;
         }
 
-        public void SetProcessResult(string? error, string? output)
+        public void SetProcessResult(string? error, string? output, IList<TestId> testsPassedIds, DateTime participationEndTime)
         {
             LastError = error;
             LastOutput = output;
+            var newScore = StepSessionEntity.Tests
+                .Where(t => testsPassedIds.Contains(t.Id))
+                .Sum(t => t.Score);
+            SetCalculatedScore(newScore);
+            _passedTestsIds = testsPassedIds.ToList();
             ProcessStartTime = null;
+            if (_passedTestsIds.Count == StepSessionEntity.Tests.Count)
+            {
+                SetEndDate(participationEndTime);
+            }
             RegisterEvent(new ProcessResultUpdated(Id));
         }
 
@@ -118,6 +145,7 @@ namespace Domain.ParticipationStates
 
         public void StartProcess(DateTime startTime)
         {
+            _passedTestsIds = new List<TestId>();
             ProcessStartTime = startTime;
             RegisterEvent(new ProcessStarted(Id));
         }
@@ -136,6 +164,5 @@ namespace Domain.ParticipationStates
             RegisterEvent(new ConnectedUserUpdated(this.Id, elevationTarget));
             RegisterEvent(new ConnectedUserUpdated(this.Id, currentUser));
         }
-
     }
 }

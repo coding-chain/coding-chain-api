@@ -28,6 +28,9 @@ namespace CodingChainApi.Infrastructure.Common.Pagination
             return new(new List<T>(), 0, pageNumber, pageSize);
         }
 
-
+        public static PagedList<T> From<U>(IList<T> items, PagedList<U> page)
+        {
+            return new PagedList<T>(items, page.Count, page.CurrentPage, page.PageSize);
+        }
     }
 }

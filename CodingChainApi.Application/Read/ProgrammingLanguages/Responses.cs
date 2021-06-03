@@ -1,7 +1,8 @@
 using System;
+using Domain.ProgrammingLanguages;
 
 namespace Application.Read.ProgrammingLanguages
 {
-    public record ProgrammingLanguageNavigation(Guid Id, string Name);
+    public record ProgrammingLanguageNavigation(Guid Id, LanguageEnum Name);
 
 }

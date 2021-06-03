@@ -13,4 +13,6 @@ namespace Application.Read.Contracts
 
         public Task<UserSessionNavigation?> GetOneUserNavigationByIdAsync(Guid participationId, Guid userId);
     }
+    
+    
 }

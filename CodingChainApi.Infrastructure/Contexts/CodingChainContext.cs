@@ -2,8 +2,10 @@
 using System.Linq;
 using CodingChainApi.Infrastructure.Models;
 using CodingChainApi.Infrastructure.Settings;
+using Domain.ProgrammingLanguages;
 using Domain.Users;
 using Microsoft.EntityFrameworkCore;
+using ProgrammingLanguage = CodingChainApi.Infrastructure.Models.ProgrammingLanguage;
 using Right = CodingChainApi.Infrastructure.Models.Right;
 using User = CodingChainApi.Infrastructure.Models.User;
 
@@ -11,12 +13,10 @@ namespace CodingChainApi.Infrastructure.Contexts
 {
     public class CodingChainContext : DbContext
     {
-        private readonly ILanguagesSettings _languagesSettings;
 
-        public CodingChainContext(DbContextOptions<CodingChainContext> options, ILanguagesSettings languagesSettings)
+        public CodingChainContext(DbContextOptions<CodingChainContext> options)
             : base(options)
         {
-            _languagesSettings = languagesSettings;
             Database.EnsureCreated();
         }
 
@@ -80,7 +80,7 @@ namespace CodingChainApi.Infrastructure.Contexts
             modelBuilder.Entity<User>()
                 .HasMany(s => s.Rights)
                 .WithMany(c => c.Users);
-            
+
 
             modelBuilder.Entity<Tournament>()
                 .HasMany(t => t.Participations)
@@ -127,6 +127,11 @@ namespace CodingChainApi.Infrastructure.Contexts
             modelBuilder.Entity<Right>()
                 .Property(c => c.Name)
                 .HasConversion<string>();
+            
+            modelBuilder.Entity<ProgrammingLanguage>()
+                .Property(c => c.Name)
+                .HasConversion<string>();
+
 
             InitRights(modelBuilder);
             InitLanguages(modelBuilder);
@@ -143,9 +148,10 @@ namespace CodingChainApi.Infrastructure.Contexts
 
         private void InitLanguages(ModelBuilder modelBuilder)
         {
+            var languages = Enum.GetValues(typeof(LanguageEnum)) as LanguageEnum[];
             modelBuilder.Entity<ProgrammingLanguage>().HasData(
-                _languagesSettings.AvailableLanguages.Select(languageName => new ProgrammingLanguage()
-                    {Id = Guid.NewGuid(), Name = languageName, IsDeleted = false}));
+                (languages ?? Array.Empty<LanguageEnum>()).Select(l => new ProgrammingLanguage
+                    {Id = Guid.NewGuid(), Name = l}));
         }
 
         private void InitDecimalPrecisions(ModelBuilder modelBuilder)

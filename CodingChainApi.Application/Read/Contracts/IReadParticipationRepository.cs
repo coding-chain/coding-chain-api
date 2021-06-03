@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Application.Common.Pagination;
 using Application.Read.Participations;
@@ -11,6 +12,9 @@ namespace Application.Read.Contracts
     {
         public Task<IPagedList<ParticipationNavigation>> GetAllParticipationNavigationPaginated(
             GetAllParticipationNavigationPaginatedQuery paginationQuery);
+
+        public Task<IList<ParticipationNavigation>> GetAllParticipationsByTeamAndTournamentId(Guid teamId,
+            Guid tournamentId);
 
         public Task<ParticipationNavigation?> GetOneParticipationNavigationById(Guid id);
         public Task<bool> ExistsById(Guid id);

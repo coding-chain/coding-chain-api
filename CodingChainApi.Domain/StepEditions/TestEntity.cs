@@ -10,12 +10,14 @@ namespace Domain.StepEditions
 
     public class TestEntity : Entity<TestId>
     {
+        public string Name { get; set; }
         public string OutputValidator { get; set; }
         public string InputGenerator { get; set; }
         public decimal Score { get; set; }
 
-        public TestEntity(TestId id, string outputValidator, string inputGenerator, decimal score) : base(id)
+        public TestEntity(TestId id, string name, string outputValidator, string inputGenerator, decimal score) : base(id)
         {
+            Name = name;
             OutputValidator = outputValidator;
             InputGenerator = inputGenerator;
             Score = score;

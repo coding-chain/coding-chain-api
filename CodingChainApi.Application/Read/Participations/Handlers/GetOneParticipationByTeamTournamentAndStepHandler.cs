@@ -29,9 +29,9 @@ namespace Application.Read.Participations.Handlers
             var participations = await _readParticipationRepository.GetAllParticipationNavigationPaginated(
                 new GetAllParticipationNavigationPaginatedQuery()
                 {
-                    StepId = request.StepId,
-                    TeamId = request.TeamId,
-                    TournamentId = request.TournamentId
+                    StepIdFilter = request.StepId,
+                    TeamIdFilter = request.TeamId,
+                    TournamentIdFilter = request.TournamentId
                 });
             if (!participations.Any())
                 throw new NotFoundException(

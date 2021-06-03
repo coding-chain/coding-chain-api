@@ -11,7 +11,7 @@ using MediatR;
 
 namespace Application.Write.StepEditions
 {
-    public record StepTest(Guid? Id, string OutputValidator, string InputGenerator, decimal Score);
+    public record StepTest(Guid? Id, string Name, string OutputValidator, string InputGenerator, decimal Score);
 
     public record SetStepTestsCommand(Guid StepId, IList<StepTest> Tests) : IRequest<string>;
 
@@ -33,7 +33,7 @@ namespace Application.Write.StepEditions
                 throw new NotFoundException(request.StepId.ToString(), "Step");
             var tests = request.Tests
                 .Where(t => t.Id is not null)
-                .Select(t => new TestEntity(new TestId(t.Id!.Value), t.OutputValidator, t.InputGenerator, t.Score))
+                .Select(t => new TestEntity(new TestId(t.Id!.Value),t.Name, t.OutputValidator, t.InputGenerator, t.Score))
                 .ToList();
             var newTests = request.Tests.Where(t => t.Id is null);
             tests.ForEach(existingTest =>
@@ -43,7 +43,7 @@ namespace Application.Write.StepEditions
             });
             foreach (var newTest in newTests)
             {
-                tests.Add(new TestEntity(await _stepEditionRepository.GetNextTestIdAsync(), newTest.OutputValidator,
+                tests.Add(new TestEntity(await _stepEditionRepository.GetNextTestIdAsync(), newTest.Name, newTest.OutputValidator,
                     newTest.InputGenerator, newTest.Score));
             }
             step.SetTests(tests);

@@ -1,11 +1,15 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
+using Application.Read.Contracts;
 using Application.Write.Contracts;
 using CodingChainApi.Infrastructure.Common.Extensions;
 using CodingChainApi.Infrastructure.Services.Cache;
 using CodingChainApi.Infrastructure.Settings;
 using Domain.Participations;
 using Domain.ParticipationStates;
+using Domain.StepEditions;
+using TestEntity = Domain.Participations.TestEntity;
 
 namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
 {
@@ -14,14 +18,18 @@ namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
         private readonly IParticipationRepository _participationRepository;
         private readonly ICache _cache;
         private readonly ICacheSettings _settings;
+        private readonly IReadTestRepository _readTestRepository;
+
         public ParticipationsSessionRepository(
-            IParticipationRepository participationRepository, ICache cache, ICacheSettings settings)
+            IParticipationRepository participationRepository, ICache cache, ICacheSettings settings,
+            IReadTestRepository readTestRepository)
         {
             _participationRepository = participationRepository;
             _cache = cache;
             _settings = settings;
+            _readTestRepository = readTestRepository;
         }
-        
+
 
         public async Task<ParticipationId> SetAsync(ParticipationSessionAggregate aggregate)
         {
@@ -40,8 +48,11 @@ namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
                     return null;
                 }
 
-                participationSession = ParticipationSessionAggregate.FromParticipationAggregate(participation);
-                _cache.SetCache( participationSession, participationSession.Id,_settings.ParticipationSecondDuration);
+                var tests = await _readTestRepository.GetAllTestNavigationByStepId(participation.StepEntity.Id.Value);
+                var testsEntities = tests.Select(t => new TestEntity(new TestId(t.Id), t.Score)).ToList();
+                participationSession =
+                    ParticipationSessionAggregate.FromParticipationAggregate(participation, testsEntities);
+                _cache.SetCache(participationSession, participationSession.Id, _settings.ParticipationSecondDuration);
             }
 
             return participationSession;

@@ -33,7 +33,8 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
                 participation.Functions.Select(f => f.Id.Value).ToList(),
                 participation.LastError,
                 participation.LastOutput,
-                participation.ProcessStartTime
+                participation.ProcessStartTime,
+                participation.PassedTestsIds.Select(id => id.Value).ToList()
             );
 
         public Task<bool> ExistsById(Guid id)
@@ -49,4 +50,6 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
             return await ToParticipationSessionNavigation(participation).ToTask();
         }
     }
+    
+    
 }

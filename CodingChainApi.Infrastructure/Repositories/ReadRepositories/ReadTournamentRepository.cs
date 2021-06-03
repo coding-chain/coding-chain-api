@@ -30,7 +30,7 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
             tournament =>
                 !tournament.IsDeleted
                 && (query.TeamId == null || tournament.Participations.Any(p =>
-                        !p.Deactivated && p.Team.Id == query.TeamId && !p.Team.IsDeleted && !p.Step.IsDeleted))
+                    !p.Deactivated && p.Team.Id == query.TeamId && !p.Team.IsDeleted && !p.Step.IsDeleted))
                 && (query.IsPublishedFilter == null || tournament.IsPublished == query.IsPublishedFilter)
                 && (query.ParticipantIdFilter == null || tournament.Participations.Any(p =>
                     !p.Deactivated && !p.Team.IsDeleted && p.Team.UserTeams.Any(uT =>
@@ -119,6 +119,16 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
                                          tournamentStep.TournamentId == paginationQuery.TournamentId)
                 .Select(tournamentStep => ToTournamentStepNavigation(tournamentStep))
                 .FromPaginationQueryAsync(paginationQuery);
+        }
+
+        public async Task<IList<TournamentStepNavigation>> GetAllTournamentStepNavigationByTournamentId(
+            Guid tournamentId)
+        {
+            return await GetTournamentStepIncludeQueryable()
+                .Where(tournamentStep => !tournamentStep.Tournament.IsDeleted && !tournamentStep.Step.IsDeleted &&
+                                         tournamentStep.TournamentId == tournamentId)
+                .Select(tournamentStep => ToTournamentStepNavigation(tournamentStep))
+                .ToListAsync();
         }
 
         public async Task<TournamentStepNavigation?> GetOneTournamentStepNavigationByID(Guid tournamentId, Guid stepId)

@@ -38,7 +38,7 @@ namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
                 participation.StartDate,
                 participation.EndDate,
                 participation.CalculatedScore,
-                participation.Functions.Select(ToFunctionEntity).ToList()
+                participation.Functions.Where(f => !f.IsDeleted).Select(ToFunctionEntity).ToList()
             );
         }
 

@@ -31,7 +31,7 @@ namespace Domain.Participations
     {
         public virtual TeamEntity Team { get; private set; }
         public TournamentEntity TournamentEntity { get; private set; }
-        public StepEntity StepEntity { get; private set; }
+        public virtual StepEntity StepEntity { get; private set; }
         public DateTime StartDate { get; private set; }
         public DateTime? EndDate { get; private set; }
         public decimal CalculatedScore { get; private set; }
@@ -82,12 +82,18 @@ namespace Domain.Participations
         public void SetFunctions(IList<FunctionEntity> functions)
         {
             var orderedFunctions = new List<FunctionEntity>(functions);
+            orderedFunctions.Sort((f1,f2) => (f1.Order ?? 0) - (f2.Order ?? 0));
+            var i = 1;
             var errors = orderedFunctions
-                .SelectMany((function, i) =>
+                .SelectMany((function) =>
                 {
                     var subErrors = new List<string>();
-                    if (function.Order is not null && function.Order != i + 1)
-                        subErrors.Add($"Function {function.Id} and order {function.Order} isn't ordered");
+                    if (function.Order is not null)
+                    {
+                        if (function.Order != i)
+                            subErrors.Add($"Function {function.Id} and order {function.Order} isn't ordered");
+                        i++;
+                    }
                     var sameFunction = _functions.FirstOrDefault(oldFunction => function.Id == oldFunction.Id);
                     if (sameFunction?.LastModificationDate > function.LastModificationDate)
                         subErrors.Add($"Function {function.Id} have last modification date lower than before");
@@ -227,7 +233,7 @@ namespace Domain.Participations
             return functionsWithOrder;
         }
 
-        public void SetEndDate(DateTime date)
+        public void SetEndDate(DateTime? date)
         {
             if (date <= StartDate)
                 throw new DomainException("End date couldn't be lower or equal than start date");

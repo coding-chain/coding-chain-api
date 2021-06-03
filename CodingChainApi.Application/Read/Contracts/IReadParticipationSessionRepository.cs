@@ -10,4 +10,6 @@ namespace Application.Read.Contracts
         public Task<ParticipationSessionNavigation?> GetOneById(Guid id);
 
     }
+    
+    
 }

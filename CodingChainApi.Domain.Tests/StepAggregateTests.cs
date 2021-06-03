@@ -31,7 +31,7 @@ namespace CodingChainApi.Domain.Tests
         }
 
         public TestEntity GetNewTest(decimal score) =>
-            new(new TestId(Guid.NewGuid()), "Validator", "Generator", score);
+            new(new TestId(Guid.NewGuid()), "Name","Validator", "Generator", score);
 
         public StepEditionAggregate GetNewStep(int? minFunctionCount = null, int? maxFunctionCount = null) =>
             StepEditionAggregate.Restore(_id, _name, _description, _headerCode, minFunctionCount, maxFunctionCount,
@@ -70,7 +70,7 @@ namespace CodingChainApi.Domain.Tests
             var step = GetNewStep();
             var test = GetNewTest(10);
             step.AddTest(test);
-            var duplicatedTest = new TestEntity(test.Id, test.OutputValidator, test.InputGenerator, test.Score);
+            var duplicatedTest = new TestEntity(test.Id, test.Name, test.OutputValidator, test.InputGenerator, test.Score);
             Assert.Throws<DomainException>(() => step.AddTest(duplicatedTest));
         }
 
@@ -245,7 +245,7 @@ namespace CodingChainApi.Domain.Tests
             var step = GetNewStep();
             var existingTest = GetNewTest(10);
             step.AddTest(existingTest);
-            var modifications = new TestEntity(existingTest.Id, "TestOutput", "TestInput", existingTest.Score + 1);
+            var modifications = new TestEntity(existingTest.Id, "Name","TestOutput", "TestInput", existingTest.Score + 1);
             step.UpdateTest(modifications);
             var modifiedTest = step.Tests.First();
             Assert.AreEqual(modifiedTest.Score, modifications.Score);
