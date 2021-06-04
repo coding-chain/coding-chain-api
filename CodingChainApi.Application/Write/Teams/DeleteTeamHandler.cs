@@ -30,7 +30,7 @@ namespace Application.Write.Teams
             var team = await _teamRepository.FindByIdAsync(new TeamId(request.TeamId));
             if (team is null)
                 throw new ApplicationException($"Team with id {request.TeamId} doesn't exists");
-            team.ValidateTeamDeletionByMember(_currentUserService.ConnectedUserId);
+            team.ValidateTeamDeletionByMember(_currentUserService.UserId);
             await _teamRepository.RemoveAsync(team.Id);
             return team.Id.ToString();
         }

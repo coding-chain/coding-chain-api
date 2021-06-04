@@ -32,7 +32,7 @@ namespace Application.Write.ParticipationsSessions
             var participation = await _repository.FindByIdAsync(new ParticipationId(request.ParticipationId));
             if (participation is null)
                 throw new NotFoundException(request.ParticipationId.ToString(), "ParticipationSession");
-            participation.ElevateUser(new UserId(request.UserId), _userService.ConnectedUserId);
+            participation.ElevateUser(new UserId(request.UserId), _userService.UserId);
             await _repository.SetAsync(participation);
             return request.UserId.ToString();
         }

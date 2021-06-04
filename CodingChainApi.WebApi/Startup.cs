@@ -49,7 +49,7 @@ namespace NeosCodingApi
 
             services.AddInfrastructure(Configuration);
             services.AddApplication();
-            services.AddSingleton<ICurrentUserService, CurrentUserService>();
+            services.AddScoped<ICurrentUserService, CurrentUserService>();
             services.AddScoped<IPropertyCheckerService, PropertyCheckerService>();
             services.AddHttpContextAccessor();
             ConfigureAuthentication(services);

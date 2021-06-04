@@ -33,7 +33,7 @@ namespace Application.Write.Teams
 
         public async Task<string> Handle(CreateTeamCommand request, CancellationToken cancellationToken)
         {
-            var adminMember = new MemberEntity(_currentUserService.ConnectedUserId, true);
+            var adminMember = new MemberEntity(_currentUserService.UserId, true);
             var team = TeamAggregate.CreateNew(await _teamRepository.NextIdAsync(), request.Name, adminMember);
             await _teamRepository.SetAsync(team);
             return team.Id.ToString();

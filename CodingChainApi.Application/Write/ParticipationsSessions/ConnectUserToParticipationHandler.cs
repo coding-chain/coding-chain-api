@@ -33,7 +33,7 @@ namespace Application.Write.ParticipationsSessions
             {
                 throw new NotFoundException(request.ParticipationId.ToString(), "Participation");
             }
-            var connectionCount = participation.AddConnectedUser(_currentUserService.ConnectedUserId);
+            var connectionCount = participation.AddConnectedUser(_currentUserService.UserId);
             await _participationsSessionsRepository.SetAsync(participation);
             return connectionCount;
         }

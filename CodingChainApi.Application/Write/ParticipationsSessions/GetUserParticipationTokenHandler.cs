@@ -34,7 +34,7 @@ namespace Application.Write.ParticipationsSessions
             }
 
             var token = await _tokenService.GenerateUserParticipationTokenAsync(
-                _currentUserService.ConnectedUserId.Value, request.ParticipationId);
+                _currentUserService.UserId.Value, request.ParticipationId);
             return new TokenResponse(token);
         }
     }

@@ -52,7 +52,6 @@ namespace CodingChainApi.Infrastructure.Services.Processes
 
             try
             {
-                Logger.LogDebug("Code executed: ${Message}", message);
                 var json = JObject.Parse(message);
                 var result = JsonConvert.DeserializeObject<ProcessEndResult>(json.ToString());
                 if (result is null)

@@ -1,11 +1,8 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Domain.Contracts;
 using Domain.Exceptions;
-using Domain.Teams;
-using Domain.Tournaments;
 using Domain.Users;
 
 namespace Domain.Participations

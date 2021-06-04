@@ -37,7 +37,6 @@ namespace Application.Common.Behaviors
 
             var user = await _userRepository.FindByIdAsync(_currentUserService.UserId);
             if(user is null) throw new UnauthorizedAccessException($"User with id {_currentUserService.UserId.Value} not found for authentication");
-            _currentUserService.ConnectedUserId = _currentUserService.UserId; 
             return await next();
         }
     }

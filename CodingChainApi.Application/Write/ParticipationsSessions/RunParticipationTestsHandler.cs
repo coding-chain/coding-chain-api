@@ -9,9 +9,11 @@ using Application.Read.Contracts;
 using Application.Write.Contracts;
 using Domain.Participations;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Application.Write.ParticipationsSessions
 {
+    [Authorize]
     public record RunParticipationCommand(Guid ParticipationId) : IRequest<string>;
 
     public class RunParticipationTestsHandler : IRequestHandler<RunParticipationCommand, string>
@@ -45,7 +47,7 @@ namespace Application.Write.ParticipationsSessions
             if (participation is null)
                 throw new NotFoundException(request.ParticipationId.ToString(), "ParticipationSession");
             
-            participation.ValidateProcessStart(_currentUserService.ConnectedUserId);
+            participation.ValidateProcessStart(_currentUserService.UserId);
             
             var step = await _readStepRepository.GetOneStepNavigationById(participation.StepEntity.Id.Value);
             if (step is null)

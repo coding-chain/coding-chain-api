@@ -69,7 +69,7 @@ namespace Domain.ParticipationStates
             if (!ConnectedTeam.UserIds.Contains(userId))
             {
                 throw new DomainException($"Can't add connected user {userId} isn't in participation team");
-            }
+            }   
 
             var user = !ConnectedTeam.ConnectedUserEntities.Any()
                 ? new ConnectedUserEntity(userId, true)

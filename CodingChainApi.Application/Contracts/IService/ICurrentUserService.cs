@@ -4,7 +4,6 @@ namespace Application.Contracts.IService
 {
     public interface ICurrentUserService
     {
-        UserId? UserId { get; }
-        public UserId ConnectedUserId { get; set; }
+        UserId UserId { get; }
     }
 }

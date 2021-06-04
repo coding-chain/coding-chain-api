@@ -30,7 +30,7 @@ namespace Application.Write.Teams
             var team = await _teamRepository.FindByIdAsync(new TeamId(teamId));
             if (team is null)
                 throw new ApplicationException($"Team with id {teamId} doesn't exists");
-            team.ValidateTeamRenamingByMember(_currentUserService.ConnectedUserId);
+            team.ValidateTeamRenamingByMember(_currentUserService.UserId);
             team.Rename(name);
             await _teamRepository.SetAsync(team);
             return team.Id.ToString();

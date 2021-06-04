@@ -31,7 +31,7 @@ namespace Application.Write.Teams
             if (team is null)
                 throw new ApplicationException($"Team with id {request.TeamId} doesn't exists");
             var memberId = new UserId(request.MemberId);
-            team.ValidateMemberDeletionByMember(_currentUserService.ConnectedUserId, memberId);
+            team.ValidateMemberDeletionByMember(_currentUserService.UserId, memberId);
             team.RemoveMember(memberId);
             await _teamRepository.SetAsync(team);
             return memberId.ToString();

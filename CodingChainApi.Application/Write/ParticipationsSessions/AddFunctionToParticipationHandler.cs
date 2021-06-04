@@ -33,12 +33,12 @@ namespace Application.Write.ParticipationsSessions
                 throw new NotFoundException(request.ParticipationId.ToString(), "ParticipationSession");
             var function = new FunctionEntity(
                 await _repository.GetNextFunctionId(),
-                _userService.ConnectedUserId,
+                _userService.UserId,
                 request.Code,
                 _timeService.Now(),
                 request.Order
                 );
-            participation.AddFunction(function, _userService.ConnectedUserId);
+            participation.AddFunction(function, _userService.UserId);
             await _repository.SetAsync(participation);
             return function.Id.ToString();
         }

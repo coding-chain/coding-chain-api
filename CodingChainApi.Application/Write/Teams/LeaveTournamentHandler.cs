@@ -30,7 +30,7 @@ namespace Application.Write.Teams
             if (team is null)
                 throw new ApplicationException($"Team with id {request.TeamId} doesn't exists");
             var tournamentId = new TournamentId(request.TournamentId);
-            team.LeaveTournament(tournamentId, this._currentUserService.ConnectedUserId);
+            team.LeaveTournament(tournamentId, this._currentUserService.UserId);
             await _teamRepository.SetAsync(team);
             return team.Id.ToString();
         }

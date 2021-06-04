@@ -37,7 +37,7 @@ namespace Application.Write.Teams
                 throw new ApplicationException($"Team with id {request.TeamId} not found");
             }
             
-            team.ValidateMemberAdditionByMember(_currentUserService.ConnectedUserId);
+            team.ValidateMemberAdditionByMember(_currentUserService.UserId);
             
             if(!await  _readUserRepository.UserExistsByIdAsync(request.MemberId))
                 throw new ApplicationException($"User with id {request.MemberId} not found");

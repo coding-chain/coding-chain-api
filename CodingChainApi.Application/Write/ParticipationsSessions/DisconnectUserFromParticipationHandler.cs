@@ -32,7 +32,7 @@ namespace Application.Write.ParticipationsSessions
             {
                 throw new NotFoundException(request.ParticipationId.ToString(), "Participation");
             }
-            var connectionCount = participation.RemoveConnectedUser(_currentUserService.ConnectedUserId);
+            var connectionCount = participation.RemoveConnectedUser(_currentUserService.UserId);
             await _participationsSessionsRepository.SetAsync(participation);
             return connectionCount;
         }

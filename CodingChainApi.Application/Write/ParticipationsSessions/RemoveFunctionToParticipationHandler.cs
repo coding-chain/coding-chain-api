@@ -29,7 +29,7 @@ namespace Application.Write.ParticipationsSessions
             var participation = await _repository.FindByIdAsync(new ParticipationId(request.ParticipationId));
             if(participation is null)
                 throw new NotFoundException(request.ParticipationId.ToString(), "ParticipationSession");
-            participation.RemoveFunction(new FunctionId(request.FunctionId), _userService.ConnectedUserId);
+            participation.RemoveFunction(new FunctionId(request.FunctionId), _userService.UserId);
             return (await _repository.SetAsync(participation)).ToString();
         }
     }
