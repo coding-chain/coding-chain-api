@@ -46,7 +46,6 @@ namespace CodingChainApi.Infrastructure
             services.AddScoped<ISecurityService, SecurityService>();
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<ITimeService, TimeService>();
-            services.AddScoped<IParticipationExecutionService, ParticipationExecutionService>();
             services.AddScoped<IParticipationsSessionsRepository, ParticipationsSessionRepository>();
             services.AddScoped<IFunctionTypeParserService, FunctionTypeParserService>();
             services.AddScoped<ICache, Cache>();
@@ -103,16 +102,24 @@ namespace CodingChainApi.Infrastructure
 
         private static TImplementation ConfigureInjectableSettings<TInterface, TImplementation>(
             IServiceCollection services,
-            IConfiguration configuration) where TImplementation : class, TInterface where TInterface : class
+            IConfiguration configuration, bool singleton = true ) where TImplementation : class, TInterface where TInterface : class
         {
             var settingsName = typeof(TImplementation).Name;
             var settings = configuration.GetSection(settingsName).Get<TImplementation>();
             services.Configure<TImplementation>(configuration.GetSection(settingsName));
-            services.AddSingleton<TInterface>(sp =>
-                sp.GetRequiredService<IOptions<TImplementation>>().Value);
+            if (singleton)
+            {
+                services.AddSingleton<TInterface>(sp =>
+                    sp.GetRequiredService<IOptions<TImplementation>>().Value);
+            }
+            else
+            {
+                services.AddScoped<TInterface>(sp =>
+                    sp.GetRequiredService<IOptions<TImplementation>>().Value);
+            }
+
             return settings;
         }
-
         private static void ConfigureJwt(IServiceCollection services, IConfiguration configuration)
         {
             var jwtSettings = ConfigureInjectableSettings<IJwtSettings, JwtSettings>(services, configuration);
@@ -182,9 +189,8 @@ namespace CodingChainApi.Infrastructure
         private static void ConfigureRabbitMQ(IServiceCollection serviceCollection, IConfiguration configuration)
         {
             // RabbitMQ
-            serviceCollection.AddHostedService<ParticipationExecutionService>();
-            serviceCollection.AddSingleton<IRabbitMqPublisher, RabbitMQPublisher>();
-            ConfigureInjectableSettings<IRabbitMQSettings, RabbitMQSettings>(serviceCollection, configuration);
+            serviceCollection.AddScoped<IParticipationPendingExecutionService, ParticipationPendingExecutionService>();
+            ConfigureInjectableSettings<IRabbitMqSettings, RabbitMqSettings>(serviceCollection, configuration);
             // End RabbitMQ Configuration
         }
     }

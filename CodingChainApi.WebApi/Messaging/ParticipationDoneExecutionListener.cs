@@ -1,46 +1,26 @@
-using System;
-using System.Collections.Generic;
-using Application.Common.Exceptions;
-using Application.Contracts.IService;
-using Application.Contracts.Processes;
+﻿using System;
 using Application.Write.ParticipationsSessions;
 using CodingChainApi.Infrastructure.MessageBroker;
+using CodingChainApi.Infrastructure.Services.Processes;
 using CodingChainApi.Infrastructure.Settings;
 using MediatR;
-using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace CodingChainApi.Infrastructure.Services.Processes
+namespace NeosCodingApi.Messaging
 {
-    public record ProcessEndResult(Guid ParticipationId, string? Errors, string? Output,  IList<Guid> TestsPassedIds);
-    public class ParticipationExecutionService : RabbitMqBaseListener<ParticipationExecutionService>,
-        IParticipationExecutionService
+    public class ParticipationDoneExecutionListener : RabbitMqBaseListener
     {
-        private readonly IRabbitMqPublisher _rabbitMqPublisher;
-
         private readonly IMediator _mediator;
-        
-        protected sealed override string QueueName { get; set; }
-        protected sealed override string RouteKey { get; set; }
 
-        public ParticipationExecutionService(IRabbitMQSettings settings, ILogger<ParticipationExecutionService> logger,
-            IRabbitMqPublisher rabbitMqPublisher, IMediator mediator)
-            : base(settings, logger)
+        public ParticipationDoneExecutionListener(IRabbitMqSettings settings,
+            ILogger<ParticipationDoneExecutionListener> logger, IMediator mediator) : base(settings, logger)
         {
-            _rabbitMqPublisher = rabbitMqPublisher;
+            Exchange = settings.ParticipationExchange;
+            RoutingKey = settings.DoneExecutionRoutingKey;
             _mediator = mediator;
-            RouteKey = settings.RoutingKey;
-            QueueName = settings.ExecutionCodeRoute;
         }
-
-
-        public void StartExecution(RunParticipationTestsDto command)
-        {
-            _rabbitMqPublisher.PushMessage(QueueName, command);
-        }
-
 
         public override bool Process(string? message)
         {
@@ -63,6 +43,7 @@ namespace CodingChainApi.Infrastructure.Services.Processes
                     _mediator.Publish(new UpdateParticipationProcessNotification(result.ParticipationId, result.Errors,
                         result.Output, result.TestsPassedIds));
                 }
+
                 return true;
             }
             catch (Exception ex)

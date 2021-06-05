@@ -18,14 +18,14 @@ namespace Application.Write.ParticipationsSessions
 
     public class RunParticipationTestsHandler : IRequestHandler<RunParticipationCommand, string>
     {
-        private readonly IParticipationExecutionService _participationExecutionService;
+        private readonly IParticipationPendingExecutionService _participationExecutionService;
         private readonly IParticipationsSessionsRepository _participationsSessionsRepository;
         private readonly IReadProgrammingLanguageRepository _readProgrammingLanguageRepository;
         private readonly IReadStepRepository _readStepRepository;
         private readonly IReadTestRepository _readTestRepository;
         private readonly ICurrentUserService _currentUserService;
         private readonly ITimeService _timeService;
-        public RunParticipationTestsHandler(IParticipationExecutionService participationExecutionService,
+        public RunParticipationTestsHandler(IParticipationPendingExecutionService participationExecutionService,
             IParticipationsSessionsRepository participationsSessionsRepository,
             IReadProgrammingLanguageRepository readProgrammingLanguageRepository,
             IReadStepRepository readStepRepository, IReadTestRepository readTestRepository, ICurrentUserService currentUserService, ITimeService timeService)

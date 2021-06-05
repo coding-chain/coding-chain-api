@@ -15,7 +15,7 @@ namespace Application.Contracts.IService
 
         public record Function(Guid Id, string Code, int Order);
     }
-    public interface IParticipationExecutionService
+    public interface IParticipationPendingExecutionService
     {
         public void StartExecution(RunParticipationTestsDto command);
     }

@@ -6,6 +6,7 @@ using Application;
 using Application.Contracts.IService;
 using CodingChainApi.Infrastructure;
 using CodingChainApi.Infrastructure.Hubs;
+using CodingChainApi.Infrastructure.Services.Processes;
 using CodingChainApi.Infrastructure.Settings;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -20,6 +21,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NeosCodingApi.Controllers;
+using NeosCodingApi.Messaging;
 using NeosCodingApi.Services;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
@@ -55,6 +57,7 @@ namespace NeosCodingApi
             ConfigureAuthentication(services);
 
             services.AddSignalR();
+            services.AddHostedService<ParticipationDoneExecutionListener>();
 
             services.AddCors();
 

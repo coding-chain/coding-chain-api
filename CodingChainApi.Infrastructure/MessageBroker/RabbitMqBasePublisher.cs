@@ -7,16 +7,16 @@ using RabbitMQ.Client;
 
 namespace CodingChainApi.Infrastructure.MessageBroker
 {
-    public class RabbitMQPublisher : IRabbitMqPublisher
+    public  abstract class RabbitMqBasePublisher
     {
         private readonly IModel? _channel;
 
         private readonly ILogger _logger;
 
-        private readonly string? _routeKey;
-        private readonly string? _queueWorker;
+        protected string? RoutingKey;
+        protected string? Exchange;
 
-        public RabbitMQPublisher(IRabbitMQSettings settings, ILogger<RabbitMQPublisher> logger)
+        public RabbitMqBasePublisher(IRabbitMqSettings settings, ILogger<RabbitMqBasePublisher> logger)
         {
             try
             {
@@ -26,8 +26,6 @@ namespace CodingChainApi.Infrastructure.MessageBroker
                 };
                 var connection = factory.CreateConnection();
                 _channel = connection.CreateModel();
-                _routeKey = settings.RoutingKey;
-                _queueWorker = settings.RabbitMqWorker;
             }
             catch (Exception ex)
             {
@@ -37,16 +35,15 @@ namespace CodingChainApi.Infrastructure.MessageBroker
             _logger = logger;
         }
 
-        public virtual void PushMessage(string queueName, object message)
+        protected void PushMessage(object message)
         {
-            _logger.LogInformation($"PushMessage,queueName:{queueName}");
-            _channel?.QueueDeclare(queue: queueName, durable: false, exclusive: false, autoDelete: true,
-                arguments: null);
+            _logger.LogInformation("PushMessage in {Exchange}, routing key:{RoutingKey}", Exchange, RoutingKey);
+            _channel.ExchangeDeclare(exchange: Exchange, type: ExchangeType.Topic);
 
             string msgJson = JsonConvert.SerializeObject(message);
             var body = Encoding.UTF8.GetBytes(msgJson);
-            _channel.BasicPublish(exchange: _queueWorker,
-                routingKey: _routeKey,
+            _channel.BasicPublish(exchange: Exchange,
+                routingKey: RoutingKey,
                 basicProperties: null,
                 body: body);
         }

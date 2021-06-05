@@ -11,19 +11,18 @@ using RabbitMQ.Client.Events;
 
 namespace CodingChainApi.Infrastructure.MessageBroker
 {
-    public abstract class RabbitMqBaseListener<TImplementation> : IHostedService
+    public abstract class RabbitMqBaseListener : IHostedService
     {
         private readonly IConnection _connection;
         private readonly IModel _channel;
-        protected abstract string RouteKey { get; set; }
-        protected abstract string QueueName { get; set; }
-        private readonly string _queueWorker;
-        protected readonly ILogger<RabbitMqBaseListener<TImplementation>> Logger;
+        protected string? RoutingKey;
+        protected string? Exchange;
+        protected readonly ILogger<RabbitMqBaseListener> Logger;
 
-        public RabbitMqBaseListener(IRabbitMQSettings settings, ILogger<RabbitMqBaseListener<TImplementation>> logger)
+        public RabbitMqBaseListener(IRabbitMqSettings settings, ILogger<RabbitMqBaseListener> logger)
         {
             Logger = logger;
-            _queueWorker = settings.RabbitMqWorker;
+
             try
             {
                 var factory = new ConnectionFactory()
@@ -35,7 +34,7 @@ namespace CodingChainApi.Infrastructure.MessageBroker
             }
             catch (Exception ex)
             {
-                Logger.LogError("RabbitListener init error,ex:{Message}",ex.Message);
+                Logger.LogError("RabbitListener init error,ex:{Error}", ex.Message);
                 throw new InfrastructureException(ex.Message);
             }
         }
@@ -60,14 +59,17 @@ namespace CodingChainApi.Infrastructure.MessageBroker
         {
             try
             {
-                Logger.LogDebug("RabbitListener register,routeKey:{RouteKey}", RouteKey);
-                _channel.ExchangeDeclare(exchange: _queueWorker, type: "topic");
-                _channel.QueueDeclare(queue: QueueName, exclusive: false);
-                _channel.QueueBind(queue: QueueName,
-                    exchange: _queueWorker,
-                    routingKey: RouteKey);
+                _channel.ExchangeDeclare(exchange: Exchange, type: ExchangeType.Topic);
+                var queueName = _channel.QueueDeclare().QueueName;
+                Logger.LogInformation(
+                    "RabbitListener register, exchange: {Exchange}, routeKey:{RoutingKey}, queueName {QueueName}",
+                    Exchange, RoutingKey, queueName);
+
+                _channel.QueueBind(queue: queueName,
+                    exchange: Exchange,
+                    routingKey: RoutingKey);
                 var consumer = new EventingBasicConsumer(_channel);
-                consumer.Received += (model, ea) =>
+                consumer.Received += async (model, ea) =>
                 {
                     var body = ea.Body;
                     var message = Encoding.UTF8.GetString(body.ToArray());
@@ -78,14 +80,18 @@ namespace CodingChainApi.Infrastructure.MessageBroker
                         _channel.BasicAck(ea.DeliveryTag, false);
                     }
                 };
-                _channel.BasicConsume(queue: QueueName, consumer: consumer);
+                _channel.BasicConsume(queue: queueName, consumer: consumer);
             }
             catch (Exception exception)
             {
-                Logger.LogError("RabbitMQ error:{ExceptionMessage}",exception.Message);
+                Logger.LogError("RabbitMQ error:{Error}", exception.Message);
             }
         }
 
+        public void DeRegister()
+        {
+            _connection.Close();
+        }
 
         // How to process messages
         public abstract bool Process(string message);
