@@ -5,6 +5,7 @@ using System.Net;
 using System.Threading.Tasks;
 using Application.Read.Users;
 using Application.Read.Users.Handlers;
+using Application.Write.Users.EditUser;
 using Application.Write.Users.LoginUser;
 using Application.Write.Users.RegisterUser;
 using AutoMapper;
@@ -70,6 +71,24 @@ namespace NeosCodingApi.Controllers
             {
                 var loggedUser = await Mediator.Send(new GetPublicUserQuery());
                 return Ok(loggedUser);
+            }
+            catch (ApplicationException e)
+            {
+                return Unauthorized();
+            }
+        }
+
+        [HttpPut(TemplateActionName, Name = nameof(Me))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public async Task<IActionResult> Me(EditUserCommand cmd)
+        {
+            try
+            {
+               await Mediator.Send(cmd);
+               return NoContent();
             }
             catch (ApplicationException e)
             {
