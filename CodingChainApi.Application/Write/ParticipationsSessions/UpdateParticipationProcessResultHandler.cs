@@ -13,10 +13,10 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Application.Write.ParticipationsSessions
 {
-    public record UpdateParticipationProcessNotification
+    public record ProcessEndNotification
         (Guid ParticipationId, string? Output, string? Error, IList<Guid> TestsPassedIds) : INotification;
 
-    public class UpdateParticipationProcessResultHandler : INotificationHandler<UpdateParticipationProcessNotification>
+    public class UpdateParticipationProcessResultHandler : INotificationHandler<ProcessEndNotification>
     {
         private readonly IServiceProvider _serviceProvider;
 
@@ -25,7 +25,7 @@ namespace Application.Write.ParticipationsSessions
             _serviceProvider = serviceProvider;
         }
 
-        public async Task Handle(UpdateParticipationProcessNotification notification,
+        public async Task Handle(ProcessEndNotification notification,
             CancellationToken cancellationToken)
         {
             using var scope = _serviceProvider.CreateScope();

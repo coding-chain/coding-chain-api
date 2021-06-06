@@ -9,6 +9,9 @@
         string PendingExecutionRoutingKey { get; set; }
         string DoneExecutionRoutingKey { get; set; }
         string ParticipationExchange { get; set; }
+        string PlagiarismExchange { get; set; }
+        string PlagiarismAnalyzeExecutionRoutingKey { get; set; }
+        string PlagiarismAnalyzeDoneRoutingKey { get; set; }
     }
     public class RabbitMqSettings :  IRabbitMqSettings
     {
@@ -19,5 +22,8 @@
         public string PendingExecutionRoutingKey { get; set; }
         public string DoneExecutionRoutingKey { get; set; }
         public string ParticipationExchange { get; set; }
+        public string PlagiarismExchange { get; set; }
+        public string PlagiarismAnalyzeExecutionRoutingKey { get; set; }
+        public string PlagiarismAnalyzeDoneRoutingKey { get; set; }
     }
 }

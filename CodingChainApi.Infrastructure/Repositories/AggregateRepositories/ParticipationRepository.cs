@@ -2,8 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Application.Contracts.IService;
-using Application.Read.Contracts;
 using Application.Write.Contracts;
 using CodingChainApi.Infrastructure.Common.Extensions;
 using CodingChainApi.Infrastructure.Contexts;
@@ -14,7 +12,6 @@ using Domain.Teams;
 using Domain.Tournaments;
 using Domain.Users;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query;
 using StepEntity = Domain.Participations.StepEntity;
 
 namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
@@ -110,7 +107,7 @@ namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
         {
             return await _context.Participations
                        .Include(p => p.Functions)
-                       .ThenInclude(f => f.UserFunctions)
+                       .ThenInclude<Participation, Function, IList<UserFunction>>(f => f.UserFunctions)
                        // .Include(p => p.Step)
                        // .ThenInclude(s => s.TournamentSteps)
                        // .Include(p => p.Tournament)
@@ -169,7 +166,7 @@ namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
                 .ThenInclude(p => p.TournamentSteps)
                 .Include(p => p.Tournament)
                 .Include(p => p.Functions)
-                .ThenInclude(f => f.UserFunctions)
+                .ThenInclude<Participation, Function, IList<UserFunction>>(f => f.UserFunctions)
                 .Include(p => p.Team)
                 .ThenInclude(t => t.UserTeams)
                 .FirstOrDefaultAsync(p =>

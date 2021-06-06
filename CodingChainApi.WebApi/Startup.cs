@@ -58,6 +58,7 @@ namespace NeosCodingApi
 
             services.AddSignalR();
             services.AddHostedService<ParticipationDoneExecutionListener>();
+            services.AddHostedService<PlagiarismExecutionDoneListener>();
 
             services.AddCors();
 

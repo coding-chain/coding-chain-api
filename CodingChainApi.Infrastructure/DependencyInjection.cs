@@ -190,6 +190,7 @@ namespace CodingChainApi.Infrastructure
         {
             // RabbitMQ
             serviceCollection.AddScoped<IParticipationPendingExecutionService, ParticipationPendingExecutionService>();
+            serviceCollection.AddScoped<IPlagiarismPendingExecutionService, PlagiarismPendingExecutionService>();
             ConfigureInjectableSettings<IRabbitMqSettings, RabbitMqSettings>(serviceCollection, configuration);
             // End RabbitMQ Configuration
         }

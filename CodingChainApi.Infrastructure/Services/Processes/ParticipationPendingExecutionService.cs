@@ -14,7 +14,6 @@ using Newtonsoft.Json.Linq;
 
 namespace CodingChainApi.Infrastructure.Services.Processes
 {
-    public record ProcessEndResult(Guid ParticipationId, string? Errors, string? Output, IList<Guid> TestsPassedIds);
 
     public class ParticipationPendingExecutionService : RabbitMqBasePublisher, IParticipationPendingExecutionService
     {
