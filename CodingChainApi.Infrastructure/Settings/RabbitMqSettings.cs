@@ -12,6 +12,9 @@
         string PlagiarismExchange { get; set; }
         string PlagiarismAnalyzeExecutionRoutingKey { get; set; }
         string PlagiarismAnalyzeDoneRoutingKey { get; set; }
+        string PrepareExecutionRoutingKey {get;set;}
+        string CleanExecutionRoutingKey {get;set;}
+        string PreparedExecutionRoutingKey { get; set; }
     }
     public class RabbitMqSettings :  IRabbitMqSettings
     {
@@ -25,5 +28,8 @@
         public string PlagiarismExchange { get; set; }
         public string PlagiarismAnalyzeExecutionRoutingKey { get; set; }
         public string PlagiarismAnalyzeDoneRoutingKey { get; set; }
+        public string PrepareExecutionRoutingKey { get; set; }
+        public string CleanExecutionRoutingKey { get; set; }
+        public string PreparedExecutionRoutingKey { get; set; }
     }
 }

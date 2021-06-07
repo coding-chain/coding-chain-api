@@ -16,6 +16,7 @@ namespace Application.Read.ParticipationSessions
         string? LastError,
         string? LastOutput,
         DateTime? ProcessStartTime,
-        IList<Guid> PassedTestsIds
+        IList<Guid> PassedTestsIds,
+        bool IsReady
         );
 }

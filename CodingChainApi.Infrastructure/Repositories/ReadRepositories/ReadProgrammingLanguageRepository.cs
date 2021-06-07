@@ -8,6 +8,7 @@ using CodingChainApi.Infrastructure.Common.Extensions;
 using CodingChainApi.Infrastructure.Contexts;
 using Domain.ProgrammingLanguages;
 using Microsoft.EntityFrameworkCore;
+using ProgrammingLanguage = CodingChainApi.Infrastructure.Models.ProgrammingLanguage;
 
 namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
 {
@@ -29,6 +30,9 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
                 .FromPaginationQueryAsync(paginationQuery);
         }
 
+        public static ProgrammingLanguageNavigation ToProgrammingLanguageNavigation(ProgrammingLanguage language) =>
+            new(
+                language.Id, language.Name);
 
         public async Task<ProgrammingLanguageNavigation?> GetOneLanguageNavigationByIdAsync(Guid id)
         {

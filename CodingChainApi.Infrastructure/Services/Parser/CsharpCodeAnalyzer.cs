@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 
 namespace CodingChainApi.Infrastructure.Services.Parser
 {
-    public class CsharpCodeAnalyzer
+    public class CsharpCodeAnalyzer : ICodeAnalyzer
     {
         public string? GetInputType(string code)
         {

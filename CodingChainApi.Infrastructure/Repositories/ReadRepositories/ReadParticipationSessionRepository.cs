@@ -34,7 +34,8 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
                 participation.LastError,
                 participation.LastOutput,
                 participation.ProcessStartTime,
-                participation.PassedTestsIds.Select(id => id.Value).ToList()
+                participation.PassedTestsIds.Select(id => id.Value).ToList(),
+                participation.IsReady
             );
 
         public Task<bool> ExistsById(Guid id)

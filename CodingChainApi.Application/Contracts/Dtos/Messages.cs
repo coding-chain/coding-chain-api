@@ -1,11 +1,8 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
-using Application.Contracts.Processes;
-using Application.Write.ParticipationsSessions;
 using Domain.ProgrammingLanguages;
-using MediatR;
 
-namespace Application.Contracts.IService
+namespace Application.Contracts.Dtos
 {
     public record RunParticipationTestsDto(Guid Id, LanguageEnum Language, string? HeaderCode,
         IList<RunParticipationTestsDto.Test> Tests,
@@ -15,8 +12,13 @@ namespace Application.Contracts.IService
 
         public record Function(Guid Id, string Code, int Order);
     }
-    public interface IParticipationPendingExecutionService
-    {
-        public void StartExecution(RunParticipationTestsDto command);
-    }
+    
+    public record Function(Guid Id, string Code);
+
+    public record PlagiarismAnalyzeExecutionDto
+        (Function SuspectedFunction, IList<Function> ComparedFunctions);
+    
+    public record PrepareParticipationExecutionDto(Guid Id, LanguageEnum Language);
+    public record CleanParticipationExecutionDto(Guid Id, LanguageEnum Language);
+
 }

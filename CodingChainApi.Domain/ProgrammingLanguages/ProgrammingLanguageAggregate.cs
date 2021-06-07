@@ -5,7 +5,8 @@ namespace Domain.ProgrammingLanguages
 {
     public enum LanguageEnum
     {
-        CSharp
+        CSharp,
+        Typescript
     }
     public record ProgrammingLanguageId(Guid Value): IEntityId
     {

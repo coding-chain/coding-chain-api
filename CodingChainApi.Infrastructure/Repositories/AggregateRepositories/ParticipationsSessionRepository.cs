@@ -60,8 +60,7 @@ namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
 
         public async Task RemoveAsync(ParticipationId id)
         {
-            _cache.RemoveCache(id);
-            await _participationRepository.RemoveAsync(id);
+            await _cache.RemoveCache(id).ToTask();
         }
 
         public Task<ParticipationId> NextIdAsync()

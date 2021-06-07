@@ -18,6 +18,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodingChainApi.CSharpClient
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodingChainApi.Domain.Tests", "CodingChainApi.Domain.Tests\CodingChainApi.Domain.Tests.csproj", "{9A248A17-39EF-467E-B736-429BCD05DB83}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodingChainApi.Infrastructure.Tests", "CodingChainApi.Infrastructure.Tests\CodingChainApi.Infrastructure.Tests.csproj", "{E293AD77-084B-43A7-8469-BCAF9C859399}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -48,6 +50,10 @@ Global
 		{9A248A17-39EF-467E-B736-429BCD05DB83}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9A248A17-39EF-467E-B736-429BCD05DB83}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9A248A17-39EF-467E-B736-429BCD05DB83}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E293AD77-084B-43A7-8469-BCAF9C859399}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E293AD77-084B-43A7-8469-BCAF9C859399}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E293AD77-084B-43A7-8469-BCAF9C859399}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E293AD77-084B-43A7-8469-BCAF9C859399}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{0715882D-B50B-4A78-A564-78A4DD46EC6B} = {20B61A66-5F2F-42D3-AF76-6FD952512EB4}
@@ -56,5 +62,6 @@ Global
 		{3A5F89A7-EC4F-4F7C-81F6-EBE057D816D5} = {1EF2800D-B856-402C-A7AC-7EE781DC9951}
 		{EB91BD00-6F7E-4A67-A025-547805C5D482} = {20B61A66-5F2F-42D3-AF76-6FD952512EB4}
 		{9A248A17-39EF-467E-B736-429BCD05DB83} = {47B38034-1919-4B32-B13A-28CB4D886009}
+		{E293AD77-084B-43A7-8469-BCAF9C859399} = {1EF2800D-B856-402C-A7AC-7EE781DC9951}
 	EndGlobalSection
 EndGlobal
