@@ -10,14 +10,12 @@ namespace Domain.CodeAnalysis
     {
         public IReadOnlyList<PlagiarizedFunctionEntity> PlagiarizedFunction => _plagiarizedFunctions.AsReadOnly();
         private List<PlagiarizedFunctionEntity> _plagiarizedFunctions;
-        public FunctionId CheatingFunctionId;
 
         public PlagiarizedFunctionAggregate(FunctionId id, List<PlagiarizedFunctionEntity> plagiarizedFunctions, FunctionId cheatingFunctionId) :
             base(id)
         {
             Id = id;
             _plagiarizedFunctions = plagiarizedFunctions;
-            CheatingFunctionId = cheatingFunctionId;
         }
 
         public void AddPlagiarizedFunction(PlagiarizedFunctionEntity plagiarizedFunction)
@@ -27,7 +25,6 @@ namespace Domain.CodeAnalysis
                 throw new DomainException(new List<string>()
                     {$"Function with id {plagiarizedFunction.Id} already in plagiarized pile"});
             }
-
             _plagiarizedFunctions.Add(plagiarizedFunction);
         }
     }
