@@ -2,6 +2,7 @@
 using System.Linq;
 using CodingChainApi.Infrastructure.Models;
 using CodingChainApi.Infrastructure.Settings;
+using Domain.CodeAnalysis;
 using Domain.ProgrammingLanguages;
 using Domain.Users;
 using Microsoft.EntityFrameworkCore;
@@ -13,7 +14,6 @@ namespace CodingChainApi.Infrastructure.Contexts
 {
     public class CodingChainContext : DbContext
     {
-
         public CodingChainContext(DbContextOptions<CodingChainContext> options)
             : base(options)
         {
@@ -35,6 +35,8 @@ namespace CodingChainApi.Infrastructure.Contexts
         public DbSet<TournamentStep> TournamentSteps { get; set; }
         public DbSet<Step> Steps { get; set; }
         public DbSet<Test> Tests { get; set; }
+
+        public DbSet<PlagiarizedFunction> PlagiarizedFunctions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -76,6 +78,11 @@ namespace CodingChainApi.Infrastructure.Contexts
                 .ToTable("test")
                 .Property(p => p.Id)
                 .ValueGeneratedNever();
+            modelBuilder.Entity<PlagiarizedFunction>()
+                .ToTable("plagiarized_functions")
+                .Property(func => func.Id)
+                .ValueGeneratedNever();
+
 
             modelBuilder.Entity<User>()
                 .HasMany(s => s.Rights)
@@ -127,7 +134,7 @@ namespace CodingChainApi.Infrastructure.Contexts
             modelBuilder.Entity<Right>()
                 .Property(c => c.Name)
                 .HasConversion<string>();
-            
+
             modelBuilder.Entity<ProgrammingLanguage>()
                 .Property(c => c.Name)
                 .HasConversion<string>();
