@@ -21,6 +21,7 @@ namespace CodingChainApi.Infrastructure.Hubs
     public record ParticipationFunctionRemovedEvent(Guid FunctionId);
     public record ParticipationProcessEndEvent(Guid ParticipationId);
     public record ParticipationProcessStartEvent(Guid ParticipationId);
+    public record ParticipationReadyEvent(Guid ParticipationId);
 
     public interface IParticipationsClient
     {
@@ -34,6 +35,7 @@ namespace CodingChainApi.Infrastructure.Hubs
         
         Task OnProcessStart(ParticipationProcessStartEvent serverEvent);
         Task OnProcessEnd(ParticipationProcessEndEvent serverEvent);
+        Task OnReady(ParticipationReadyEvent serverEvent);
     }
 
     public class ParticipationSessionsHub : Hub<IParticipationsClient>

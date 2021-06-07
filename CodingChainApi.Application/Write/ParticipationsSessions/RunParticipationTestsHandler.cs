@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Application.Common.Exceptions;
+using Application.Contracts.Dtos;
 using Application.Contracts.IService;
 using Application.Read.Contracts;
 using Application.Write.Contracts;
@@ -18,14 +19,14 @@ namespace Application.Write.ParticipationsSessions
 
     public class RunParticipationTestsHandler : IRequestHandler<RunParticipationCommand, string>
     {
-        private readonly IParticipationPendingExecutionService _participationExecutionService;
+        private readonly IDispatcher<RunParticipationTestsDto> _participationExecutionService;
         private readonly IParticipationsSessionsRepository _participationsSessionsRepository;
         private readonly IReadProgrammingLanguageRepository _readProgrammingLanguageRepository;
         private readonly IReadStepRepository _readStepRepository;
         private readonly IReadTestRepository _readTestRepository;
         private readonly ICurrentUserService _currentUserService;
         private readonly ITimeService _timeService;
-        public RunParticipationTestsHandler(IParticipationPendingExecutionService participationExecutionService,
+        public RunParticipationTestsHandler(IDispatcher<RunParticipationTestsDto> participationExecutionService,
             IParticipationsSessionsRepository participationsSessionsRepository,
             IReadProgrammingLanguageRepository readProgrammingLanguageRepository,
             IReadStepRepository readStepRepository, IReadTestRepository readTestRepository, ICurrentUserService currentUserService, ITimeService timeService)
@@ -69,7 +70,7 @@ namespace Application.Write.ParticipationsSessions
                     .ToList()
             );
             participation.StartProcess(_timeService.Now());
-            _participationExecutionService.StartExecution(runTestDto);
+            _participationExecutionService.Dispatch(runTestDto);
             await _participationsSessionsRepository.SetAsync(participation);
             return await Task.FromResult(request.ParticipationId.ToString());
         }

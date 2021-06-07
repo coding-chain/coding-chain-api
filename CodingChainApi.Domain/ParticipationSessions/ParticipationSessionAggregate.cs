@@ -20,6 +20,7 @@ namespace Domain.ParticipationStates
     public record ProcessResultUpdated(ParticipationId ParticipationId) : IDomainEvent;
 
     public record ProcessStarted(ParticipationId ParticipationId) : IDomainEvent;
+    public record ParticipationReady(ParticipationId ParticipationId) : IDomainEvent;
 
     public class ParticipationSessionAggregate : ParticipationAggregate
     {
@@ -33,14 +34,19 @@ namespace Domain.ParticipationStates
 
         public string? LastError { get; private set; }
         public string? LastOutput { get; private set; }
+        
+        
+        public bool IsReady { get; private set; }
 
         public DateTime? ProcessStartTime { get; private set; }
 
+        public bool HasConnectedUsers => ConnectedTeam.ConnectedUserEntities.Any(); 
         public static ParticipationSessionAggregate FromParticipationAggregate(ParticipationAggregate participation,
             IList<TestEntity> testEntities)
         {
             var team = new TeamStateEntity(participation.Team.Id, participation.Team.UserIds,
                 new List<ConnectedUserEntity>());
+            
             return new ParticipationSessionAggregate(
                 participation.Id,
                 team,
@@ -50,18 +56,20 @@ namespace Domain.ParticipationStates
                 participation.StartDate,
                 participation.EndDate,
                 participation.CalculatedScore,
-                participation.Functions.ToList());
+                participation.Functions.ToList(),
+                false);
         }
 
         protected ParticipationSessionAggregate(ParticipationId id, TeamStateEntity team,
             TournamentEntity tournamentEntity, StepSessionEntity stepSessionEntity, DateTime startDate,
             DateTime? endDate,
-            decimal calculatedScore, IList<FunctionEntity> functions) : base(id, team, tournamentEntity,
+            decimal calculatedScore, IList<FunctionEntity> functions, bool isReady) : base(id, team, tournamentEntity,
             stepSessionEntity,
             startDate, endDate, calculatedScore, functions)
         {
             ConnectedTeam = team;
             StepSessionEntity = stepSessionEntity;
+            IsReady = isReady;
         }
 
         public int AddConnectedUser(UserId userId)
@@ -148,6 +156,14 @@ namespace Domain.ParticipationStates
             _passedTestsIds = new List<TestId>();
             ProcessStartTime = startTime;
             RegisterEvent(new ProcessStarted(Id));
+        }
+
+        public void SetReadyState()
+        {
+            if (IsReady)
+                throw new DomainException($"Participation {Id} is already ready");
+            IsReady = true;
+            RegisterEvent(new ParticipationReady(Id));
         }
 
 

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Application;
 using Application.Common.Events;
 using Application.Common.Interceptors;
+using Application.Contracts.Dtos;
 using Application.Contracts.IService;
 using Application.Read.Contracts;
 using Application.Write.Contracts;
@@ -15,6 +16,7 @@ using CodingChainApi.Infrastructure.Repositories.AggregateRepositories;
 using CodingChainApi.Infrastructure.Repositories.ReadRepositories;
 using CodingChainApi.Infrastructure.Services;
 using CodingChainApi.Infrastructure.Services.Cache;
+using CodingChainApi.Infrastructure.Services.Messaging;
 using CodingChainApi.Infrastructure.Services.Parser;
 using CodingChainApi.Infrastructure.Services.Processes;
 using CodingChainApi.Infrastructure.Settings;
@@ -41,7 +43,7 @@ namespace CodingChainApi.Infrastructure
             ConfigureBcrypt(services, configuration);
             ConfigureProcess(services, configuration);
             ConfigureAppData(services, configuration);
-            ConfigureRabbitMQ(services, configuration);
+            ConfigureRabbitMq(services, configuration);
             //
             services.AddScoped<ISecurityService, SecurityService>();
             services.AddScoped<ITokenService, TokenService>();
@@ -186,11 +188,13 @@ namespace CodingChainApi.Infrastructure
             );
         }
 
-        private static void ConfigureRabbitMQ(IServiceCollection serviceCollection, IConfiguration configuration)
+        private static void ConfigureRabbitMq(IServiceCollection serviceCollection, IConfiguration configuration)
         {
             // RabbitMQ
-            serviceCollection.AddScoped<IParticipationPendingExecutionService, ParticipationPendingExecutionService>();
-            serviceCollection.AddScoped<IPlagiarismPendingExecutionService, PlagiarismPendingExecutionService>();
+            serviceCollection.AddScoped<IDispatcher<RunParticipationTestsDto>, ParticipationPendingExecutionService>();
+            serviceCollection.AddScoped<IDispatcher<PlagiarismAnalyzeExecutionDto>, PlagiarismPendingExecutionService>();
+            serviceCollection.AddScoped<IDispatcher<CleanParticipationExecutionDto>, CleanParticipationExecutionService>();
+            serviceCollection.AddScoped<IDispatcher<PrepareParticipationExecutionDto>, PrepareParticipationExecutionService>();
             ConfigureInjectableSettings<IRabbitMqSettings, RabbitMqSettings>(serviceCollection, configuration);
             // End RabbitMQ Configuration
         }
