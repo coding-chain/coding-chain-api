@@ -12,5 +12,7 @@ namespace Application.Read.Contracts
         public Task<ProgrammingLanguageNavigation?> GetOneLanguageNavigationByIdAsync(Guid id);
         public Task<bool> LanguageExistById(Guid programmingLanguageId);
         public Task<bool> LanguageExistsByName(LanguageEnum name);
+
+
     }
 }

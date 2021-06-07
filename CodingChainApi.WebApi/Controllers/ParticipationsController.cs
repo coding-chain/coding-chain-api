@@ -39,7 +39,6 @@ namespace NeosCodingApi.Controllers
         }
 
 
-
         [HttpGet("{participationId:guid}", Name = nameof(GetParticipationById))]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

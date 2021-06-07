@@ -7,6 +7,7 @@ using Application.Common.Pagination;
 using Application.Read.Contracts;
 using Application.Read.Participations;
 using Application.Read.Participations.Handlers;
+using Application.Read.ProgrammingLanguages;
 using Application.Read.Teams.Handlers;
 using Application.Read.Tournaments.Handlers;
 using CodingChainApi.Infrastructure.Common.Extensions;
@@ -25,6 +26,7 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
         {
             _context = context;
         }
+
         private static IQueryable<Participation> GetOrderByQuery(IQueryable<Participation> participationQuery,
             GetAllParticipationNavigationPaginatedQuery paginationQuery)
         {
@@ -32,6 +34,7 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
                 return participationQuery.OrderBy(t => t.EndDate);
             return participationQuery.OrderByDescending(t => t.EndDate);
         }
+
         public async Task<IPagedList<ParticipationNavigation>> GetAllParticipationNavigationPaginated(
             GetAllParticipationNavigationPaginatedQuery paginationQuery)
         {
@@ -41,18 +44,20 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
             {
                 query = GetOrderByQuery(query, paginationQuery);
             }
+
             return await query
                 .Select(p => ToParticipationNavigation(p))
                 .FromPaginationQueryAsync(paginationQuery);
         }
 
-        public async Task<IList<ParticipationNavigation>> GetAllParticipationsByTeamAndTournamentId(Guid teamId, Guid tournamentId)
+        public async Task<IList<ParticipationNavigation>> GetAllParticipationsByTeamAndTournamentId(Guid teamId,
+            Guid tournamentId)
         {
             return await GetParticipationIncludeQueryable()
-                .Where(p => !p.Deactivated 
-                       && !p.Tournament.IsDeleted && p.Tournament.IsPublished && p.Tournament.Id == tournamentId 
-                       && !p.Step.IsDeleted
-                       && !p.Team.IsDeleted && p.Team.Id == teamId)
+                .Where(p => !p.Deactivated
+                            && !p.Tournament.IsDeleted && p.Tournament.IsPublished && p.Tournament.Id == tournamentId
+                            && !p.Step.IsDeleted
+                            && !p.Team.IsDeleted && p.Team.Id == teamId)
                 .Select(p => ToParticipationNavigation(p))
                 .ToListAsync();
         }
@@ -67,9 +72,9 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
         public async Task<bool> ExistsById(Guid id)
         {
             return await this.GetParticipationIncludeQueryable()
-                .AnyAsync(p => !p.Deactivated 
-                               && !p.Tournament.IsDeleted 
-                               && p.Tournament.IsPublished 
+                .AnyAsync(p => !p.Deactivated
+                               && !p.Tournament.IsDeleted
+                               && p.Tournament.IsPublished
                                && !p.Step.IsDeleted
                                && !p.Team.IsDeleted);
         }
@@ -77,9 +82,9 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
         public async Task<bool> ParticipationExistsByTournamentStepTeamIds(Guid tournamentId, Guid stepId, Guid teamId)
         {
             return await this.GetParticipationIncludeQueryable()
-                .AnyAsync(p => !p.Deactivated 
-                               && !p.Tournament.IsDeleted 
-                               && p.Tournament.IsPublished 
+                .AnyAsync(p => !p.Deactivated
+                               && !p.Tournament.IsDeleted
+                               && p.Tournament.IsPublished
                                && !p.Step.IsDeleted
                                && !p.Team.IsDeleted
                                && p.Tournament.Id == tournamentId
@@ -87,25 +92,42 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
                                && p.Team.Id == teamId);
         }
 
+        public async Task<ProgrammingLanguageNavigation?> GetLanguageByParticipation(Guid participationId)
+        {
+            var participation = await _context.Participations
+                .Include(p => p.Step)
+                .ThenInclude(s => s.ProgrammingLanguage)
+                .FirstOrDefaultAsync(p =>
+                    p.Id == participationId && !p.Deactivated && !p.Step.IsDeleted &&
+                    !p.Step.ProgrammingLanguage.IsDeleted);
+            if (participation?.Step?.ProgrammingLanguage is null)
+                return null;
+            return ReadProgrammingLanguageRepository.ToProgrammingLanguageNavigation(participation.Step
+                .ProgrammingLanguage);
+        }
+
         private static Expression<Func<Participation, bool>> ToPredicate(
             GetAllParticipationNavigationPaginatedQuery query) =>
             participation =>
                 !participation.Deactivated
-                && (query.EndTournamentStepFilter == null 
-                    || !participation.Step.IsDeleted 
+                && (query.EndTournamentStepFilter == null
+                    || !participation.Step.IsDeleted
                     && participation.EndDate != null
-                    && participation.Tournament.IsPublished 
-                    && !participation.Tournament.IsDeleted 
+                    && participation.Tournament.IsPublished
+                    && !participation.Tournament.IsDeleted
                     && participation.Step.TournamentSteps
-                        .Any(tournamentStep => tournamentStep.TournamentId == participation.Tournament.Id 
+                        .Any(tournamentStep => tournamentStep.TournamentId == participation.Tournament.Id
                                                && tournamentStep.Step.Id == participation.Step.Id
                                                && tournamentStep.Order == participation.Tournament.TournamentSteps
                                                    .Max(tS => tS.Order)
-                                               )
-                    )
-                && (query.TeamIdFilter == null || !participation.Team.IsDeleted && query.TeamIdFilter == participation.Team.Id)
-                && (query.TournamentIdFilter == null || !participation.Tournament.IsDeleted && participation.Tournament.IsPublished && query.TournamentIdFilter == participation.Tournament.Id)
-                && (query.StepIdFilter == null || !participation.Step.IsDeleted && query.StepIdFilter == participation.Step.Id);
+                        )
+                )
+                && (query.TeamIdFilter == null ||
+                    !participation.Team.IsDeleted && query.TeamIdFilter == participation.Team.Id)
+                && (query.TournamentIdFilter == null || !participation.Tournament.IsDeleted &&
+                    participation.Tournament.IsPublished && query.TournamentIdFilter == participation.Tournament.Id)
+                && (query.StepIdFilter == null ||
+                    !participation.Step.IsDeleted && query.StepIdFilter == participation.Step.Id);
 
         private IQueryable<Participation> GetParticipationIncludeQueryable()
         {

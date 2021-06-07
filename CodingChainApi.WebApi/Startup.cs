@@ -1,26 +1,19 @@
 using System.Linq;
-using System.Net.Http.Headers;
 using System.Reflection;
-using System.Threading.Tasks;
 using Application;
 using Application.Contracts.IService;
 using CodingChainApi.Infrastructure;
 using CodingChainApi.Infrastructure.Hubs;
-using CodingChainApi.Infrastructure.Services.Processes;
-using CodingChainApi.Infrastructure.Settings;
 using FluentValidation.AspNetCore;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http.Connections;
-using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using NeosCodingApi.Controllers;
 using NeosCodingApi.Messaging;
 using NeosCodingApi.Services;
 using Newtonsoft.Json.Converters;
@@ -55,8 +48,8 @@ namespace NeosCodingApi
             services.AddScoped<IPropertyCheckerService, PropertyCheckerService>();
             services.AddHttpContextAccessor();
             ConfigureAuthentication(services);
-
             services.AddSignalR();
+            services.AddHostedService<ParticipationPreparedListener>();
             services.AddHostedService<ParticipationDoneExecutionListener>();
             services.AddHostedService<PlagiarismExecutionDoneListener>();
 

@@ -22,6 +22,9 @@ namespace NeosCodingApi.Messaging
         {
             try
             {
+                Logger.LogInformation(
+                    "RabbitListener message received on , exchange: {Exchange}, routeKey:{RoutingKey}",
+                    Exchange, RoutingKey);
                 var json = JObject.Parse(message);
                 var runParticipation = JsonConvert.DeserializeObject<TCommand>(json.ToString());
                 if (runParticipation is null)
