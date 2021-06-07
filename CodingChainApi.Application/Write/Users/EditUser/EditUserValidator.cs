@@ -1,15 +1,14 @@
-﻿using Application.Write.Users.EditUser;
-using FluentValidation;
+﻿using FluentValidation;
 
-namespace Application.Write.Users.RegisterUser
+namespace Application.Write.Users.EditUser
 {
     public class EditUserValidator : AbstractValidator<EditUserCommand>
     {
         public EditUserValidator()
         {
-            RuleFor(v => v.Email).EmailAddress();
-            RuleFor(v => v.Password).MinimumLength(8);
-            RuleFor(v => v.Username).MinimumLength(5);
+            RuleFor(cmd => cmd.Email).EmailAddress().When(cmd => cmd.Email is not null);
+            RuleFor(cmd => cmd.Password).MinimumLength(8).When(cmd => cmd.Password is not null);
+            RuleFor(cmd => cmd.Username).MinimumLength(5).When(cmd => cmd.Username is not null);
         }
     }
 }

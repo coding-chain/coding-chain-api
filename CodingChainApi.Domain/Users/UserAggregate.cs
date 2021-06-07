@@ -5,7 +5,7 @@ using Domain.Contracts;
 
 namespace Domain.Users
 {
-    public record UserId(Guid Value): IEntityId
+    public record UserId(Guid Value) : IEntityId
     {
         public override string ToString()
         {
@@ -49,23 +49,16 @@ namespace Domain.Users
             return roles.Where(r => !_rights.Contains(r)).ToList();
         }
 
-        public void UpdateUser(String email, String username, String password)
+        public void UpdateUser(string? email, string? username, string? password)
         {
-            if (email != null)
-            {
+            if (email is not null)
                 Email = email;
-            }
 
-            if (username != null)
-            {
+            if (username is not null)
                 Username = username;
-            }
 
-            if (password != null)
-            {
+            if (password is not null)
                 Password = password;
-            }
         }
-        
     }
 }
