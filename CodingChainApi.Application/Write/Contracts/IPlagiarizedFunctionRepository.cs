@@ -4,7 +4,7 @@ using Domain.Participations;
 
 namespace Application.Write.Contracts
 {
-    public interface IPlagiarizedFunctionRepository : IAggregateRepository<FunctionId, PlagiarizedFunctionAggregate>
+    public interface IPlagiarizedFunctionRepository : IAggregateRepository<FunctionId, SuspectFunctionAggregate>
     {
     }
 }

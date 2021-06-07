@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace CodingChainApi.Infrastructure.Models
@@ -13,5 +14,7 @@ namespace CodingChainApi.Infrastructure.Models
         public Participation Participation { get; set; }
         public IList<UserFunction> UserFunctions { get; set; } = new List<UserFunction>();
 
+        public IList<PlagiarismFunction> CheatingFunctions { get; set; } = new List<PlagiarismFunction>();
+        public IList<PlagiarismFunction> PlagiarizedFunctions { get; set; } = new List<PlagiarismFunction>();
     }
 }

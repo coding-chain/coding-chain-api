@@ -36,7 +36,7 @@ namespace CodingChainApi.Infrastructure.Contexts
         public DbSet<Step> Steps { get; set; }
         public DbSet<Test> Tests { get; set; }
 
-        public DbSet<PlagiarizedFunction> PlagiarizedFunctions { get; set; }
+        public DbSet<PlagiarismFunction> PlagiarismFunctions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -78,10 +78,8 @@ namespace CodingChainApi.Infrastructure.Contexts
                 .ToTable("test")
                 .Property(p => p.Id)
                 .ValueGeneratedNever();
-            modelBuilder.Entity<PlagiarizedFunction>()
-                .ToTable("plagiarized_functions")
-                .Property(func => func.Id)
-                .ValueGeneratedNever();
+            modelBuilder.Entity<PlagiarismFunction>()
+                .ToTable("plagiarism_function");
 
 
             modelBuilder.Entity<User>()
@@ -130,6 +128,18 @@ namespace CodingChainApi.Infrastructure.Contexts
                 .HasOne(bc => bc.Step)
                 .WithMany(c => c.TournamentSteps)
                 .HasForeignKey(bc => bc.StepId);
+            
+            modelBuilder.Entity<PlagiarismFunction>()
+                .HasOne(bc => bc.CheatingFunction)
+                .WithMany(b => b.CheatingFunctions)
+                .HasForeignKey(bc => bc.CheatingFunctionId)
+                .OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<PlagiarismFunction>()
+                .HasOne(bc => bc.PlagiarizedFunction)
+                .WithMany(b => b.PlagiarizedFunctions)
+                .HasForeignKey(bc => bc.PlagiarizedFunctionId)
+                .OnDelete(DeleteBehavior.NoAction);
+
 
             modelBuilder.Entity<Right>()
                 .Property(c => c.Name)

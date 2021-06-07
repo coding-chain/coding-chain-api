@@ -6,12 +6,12 @@ using Domain.Participations;
 
 namespace Domain.CodeAnalysis
 {
-    public class PlagiarizedFunctionAggregate : Aggregate<FunctionId>
+    public class SuspectFunctionAggregate : Aggregate<FunctionId>
     {
-        public IReadOnlyList<PlagiarizedFunctionEntity> PlagiarizedFunction => _plagiarizedFunctions.AsReadOnly();
+        public IReadOnlyList<PlagiarizedFunctionEntity> PlagiarizedFunctions => _plagiarizedFunctions.AsReadOnly();
         private List<PlagiarizedFunctionEntity> _plagiarizedFunctions;
 
-        public PlagiarizedFunctionAggregate(FunctionId id, List<PlagiarizedFunctionEntity> plagiarizedFunctions, FunctionId cheatingFunctionId) :
+        public SuspectFunctionAggregate(FunctionId id, List<PlagiarizedFunctionEntity> plagiarizedFunctions) :
             base(id)
         {
             Id = id;

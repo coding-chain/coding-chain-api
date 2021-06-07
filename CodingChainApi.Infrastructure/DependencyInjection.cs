@@ -48,7 +48,6 @@ namespace CodingChainApi.Infrastructure
             services.AddScoped<ISecurityService, SecurityService>();
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<ITimeService, TimeService>();
-            services.AddScoped<IParticipationsSessionsRepository, ParticipationsSessionRepository>();
             services.AddScoped<IFunctionTypeParserService, FunctionTypeParserService>();
             services.AddScoped<ICache, Cache>();
             RegisterAggregateRepositories(services);
@@ -68,6 +67,9 @@ namespace CodingChainApi.Infrastructure
                 typeof(EventPublisherInterceptor));
             services.AddProxiedScoped<IParticipationsSessionsRepository, ParticipationsSessionRepository>(
                 typeof(EventPublisherInterceptor));
+            services.AddProxiedScoped<IPlagiarizedFunctionRepository, PlagiarizedFunctionRepository>(
+                typeof(EventPublisherInterceptor));
+
         }
 
         private static void RegisterReadRepositories(IServiceCollection services)
@@ -90,6 +92,7 @@ namespace CodingChainApi.Infrastructure
             services.AddMemoryCache();
             ConfigureInjectableSettings<ICacheSettings, CacheSettings>(services, configuration);
         }
+
         private static void ConfigureProcess(IServiceCollection services, IConfiguration configuration)
         {
             ConfigureInjectableSettings<IProcessSettings, ProcessSettings>(services, configuration);
@@ -101,10 +104,10 @@ namespace CodingChainApi.Infrastructure
         }
 
 
-
         private static TImplementation ConfigureInjectableSettings<TInterface, TImplementation>(
             IServiceCollection services,
-            IConfiguration configuration, bool singleton = true ) where TImplementation : class, TInterface where TInterface : class
+            IConfiguration configuration, bool singleton = true) where TImplementation : class, TInterface
+            where TInterface : class
         {
             var settingsName = typeof(TImplementation).Name;
             var settings = configuration.GetSection(settingsName).Get<TImplementation>();
@@ -122,6 +125,7 @@ namespace CodingChainApi.Infrastructure
 
             return settings;
         }
+
         private static void ConfigureJwt(IServiceCollection services, IConfiguration configuration)
         {
             var jwtSettings = ConfigureInjectableSettings<IJwtSettings, JwtSettings>(services, configuration);
@@ -151,6 +155,7 @@ namespace CodingChainApi.Infrastructure
                                 // Read the token out of the query string
                                 context.Token = accessToken;
                             }
+
                             return Task.CompletedTask;
                         }
                     };
@@ -192,9 +197,12 @@ namespace CodingChainApi.Infrastructure
         {
             // RabbitMQ
             serviceCollection.AddScoped<IDispatcher<RunParticipationTestsDto>, ParticipationPendingExecutionService>();
-            serviceCollection.AddScoped<IDispatcher<PlagiarismAnalyzeExecutionDto>, PlagiarismPendingExecutionService>();
-            serviceCollection.AddScoped<IDispatcher<CleanParticipationExecutionDto>, CleanParticipationExecutionService>();
-            serviceCollection.AddScoped<IDispatcher<PrepareParticipationExecutionDto>, PrepareParticipationExecutionService>();
+            serviceCollection
+                .AddScoped<IDispatcher<PlagiarismAnalyzeExecutionDto>, PlagiarismPendingExecutionService>();
+            serviceCollection
+                .AddScoped<IDispatcher<CleanParticipationExecutionDto>, CleanParticipationExecutionService>();
+            serviceCollection
+                .AddScoped<IDispatcher<PrepareParticipationExecutionDto>, PrepareParticipationExecutionService>();
             ConfigureInjectableSettings<IRabbitMqSettings, RabbitMqSettings>(serviceCollection, configuration);
             // End RabbitMQ Configuration
         }
