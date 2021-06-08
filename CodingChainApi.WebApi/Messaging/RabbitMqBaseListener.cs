@@ -25,6 +25,9 @@ namespace NeosCodingApi.Messaging
 
             try
             {
+                Logger.LogDebug(
+                    "RabbitMqListener connecting to host :  {Host}, password: {Password}, username: {Username}, port: {Port}",
+                    settings.Host, settings.Password, settings.Username, settings.Port);
                 var factory = new ConnectionFactory
                 {
                     HostName = settings.Host

@@ -1,4 +1,5 @@
-﻿using Application.Write.ParticipationsSessions;
+﻿using System;
+using Application.Write.ParticipationsSessions;
 using Application.Write.Plagiarism;
 using CodingChainApi.Infrastructure.Settings;
 using MediatR;
@@ -9,7 +10,8 @@ namespace NeosCodingApi.Messaging
     public class PlagiarismExecutionDoneListener : NotifierListenerService<PlagiarismDoneAnalyzeNotification>
     {
         public PlagiarismExecutionDoneListener(IRabbitMqSettings settings,
-            ILogger<PlagiarismExecutionDoneListener> logger, IPublisher mediator) : base(settings, logger, mediator)
+            ILogger<PlagiarismExecutionDoneListener> logger, IServiceProvider serviceProvider) : base(settings, logger,
+            serviceProvider)
         {
             Exchange = settings.PlagiarismExchange;
             RoutingKey = settings.PlagiarismAnalyzeDoneRoutingKey;
@@ -19,7 +21,8 @@ namespace NeosCodingApi.Messaging
     public class ParticipationPreparedListener : NotifierListenerService<SetParticipationReadyStateNotification>
     {
         public ParticipationPreparedListener(IRabbitMqSettings settings,
-            ILogger<ParticipationPreparedListener> logger, IPublisher mediator) : base(settings, logger, mediator)
+            ILogger<ParticipationPreparedListener> logger, IServiceProvider serviceProvider) : base(settings, logger,
+            serviceProvider)
         {
             Exchange = settings.ParticipationExchange;
             RoutingKey = settings.PreparedExecutionRoutingKey;
@@ -29,7 +32,8 @@ namespace NeosCodingApi.Messaging
     public class ParticipationDoneExecutionListener : NotifierListenerService<ProcessEndNotification>
     {
         public ParticipationDoneExecutionListener(IRabbitMqSettings settings,
-            ILogger<ParticipationDoneExecutionListener> logger, IPublisher mediator) : base(settings, logger, mediator)
+            ILogger<ParticipationDoneExecutionListener> logger, IServiceProvider serviceProvider) : base(settings,
+            logger, serviceProvider)
         {
             Exchange = settings.ParticipationExchange;
             RoutingKey = settings.DoneExecutionRoutingKey;
