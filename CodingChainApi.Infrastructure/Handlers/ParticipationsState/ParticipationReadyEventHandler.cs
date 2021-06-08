@@ -8,21 +8,21 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace CodingChainApi.Infrastructure.Handlers.ParticipationsState
 {
-    public class ProcessEndEventHandler : INotificationHandler<DomainEventNotification<ProcessResultUpdated>>
+    public class ParticipationReadyEventHandler : INotificationHandler<DomainEventNotification<ParticipationReady>>
     {
         private readonly IHubContext<ParticipationSessionsHub, IParticipationsClient> _hub;
 
-        public ProcessEndEventHandler(IHubContext<ParticipationSessionsHub, IParticipationsClient> hub)
+        public ParticipationReadyEventHandler(IHubContext<ParticipationSessionsHub, IParticipationsClient> hub)
         {
             _hub = hub;
         }
 
-        public async Task Handle(DomainEventNotification<ProcessResultUpdated> notification,
+        public async Task Handle(DomainEventNotification<ParticipationReady> notification,
             CancellationToken cancellationToken)
         {
             await _hub.Clients
                 .Group(notification.DomainEvent.ParticipationId.ToString())
-                .OnProcessEnd(new ParticipationProcessEndEvent(
+                .OnReady(new ParticipationReadyEvent(
                     notification.DomainEvent.ParticipationId.Value
                 ));
         }

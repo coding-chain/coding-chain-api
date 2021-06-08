@@ -18,28 +18,30 @@ namespace Application.Write.ParticipationsSessions
 
     public class UpdateParticipationProcessResultHandler : INotificationHandler<ProcessEndNotification>
     {
-        private readonly IParticipationsSessionsRepository _participationsSessionsRepository;
-        private readonly ITimeService _timeService;
+        private readonly IServiceProvider _serviceProvider;
 
-        public UpdateParticipationProcessResultHandler(IParticipationsSessionsRepository participationsSessionsRepository, ITimeService timeService)
+        public UpdateParticipationProcessResultHandler(IServiceProvider serviceProvider)
         {
-            _participationsSessionsRepository = participationsSessionsRepository;
-            _timeService = timeService;
+            _serviceProvider = serviceProvider;
         }
 
         public async Task Handle(ProcessEndNotification notification,
             CancellationToken cancellationToken)
         {
-
+            using var scope = _serviceProvider.CreateScope();
+            var participationsSessionsRepository =
+                scope.ServiceProvider.GetRequiredService<IParticipationsSessionsRepository>();
+            var timeService =
+                scope.ServiceProvider.GetRequiredService<ITimeService>();
             var participation =
-                await _participationsSessionsRepository.FindByIdAsync(
+                await participationsSessionsRepository.FindByIdAsync(
                     new ParticipationId(notification.ParticipationId));
             if (participation is null)
                 throw new NotFoundException(notification.ParticipationId.ToString(), "Participation");
 
             var testsPassedIds = notification.TestsPassedIds.Select(id => new TestId(id)).ToList();
-            participation.SetProcessResult(notification.Error, notification.Output, testsPassedIds, _timeService.Now());
-            await _participationsSessionsRepository.SetAsync(participation);
+            participation.SetProcessResult(notification.Error, notification.Output, testsPassedIds, timeService.Now());
+            await participationsSessionsRepository.SetAsync(participation);
         }
     }
 }
