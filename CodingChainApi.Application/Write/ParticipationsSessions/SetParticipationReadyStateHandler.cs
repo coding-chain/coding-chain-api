@@ -13,26 +13,23 @@ namespace Application.Write.ParticipationsSessions
 
     public class SetParticipationReadyStateHandler : INotificationHandler<SetParticipationReadyStateNotification>
     {
-        private readonly IServiceProvider _serviceProvider;
+        private IParticipationsSessionsRepository _participationsSessionsRepository;
 
-        public SetParticipationReadyStateHandler(IServiceProvider serviceProvider)
+        public SetParticipationReadyStateHandler(IParticipationsSessionsRepository participationsSessionsRepository)
         {
-            _serviceProvider = serviceProvider;
+            _participationsSessionsRepository = participationsSessionsRepository;
         }
 
         public async Task Handle(SetParticipationReadyStateNotification notification,
             CancellationToken cancellationToken)
         {
-            var scope = _serviceProvider.CreateScope();
-            var participationsSessionsRepository =
-                scope.ServiceProvider.GetRequiredService<IParticipationsSessionsRepository>();
             var participation =
-                await participationsSessionsRepository.FindByIdAsync(new ParticipationId(notification.ParticipationId));
+                await _participationsSessionsRepository.FindByIdAsync(new ParticipationId(notification.ParticipationId));
 
             if (participation is null)
                 throw new NotFoundException(notification.ParticipationId.ToString(), "ParticipationSession");
             participation.SetReadyState();
-            await participationsSessionsRepository.SetAsync(participation);
+            await _participationsSessionsRepository.SetAsync(participation);
         }
     }
 }
