@@ -4,6 +4,7 @@ using Application;
 using Application.Contracts.IService;
 using CodingChainApi.Infrastructure;
 using CodingChainApi.Infrastructure.Hubs;
+using CodingChainApi.Infrastructure.Settings;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -43,11 +44,11 @@ namespace NeosCodingApi
 
 
             services.AddInfrastructure(Configuration);
+            AddCors(services);
             services.AddApplication();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
             services.AddScoped<IPropertyCheckerService, PropertyCheckerService>();
             services.AddHttpContextAccessor();
-            ConfigureAuthentication(services);
             services.AddSignalR();
             services.AddHostedService<ParticipationPreparedListener>();
             services.AddHostedService<ParticipationDoneExecutionListener>();
@@ -68,6 +69,22 @@ namespace NeosCodingApi
             {
                 opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
                     new[] {"application/octet-stream"});
+            });
+        }
+
+        private void AddCors(IServiceCollection services)
+        {
+            var corsSettings = services.ConfigureInjectableSettings<ICorsSettings, CorsSettings>(Configuration);
+            services.AddCors(options =>
+            {
+                options.AddPolicy(PolicyName, builder =>
+                {
+                    builder.WithOrigins(corsSettings.FrontEndUrl)
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials()
+                        .WithExposedHeaders("Location");
+                });
             });
         }
 
@@ -125,48 +142,11 @@ namespace NeosCodingApi
                 });
         }
 
-        private void ConfigureAuthentication(IServiceCollection services)
-        {
-            // var settingsName = nameof(JwtSettings);
-            // var jwtSettings = Configuration.GetSection(settingsName).Get<JwtSettings>();
-            // services.AddAuthentication(opt =>
-            // {
-            //     opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            //     opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            // }).AddJwtBearer(opt =>
-            // {
-            //     opt.Authority = jwtSettings.Issuer;
-            //     opt.Events = new JwtBearerEvents
-            //     {
-            //         OnMessageReceived = context =>
-            //         {
-            //             var accessToken = context.Request.Query["access_token"];
-            //
-            //             // If the request is for our hub...
-            //             var path = context.HttpContext.Request.Path;
-            //             if (!string.IsNullOrEmpty(accessToken) &&
-            //                 (path.StartsWithSegments("/hubs/chat")))
-            //             {
-            //                 // Read the token out of the query string
-            //                 context.Token = accessToken;
-            //             }
-            //
-            //             return Task.CompletedTask;
-            //         }
-            //     };
-            // });
-        }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            app.UseCors(builder => builder
-                .WithOrigins("http://localhost:4200")
-                .AllowAnyMethod()
-                .AllowAnyHeader()
-                .AllowCredentials()
-                .WithExposedHeaders("Location")
-            );
+
 
             app.UseResponseCompression();
             if (env.IsDevelopment())
@@ -177,7 +157,7 @@ namespace NeosCodingApi
 
             app.UseRouting();
 
-
+            app.UseCors(PolicyName);
             app.UseAuthentication();
 
             app.UseAuthorization();

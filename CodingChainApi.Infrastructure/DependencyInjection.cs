@@ -52,6 +52,8 @@ namespace CodingChainApi.Infrastructure
             return services;
         }
 
+
+
         private static void RegisterAggregateRepositories(IServiceCollection services)
         {
             services.AddProxiedScoped<IUserRepository, UserRepository>(typeof(EventPublisherInterceptor));
@@ -99,9 +101,9 @@ namespace CodingChainApi.Infrastructure
             ConfigureInjectableSettings<IAppDataSettings, AppDataSettings>(services, configuration);
         }
 
-
-        private static TImplementation ConfigureInjectableSettings<TInterface, TImplementation>(
-            IServiceCollection services,
+        
+        public static TImplementation ConfigureInjectableSettings<TInterface, TImplementation>(
+            this IServiceCollection services,
             IConfiguration configuration, bool singleton = true) where TImplementation : class, TInterface
             where TInterface : class
         {
