@@ -2,8 +2,7 @@
 using System.Threading.Tasks;
 using Application.Common.Events;
 using CodingChainApi.Infrastructure.Hubs;
-using Domain.Participations;
-using Domain.ParticipationStates;
+using Domain.ParticipationSessions;
 using MediatR;
 using Microsoft.AspNetCore.SignalR;
 
@@ -28,8 +27,8 @@ namespace CodingChainApi.Infrastructure.Handlers.ParticipationsState
                 ));
         }
     }
-    
-    
+
+
     public class ParticipationReadyEventHandler : INotificationHandler<DomainEventNotification<ParticipationReady>>
     {
         private readonly IHubContext<ParticipationSessionsHub, IParticipationsClient> _hub;

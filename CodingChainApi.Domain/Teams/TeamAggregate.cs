@@ -18,28 +18,9 @@ namespace Domain.Teams
 
     public class TeamAggregate : Aggregate<TeamId>
     {
-        public IReadOnlyList<MemberEntity> Members => _members.AsReadOnly();
-        private List<MemberEntity> _members;
-        private MemberEntity Admin => _members.First(u => u.IsAdmin);
+        private readonly List<MemberEntity> _members;
 
-        public IReadOnlyList<TournamentId> TournamentIds => _tournamentIds.AsReadOnly();
-
-        private List<TournamentId> _tournamentIds;
-        public string Name { get; private set; }
-
-        public static TeamAggregate CreateNew(TeamId id, string name, MemberEntity admin)
-        {
-            if (!admin.IsAdmin)
-                throw new DomainException(new List<string>() {"Cannot create team without admin member"});
-
-            return new TeamAggregate(id, name, new List<MemberEntity> {admin}, new List<TournamentId>());
-        }
-
-        public static TeamAggregate Restore(TeamId id, string name, List<MemberEntity> members,
-            List<TournamentId> tournamentIds)
-        {
-            return new TeamAggregate(id, name, members, tournamentIds);
-        }
+        private readonly List<TournamentId> _tournamentIds;
 
         private TeamAggregate(TeamId id, string name, List<MemberEntity> members, List<TournamentId> tournamentIds) :
             base(id)
@@ -47,6 +28,26 @@ namespace Domain.Teams
             Name = name;
             _members = members;
             _tournamentIds = tournamentIds;
+        }
+
+        public IReadOnlyList<MemberEntity> Members => _members.AsReadOnly();
+        private MemberEntity Admin => _members.First(u => u.IsAdmin);
+
+        public IReadOnlyList<TournamentId> TournamentIds => _tournamentIds.AsReadOnly();
+        public string Name { get; private set; }
+
+        public static TeamAggregate CreateNew(TeamId id, string name, MemberEntity admin)
+        {
+            if (!admin.IsAdmin)
+                throw new DomainException(new List<string> {"Cannot create team without admin member"});
+
+            return new TeamAggregate(id, name, new List<MemberEntity> {admin}, new List<TournamentId>());
+        }
+
+        public static TeamAggregate Restore(TeamId id, string name, List<MemberEntity> members,
+            List<TournamentId> tournamentIds)
+        {
+            return new(id, name, members, tournamentIds);
         }
 
         public void ValidateMemberAdditionByMember(UserId requestingUserId)
@@ -84,14 +85,9 @@ namespace Domain.Teams
         public void AddMember(MemberEntity newMember)
         {
             if (_members.Contains(newMember))
-            {
-                throw new DomainException(new List<string>() {$"Member with id {newMember.Id} already in team"});
-            }
+                throw new DomainException(new List<string> {$"Member with id {newMember.Id} already in team"});
 
-            if (newMember.IsAdmin)
-            {
-                Admin.IsAdmin = false;
-            }
+            if (newMember.IsAdmin) Admin.IsAdmin = false;
 
             _members.Add(newMember);
         }
@@ -100,10 +96,8 @@ namespace Domain.Teams
         {
             var teamMember = GetMember(memberId);
             if (Admin.Id == teamMember.Id)
-            {
-                throw new DomainException(new List<string>()
+                throw new DomainException(new List<string>
                     {$"Member with id {teamMember.Id} cannot be removed because it's the team administrator"});
-            }
 
             _members.Remove(teamMember);
         }
@@ -112,9 +106,7 @@ namespace Domain.Teams
         {
             var teamMember = _members.FirstOrDefault(m => m.Id == memberId);
             if (teamMember is null)
-            {
-                throw new DomainException(new List<string>() {$"User with id {memberId} is not team member"});
-            }
+                throw new DomainException(new List<string> {$"User with id {memberId} is not team member"});
 
             return teamMember;
         }
@@ -129,11 +121,9 @@ namespace Domain.Teams
         public void ValidateTeamDeletionByMember(UserId memberId)
         {
             if (Admin.Id != memberId)
-            {
-                throw new DomainException(new List<string>() {$"Member with id {memberId} can't delete team"});
-            }
+                throw new DomainException(new List<string> {$"Member with id {memberId} can't delete team"});
         }
-        
+
         public void LeaveTournament(TournamentId tournamentId, UserId memberId)
         {
             ValidateTournamentLeaving(tournamentId, memberId);

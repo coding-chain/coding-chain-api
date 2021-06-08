@@ -6,8 +6,7 @@ using Application.Read.ParticipationSessions;
 using CodingChainApi.Infrastructure.Common.Extensions;
 using CodingChainApi.Infrastructure.Services.Cache;
 using Domain.Participations;
-using Domain.ParticipationStates;
-using Microsoft.AspNetCore.Http;
+using Domain.ParticipationSessions;
 
 namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
 {
@@ -20,9 +19,23 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
             _cache = cache;
         }
 
+        public Task<bool> ExistsById(Guid id)
+        {
+            var participation = _cache.GetCache<ParticipationSessionAggregate>(new ParticipationId(id));
+            return (participation is not null).ToTask();
+        }
+
+        public async Task<ParticipationSessionNavigation?> GetOneById(Guid id)
+        {
+            var participation = _cache.GetCache<ParticipationSessionAggregate>(new ParticipationId(id));
+            if (participation is null) return null;
+            return await ToParticipationSessionNavigation(participation).ToTask();
+        }
+
         private static ParticipationSessionNavigation ToParticipationSessionNavigation(
             ParticipationSessionAggregate participation)
-            => new ParticipationSessionNavigation(
+        {
+            return new(
                 participation.Id.Value,
                 participation.Team.Id.Value,
                 participation.TournamentEntity.Id.Value,
@@ -37,20 +50,6 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
                 participation.PassedTestsIds.Select(id => id.Value).ToList(),
                 participation.IsReady
             );
-
-        public Task<bool> ExistsById(Guid id)
-        {
-            var participation = _cache.GetCache<ParticipationSessionAggregate>(new ParticipationId(id));
-            return (participation is not null).ToTask();
-        }
-
-        public async Task<ParticipationSessionNavigation?> GetOneById(Guid id)
-        {
-            var participation = _cache.GetCache<ParticipationSessionAggregate>(new ParticipationId(id));
-            if (participation is null) return null;
-            return await ToParticipationSessionNavigation(participation).ToTask();
         }
     }
-    
-    
 }

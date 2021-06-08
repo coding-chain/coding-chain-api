@@ -6,7 +6,6 @@ using Application.Common.Security;
 using Application.Contracts.IService;
 using Application.Write.Contracts;
 using Domain.Participations;
-using Domain.ParticipationStates;
 using Domain.Users;
 using MediatR;
 

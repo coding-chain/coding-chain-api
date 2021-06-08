@@ -7,10 +7,9 @@ using Application.Common.Exceptions;
 using Application.Read.Contracts;
 using Application.Write.Contracts;
 using Domain.Participations;
-using Domain.ParticipationStates;
+using Domain.ParticipationSessions;
 using Domain.Users;
 using MediatR;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Application.Write.ParticipationsSessions
@@ -48,14 +47,9 @@ namespace Application.Write.ParticipationsSessions
                 f.Order
             )).ToList();
             if (participationNav is null)
-            {
                 throw new NotFoundException(participationId.ToString(), "ParticipationSession");
-            }
 
-            if (participation is null)
-            {
-                throw new NotFoundException(participationId.ToString(), "Participation");
-            }
+            if (participation is null) throw new NotFoundException(participationId.ToString(), "Participation");
             participation.Update(participationNav.EndDate, participationNav.CalculatedScore, functionsEntities);
             await participationsRepository.SetAsync(participation);
         }

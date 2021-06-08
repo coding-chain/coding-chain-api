@@ -9,15 +9,15 @@ using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
-namespace CodingChainApi.Infrastructure.MessageBroker
+namespace NeosCodingApi.Messaging
 {
     public abstract class RabbitMqBaseListener : IHostedService
     {
-        private readonly IConnection _connection;
         private readonly IModel _channel;
-        protected string? RoutingKey;
-        protected string? Exchange;
+        private readonly IConnection _connection;
         protected readonly ILogger<RabbitMqBaseListener> Logger;
+        protected string? Exchange;
+        protected string? RoutingKey;
 
         public RabbitMqBaseListener(IRabbitMqSettings settings, ILogger<RabbitMqBaseListener> logger)
         {
@@ -25,9 +25,9 @@ namespace CodingChainApi.Infrastructure.MessageBroker
 
             try
             {
-                var factory = new ConnectionFactory()
+                var factory = new ConnectionFactory
                 {
-                    HostName = settings.RabbitHost
+                    HostName = settings.Host
                 };
                 _connection = factory.CreateConnection();
                 _channel = _connection.CreateModel();
@@ -50,7 +50,7 @@ namespace CodingChainApi.Infrastructure.MessageBroker
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
-            this._connection.Close();
+            _connection.Close();
             return Task.CompletedTask;
         }
 
@@ -59,15 +59,15 @@ namespace CodingChainApi.Infrastructure.MessageBroker
         {
             try
             {
-                _channel.ExchangeDeclare(exchange: Exchange, type: ExchangeType.Topic);
+                _channel.ExchangeDeclare(Exchange, ExchangeType.Topic);
                 var queueName = _channel.QueueDeclare().QueueName;
                 Logger.LogInformation(
                     "RabbitListener register, exchange: {Exchange}, routeKey:{RoutingKey}, queueName {QueueName}",
                     Exchange, RoutingKey, queueName);
 
-                _channel.QueueBind(queue: queueName,
-                    exchange: Exchange,
-                    routingKey: RoutingKey);
+                _channel.QueueBind(queueName,
+                    Exchange,
+                    RoutingKey);
                 var consumer = new EventingBasicConsumer(_channel);
                 consumer.Received += async (model, ea) =>
                 {
@@ -75,10 +75,7 @@ namespace CodingChainApi.Infrastructure.MessageBroker
                     var message = Encoding.UTF8.GetString(body.ToArray());
 
                     var result = Process(message);
-                    if (result)
-                    {
-                        _channel.BasicAck(ea.DeliveryTag, false);
-                    }
+                    if (result) _channel.BasicAck(ea.DeliveryTag, false);
                 };
                 _channel.BasicConsume(queue: queueName, consumer: consumer);
             }

@@ -12,6 +12,7 @@ namespace Application.Read.UserSessions.Handlers
     {
         public Guid ParticipationId { get; set; }
     }
+
     public class GetParticipationSessionUsersPaginatedHandler : IRequestHandler<
         GetParticipationSessionUsersPaginatedQuery, IPagedList<UserSessionNavigation>>
     {

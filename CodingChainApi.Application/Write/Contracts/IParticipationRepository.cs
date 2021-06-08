@@ -3,8 +3,7 @@ using Domain.Participations;
 
 namespace Application.Write.Contracts
 {
-    public interface IParticipationRepository: IAggregateRepository<ParticipationId, ParticipationAggregate>
+    public interface IParticipationRepository : IAggregateRepository<ParticipationId, ParticipationAggregate>
     {
-        
     }
 }

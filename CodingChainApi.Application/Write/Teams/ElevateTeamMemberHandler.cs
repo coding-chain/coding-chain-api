@@ -15,8 +15,8 @@ namespace Application.Write.Teams
 
     public class ElevateTeamMemberHandler : IRequestHandler<ElevateTeamMemberCommand, string>
     {
-        private readonly ITeamRepository _teamRepository;
         private readonly ICurrentUserService _currentUserService;
+        private readonly ITeamRepository _teamRepository;
 
         public ElevateTeamMemberHandler(ITeamRepository teamRepository, ICurrentUserService currentUserService)
         {

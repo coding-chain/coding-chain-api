@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Domain.Contracts;
@@ -7,9 +6,8 @@ using Domain.Exceptions;
 using Domain.Participations;
 using Domain.StepEditions;
 using Domain.Users;
-using TestEntity = Domain.Participations.TestEntity;
 
-namespace Domain.ParticipationStates
+namespace Domain.ParticipationSessions
 {
     public record ConnectedUserAdded(ParticipationId ParticipationId, UserId UserId) : IDomainEvent;
 
@@ -20,45 +18,12 @@ namespace Domain.ParticipationStates
     public record ProcessResultUpdated(ParticipationId ParticipationId) : IDomainEvent;
 
     public record ProcessStarted(ParticipationId ParticipationId) : IDomainEvent;
+
     public record ParticipationReady(ParticipationId ParticipationId) : IDomainEvent;
 
     public class ParticipationSessionAggregate : ParticipationAggregate
     {
-        public IReadOnlyCollection<TestId> PassedTestsIds => _passedTestsIds.AsReadOnly();
-        private List<TestId> _passedTestsIds = new List<TestId>();
-        public TeamStateEntity ConnectedTeam { get; private init; }
-        public override TeamEntity Team => ConnectedTeam;
-        public StepSessionEntity StepSessionEntity { get; private init; }
-
-        public override StepEntity StepEntity => StepSessionEntity;
-
-        public string? LastError { get; private set; }
-        public string? LastOutput { get; private set; }
-        
-        
-        public bool IsReady { get; private set; }
-
-        public DateTime? ProcessStartTime { get; private set; }
-
-        public bool HasConnectedUsers => ConnectedTeam.ConnectedUserEntities.Any(); 
-        public static ParticipationSessionAggregate FromParticipationAggregate(ParticipationAggregate participation,
-            IList<TestEntity> testEntities)
-        {
-            var team = new TeamStateEntity(participation.Team.Id, participation.Team.UserIds,
-                new List<ConnectedUserEntity>());
-            
-            return new ParticipationSessionAggregate(
-                participation.Id,
-                team,
-                participation.TournamentEntity,
-                new StepSessionEntity(participation.StepEntity.Id, participation.StepEntity.TournamentIds,
-                    testEntities),
-                participation.StartDate,
-                participation.EndDate,
-                participation.CalculatedScore,
-                participation.Functions.ToList(),
-                false);
-        }
+        private List<TestId> _passedTestsIds = new();
 
         protected ParticipationSessionAggregate(ParticipationId id, TeamStateEntity team,
             TournamentEntity tournamentEntity, StepSessionEntity stepSessionEntity, DateTime startDate,
@@ -72,12 +37,46 @@ namespace Domain.ParticipationStates
             IsReady = isReady;
         }
 
+        public IReadOnlyCollection<TestId> PassedTestsIds => _passedTestsIds.AsReadOnly();
+        public TeamStateEntity ConnectedTeam { get; }
+        public override TeamEntity Team => ConnectedTeam;
+        public StepSessionEntity StepSessionEntity { get; }
+
+        public override StepEntity StepEntity => StepSessionEntity;
+
+        public string? LastError { get; private set; }
+        public string? LastOutput { get; private set; }
+
+
+        public bool IsReady { get; private set; }
+
+        public DateTime? ProcessStartTime { get; private set; }
+
+        public bool HasConnectedUsers => ConnectedTeam.ConnectedUserEntities.Any();
+
+        public static ParticipationSessionAggregate FromParticipationAggregate(ParticipationAggregate participation,
+            IList<TestEntity> testEntities)
+        {
+            var team = new TeamStateEntity(participation.Team.Id, participation.Team.UserIds,
+                new List<ConnectedUserEntity>());
+
+            return new ParticipationSessionAggregate(
+                participation.Id,
+                team,
+                participation.TournamentEntity,
+                new StepSessionEntity(participation.StepEntity.Id, participation.StepEntity.TournamentIds,
+                    testEntities),
+                participation.StartDate,
+                participation.EndDate,
+                participation.CalculatedScore,
+                participation.Functions.ToList(),
+                false);
+        }
+
         public int AddConnectedUser(UserId userId)
         {
             if (!ConnectedTeam.UserIds.Contains(userId))
-            {
                 throw new DomainException($"Can't add connected user {userId} isn't in participation team");
-            }   
 
             var user = !ConnectedTeam.ConnectedUserEntities.Any()
                 ? new ConnectedUserEntity(userId, true)
@@ -97,21 +96,13 @@ namespace Domain.ParticipationStates
         public int RemoveConnectedUser(UserId userId)
         {
             if (!ConnectedTeam.UserIds.Contains(userId))
-            {
                 throw new DomainException($"Can't disconnect user {userId} isn't in participation team");
-            }
 
             var existingUser = ConnectedTeam.ConnectedUserEntities.FirstOrDefault(u => u.Id == userId);
-            if (existingUser is null)
-            {
-                throw new DomainException($"Can't disconnect user {userId} isn't connected");
-            }
+            if (existingUser is null) throw new DomainException($"Can't disconnect user {userId} isn't connected");
 
             existingUser.ConnectionCount--;
-            if (existingUser.ConnectionCount == 0)
-            {
-                ConnectedTeam.ConnectedUserEntities.Remove(existingUser);
-            }
+            if (existingUser.ConnectionCount == 0) ConnectedTeam.ConnectedUserEntities.Remove(existingUser);
 
             if (existingUser.IsAdmin)
             {
@@ -119,14 +110,15 @@ namespace Domain.ParticipationStates
                 if (newAdmin is not null)
                 {
                     newAdmin.IsAdmin = true;
-                    RegisterEvent(new ConnectedUserUpdated(this.Id, newAdmin.Id));
+                    RegisterEvent(new ConnectedUserUpdated(Id, newAdmin.Id));
                 }
             }
 
             return existingUser.ConnectionCount;
         }
 
-        public void SetProcessResult(string? error, string? output, IList<TestId> testsPassedIds, DateTime participationEndTime)
+        public void SetProcessResult(string? error, string? output, IList<TestId> testsPassedIds,
+            DateTime participationEndTime)
         {
             LastError = error;
             LastOutput = output;
@@ -136,10 +128,7 @@ namespace Domain.ParticipationStates
             SetCalculatedScore(newScore);
             _passedTestsIds = testsPassedIds.ToList();
             ProcessStartTime = null;
-            if (_passedTestsIds.Count == StepSessionEntity.Tests.Count)
-            {
-                SetEndDate(participationEndTime);
-            }
+            if (_passedTestsIds.Count == StepSessionEntity.Tests.Count) SetEndDate(participationEndTime);
             RegisterEvent(new ProcessResultUpdated(Id));
         }
 
@@ -177,8 +166,8 @@ namespace Domain.ParticipationStates
                 throw new DomainException($"User {elevationTarget} is not connected");
             ConnectedTeam.TeamAdmin.IsAdmin = false;
             user.IsAdmin = true;
-            RegisterEvent(new ConnectedUserUpdated(this.Id, elevationTarget));
-            RegisterEvent(new ConnectedUserUpdated(this.Id, currentUser));
+            RegisterEvent(new ConnectedUserUpdated(Id, elevationTarget));
+            RegisterEvent(new ConnectedUserUpdated(Id, currentUser));
         }
     }
 }

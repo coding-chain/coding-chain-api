@@ -7,7 +7,6 @@ using Application.Common.Pagination;
 using Application.Read.Contracts;
 using Application.Read.Teams;
 using Application.Read.Teams.Handlers;
-using Application.Read.Tournaments;
 using CodingChainApi.Infrastructure.Common.Extensions;
 using CodingChainApi.Infrastructure.Contexts;
 using CodingChainApi.Infrastructure.Models;
@@ -25,39 +24,12 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
             _context = context;
         }
 
-        private static TeamNavigation ToTeamNavigation(Team team) => new(
-            team.Id,
-            team.Name,
-            team.ActiveMembersIds,
-            team.ActiveParticipationsIds
-        );
-
-        private static Expression<Func<Team, bool>> ToPredicate(GetTeamNavigationPaginatedQuery query) =>
-            team =>
-                !team.IsDeleted
-                && (query.TournamentFilter == null || team.Participations.Any(p => 
-                    !p.Deactivated && !p.Tournament.IsDeleted && p.Tournament.IsPublished && p.Tournament.Id == query.TournamentFilter)) 
-                && (query.MemberIdFilter == null || team.UserTeams.Any(uT =>
-                    uT.LeaveDate == null && !uT.User.IsDeleted && uT.User.Id == query.MemberIdFilter))
-                && (query.NameFilter == null || team.Name.Contains(query.NameFilter));
-
-        private static IQueryable<Team> GetOrderByQuery(IQueryable<Team> teamQuery,
-            GetTeamNavigationPaginatedQuery paginationQuery)
-        {
-            if (paginationQuery.NameOrder == OrderEnum.Asc)
-                return teamQuery.OrderBy(t => t.Name);
-            return teamQuery.OrderByDescending(t => t.Name);
-        }
-
         public async Task<IPagedList<TeamNavigation>> GetAllTeamNavigationPaginated(
             GetTeamNavigationPaginatedQuery paginationQuery)
         {
             var query = GetTeamIncludeQueryable()
                 .Where(ToPredicate(paginationQuery));
-            if (paginationQuery.NameOrder != null)
-            {
-                query = GetOrderByQuery(query, paginationQuery);
-            }
+            if (paginationQuery.NameOrder != null) query = GetOrderByQuery(query, paginationQuery);
 
             return await query.Select(t => ToTeamNavigation(t))
                 .FromPaginationQueryAsync(paginationQuery);
@@ -70,18 +42,6 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
                 .FirstOrDefaultAsync(t => !t.IsDeleted && t.Id == id);
             if (team is null) return null;
             return ToTeamNavigation(team);
-        }
-
-        private IIncludableQueryable<Team, User> GetTeamIncludeQueryable()
-        {
-            return _context.Teams
-                .Include(t => t.UserTeams)
-                .Include(t => t.Participations)
-                .ThenInclude(p => p.Tournament)
-                .Include(t => t.Participations)
-                .ThenInclude(p => p.Step)
-                .Include(t => t.UserTeams)
-                .ThenInclude(uT => uT.User);
         }
 
         public async Task<MemberNavigation?> GetOneMemberNavigationByIdAsync(Guid teamId, Guid userId)
@@ -116,7 +76,49 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
                 .FromPaginationQueryAsync(query);
         }
 
-      
+        private static TeamNavigation ToTeamNavigation(Team team)
+        {
+            return new(
+                team.Id,
+                team.Name,
+                team.ActiveMembersIds,
+                team.ActiveParticipationsIds
+            );
+        }
+
+        private static Expression<Func<Team, bool>> ToPredicate(GetTeamNavigationPaginatedQuery query)
+        {
+            return team =>
+                !team.IsDeleted
+                && (query.TournamentFilter == null || team.Participations.Any(p =>
+                    !p.Deactivated && !p.Tournament.IsDeleted && p.Tournament.IsPublished &&
+                    p.Tournament.Id == query.TournamentFilter))
+                && (query.MemberIdFilter == null || team.UserTeams.Any(uT =>
+                    uT.LeaveDate == null && !uT.User.IsDeleted && uT.User.Id == query.MemberIdFilter))
+                && (query.NameFilter == null || team.Name.Contains(query.NameFilter));
+        }
+
+        private static IQueryable<Team> GetOrderByQuery(IQueryable<Team> teamQuery,
+            GetTeamNavigationPaginatedQuery paginationQuery)
+        {
+            if (paginationQuery.NameOrder == OrderEnum.Asc)
+                return teamQuery.OrderBy(t => t.Name);
+            return teamQuery.OrderByDescending(t => t.Name);
+        }
+
+        private IIncludableQueryable<Team, User> GetTeamIncludeQueryable()
+        {
+            return _context.Teams
+                .Include(t => t.UserTeams)
+                .Include(t => t.Participations)
+                .ThenInclude<Team, Participation, Tournament>(p => p.Tournament)
+                .Include(t => t.Participations)
+                .ThenInclude<Team, Participation, Step>(p => p.Step)
+                .Include(t => t.UserTeams)
+                .ThenInclude<Team, UserTeam, User>(uT => uT.User);
+        }
+
+
         private IIncludableQueryable<UserTeam, User> GetUserTeamIncludeQueryable()
         {
             return _context.UserTeams
@@ -125,12 +127,15 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
         }
 
 
-        private static MemberNavigation ToMemberNavigation(UserTeam member) => new MemberNavigation(
-            member.UserId,
-            member.TeamId,
-            member.IsAdmin,
-            member.JoinDate,
-            member.LeaveDate
-        );
+        private static MemberNavigation ToMemberNavigation(UserTeam member)
+        {
+            return new(
+                member.UserId,
+                member.TeamId,
+                member.IsAdmin,
+                member.JoinDate,
+                member.LeaveDate
+            );
+        }
     }
 }

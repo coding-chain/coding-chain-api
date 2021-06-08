@@ -1,5 +1,4 @@
 ﻿using System;
-using CodingChainApi.Infrastructure.MessageBroker;
 using CodingChainApi.Infrastructure.Settings;
 using MediatR;
 using Microsoft.Extensions.Logging;

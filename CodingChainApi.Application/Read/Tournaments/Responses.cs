@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Application.Read.Tournaments
 {
-    public record TournamentStepNavigation(Guid StepId, Guid TournamentId,  bool IsOptional, int Order, 
+    public record TournamentStepNavigation(Guid StepId, Guid TournamentId, bool IsOptional, int Order,
         Guid LanguageId, string Name, string Description, int? MinFunctionsCount,
         int? MaxFunctionsCount, decimal Score, int Difficulty, string? HeaderCode, bool IsPublished,
         IList<Guid> TestIds,

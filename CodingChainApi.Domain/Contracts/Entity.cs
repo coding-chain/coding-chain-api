@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace Domain.Contracts
 {
-    public class Entity<TId> where TId: IEntityId
+    public class Entity<TId> where TId : IEntityId
     {
         public Entity(TId id)
         {
@@ -21,7 +21,7 @@ namespace Domain.Contracts
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != this.GetType()) return false;
+            if (obj.GetType() != GetType()) return false;
             return Equals((Entity<TId>) obj);
         }
 

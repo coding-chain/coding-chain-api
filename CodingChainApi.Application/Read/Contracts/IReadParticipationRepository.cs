@@ -5,7 +5,6 @@ using Application.Common.Pagination;
 using Application.Read.Participations;
 using Application.Read.Participations.Handlers;
 using Application.Read.ProgrammingLanguages;
-using Application.Read.Teams.Handlers;
 
 namespace Application.Read.Contracts
 {
@@ -20,8 +19,7 @@ namespace Application.Read.Contracts
         public Task<ParticipationNavigation?> GetOneParticipationNavigationById(Guid id);
         public Task<bool> ExistsById(Guid id);
         public Task<bool> ParticipationExistsByTournamentStepTeamIds(Guid tournamentId, Guid stepId, Guid teamId);
-        
-        public Task<ProgrammingLanguageNavigation?> GetLanguageByParticipation(Guid participationId);
 
+        public Task<ProgrammingLanguageNavigation?> GetLanguageByParticipation(Guid participationId);
     }
 }

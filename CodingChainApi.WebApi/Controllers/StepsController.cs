@@ -66,7 +66,7 @@ namespace NeosCodingApi.Controllers
             );
         }
 
-        public record GetPaginatedTestNavigationQueryParams() : PaginationQueryBase;
+        public record GetPaginatedTestNavigationQueryParams : PaginationQueryBase;
 
         [HttpGet("{stepId:guid}/tests", Name = nameof(GetStepTests))]
         [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasPageResponse<HateoasResponse<TestNavigation>>))]
@@ -84,13 +84,15 @@ namespace NeosCodingApi.Controllers
                 nameof(GetStepTests))
             );
         }
-        public record GetPaginatedPublicTestNavigationQueryParams() : PaginationQueryBase;
+
+        public record GetPaginatedPublicTestNavigationQueryParams : PaginationQueryBase;
+
         [HttpGet("{stepId:guid}/publictests", Name = nameof(GetPublicStepTests))]
         [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasPageResponse<HateoasResponse<PublicTestNavigation>>))]
         public async Task<IActionResult> GetPublicStepTests(Guid stepId,
             [FromQuery] GetPaginatedPublicTestNavigationQueryParams query)
         {
-            var tests = await Mediator.Send(new GetPaginatedPublicTestNavigationQuery()
+            var tests = await Mediator.Send(new GetPaginatedPublicTestNavigationQuery
                 {StepId = stepId, Page = query.Page, Size = query.Size});
             var testsWithLinks = tests.Select(test =>
                 new HateoasResponse<PublicTestNavigation>(test, GetLinksForTest(stepId, test.Id)));
@@ -192,7 +194,7 @@ namespace NeosCodingApi.Controllers
 
         private IList<LinkDto> GetLinksForStep(Guid stepId)
         {
-            return new List<LinkDto>()
+            return new List<LinkDto>
             {
                 LinkDto.CreateLink(Url.Link(nameof(CreateStep), null)),
                 LinkDto.SelfLink(Url.Link(nameof(GetStepById), new {stepId})),
@@ -206,7 +208,7 @@ namespace NeosCodingApi.Controllers
 
         private IList<LinkDto> GetLinksForTest(Guid stepId, Guid testId)
         {
-            return new List<LinkDto>()
+            return new List<LinkDto>
             {
                 LinkDto.SelfLink(Url.Link(nameof(TestsController.GetTestById), new {testId})),
                 LinkDto.CreateLink(Url.Link(nameof(AddTest), new {stepId, testId})),

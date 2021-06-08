@@ -12,13 +12,13 @@ namespace Application.Contracts.Dtos
 
         public record Function(Guid Id, string Code, int Order);
     }
-    
+
     public record Function(Guid Id, string Code);
 
     public record PlagiarismAnalyzeExecutionDto
         (Function SuspectedFunction, IList<Function> ComparedFunctions);
-    
-    public record PrepareParticipationExecutionDto(Guid Id, LanguageEnum Language);
-    public record CleanParticipationExecutionDto(Guid Id, LanguageEnum Language);
 
+    public record PrepareParticipationExecutionDto(Guid Id, LanguageEnum Language);
+
+    public record CleanParticipationExecutionDto(Guid Id, LanguageEnum Language);
 }

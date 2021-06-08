@@ -8,7 +8,7 @@ using Application.Contracts.IService;
 using Application.Read.Contracts;
 using Application.Write.Contracts;
 using Domain.Participations;
-using Domain.ParticipationStates;
+using Domain.ParticipationSessions;
 using MediatR;
 
 namespace Application.Write.ParticipationsSessions
@@ -18,12 +18,15 @@ namespace Application.Write.ParticipationsSessions
 
     public class DisconnectUserFromParticipationHandler : IRequestHandler<DisconnectUserFromParticipationCommand, int>
     {
-        private readonly IParticipationsSessionsRepository _participationsSessionsRepository;
-        private readonly ICurrentUserService _currentUserService;
-        private readonly IReadParticipationRepository _readParticipationRepository;
         private readonly IDispatcher<CleanParticipationExecutionDto> _cleanParticipationExecutionService;
+        private readonly ICurrentUserService _currentUserService;
+        private readonly IParticipationsSessionsRepository _participationsSessionsRepository;
+        private readonly IReadParticipationRepository _readParticipationRepository;
+
         public DisconnectUserFromParticipationHandler(
-            IParticipationsSessionsRepository participationsSessionsRepository, ICurrentUserService currentUserService, IReadParticipationRepository readParticipationRepository, IDispatcher<CleanParticipationExecutionDto> cleanParticipationExecutionService)
+            IParticipationsSessionsRepository participationsSessionsRepository, ICurrentUserService currentUserService,
+            IReadParticipationRepository readParticipationRepository,
+            IDispatcher<CleanParticipationExecutionDto> cleanParticipationExecutionService)
         {
             _participationsSessionsRepository = participationsSessionsRepository;
             _currentUserService = currentUserService;
@@ -31,14 +34,12 @@ namespace Application.Write.ParticipationsSessions
             _cleanParticipationExecutionService = cleanParticipationExecutionService;
         }
 
-        public async Task<int> Handle(DisconnectUserFromParticipationCommand request, CancellationToken cancellationToken)
+        public async Task<int> Handle(DisconnectUserFromParticipationCommand request,
+            CancellationToken cancellationToken)
         {
             var participation =
                 await _participationsSessionsRepository.FindByIdAsync(new ParticipationId(request.ParticipationId));
-            if (participation is null)
-            {
-                throw new NotFoundException(request.ParticipationId.ToString(), "Participation");
-            }
+            if (participation is null) throw new NotFoundException(request.ParticipationId.ToString(), "Participation");
             var connectionCount = participation.RemoveConnectedUser(_currentUserService.UserId);
             if (participation.HasConnectedUsers)
             {
@@ -49,6 +50,7 @@ namespace Application.Write.ParticipationsSessions
                 await _participationsSessionsRepository.RemoveAsync(participation.Id);
                 await CleanParticipation(participation);
             }
+
             return connectionCount;
         }
 

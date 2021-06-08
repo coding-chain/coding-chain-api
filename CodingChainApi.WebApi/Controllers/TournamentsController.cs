@@ -6,8 +6,6 @@ using System.Threading.Tasks;
 using Application.Common.Pagination;
 using Application.Read.Participations;
 using Application.Read.Participations.Handlers;
-using Application.Read.Teams;
-using Application.Read.Teams.Handlers;
 using Application.Read.Tournaments;
 using Application.Read.Tournaments.Handlers;
 using Application.Write.Tournaments;
@@ -125,7 +123,7 @@ namespace NeosCodingApi.Controllers
             await Mediator.Send(new DeleteTournamentStepCommand(tournamentId, stepId));
             return NoContent();
         }
-        
+
 
         [HttpGet("{tournamentId:guid}/steps/{stepId:guid}", Name = nameof(GetTournamentStepById))]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -153,7 +151,8 @@ namespace NeosCodingApi.Controllers
                 TournamentId = tournamentId
             });
             var stepsWithLinks = steps.Select(step =>
-                new HateoasResponse<TournamentStepNavigation>(step, GetLinksForTournamentStep(tournamentId, step.StepId)));
+                new HateoasResponse<TournamentStepNavigation>(step,
+                    GetLinksForTournamentStep(tournamentId, step.StepId)));
             return Ok(HateoasResponseBuilder.FromPagedList(
                 Url,
                 steps.ToPagedListResume(),
@@ -161,20 +160,21 @@ namespace NeosCodingApi.Controllers
                 nameof(GetTournamentSteps))
             );
         }
-        
+
         [HttpGet("{tournamentId:guid}/participations", Name = nameof(GetTournamentParticipations))]
         [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasPageResponse<HateoasResponse<ParticipationNavigation>>))]
         public async Task<IActionResult> GetTournamentParticipations(Guid tournamentId,
             [FromQuery] GetTournamentNavigationPaginatedQueryParameters query)
         {
-            var participations = await Mediator.Send(new GetAllParticipationNavigationPaginatedQuery()
+            var participations = await Mediator.Send(new GetAllParticipationNavigationPaginatedQuery
             {
                 Page = query.Page,
                 Size = query.Size,
                 TournamentIdFilter = tournamentId
             });
             var participationsWithLinks = participations.Select(participation =>
-                new HateoasResponse<ParticipationNavigation>(participation, GetLinksForTournamentParticipation(tournamentId)));
+                new HateoasResponse<ParticipationNavigation>(participation,
+                    GetLinksForTournamentParticipation(tournamentId)));
             return Ok(HateoasResponseBuilder.FromPagedList(
                 Url,
                 participations.ToPagedListResume(),
@@ -189,31 +189,31 @@ namespace NeosCodingApi.Controllers
 
         private IList<LinkDto> GetLinksForTournament(Guid tournamentId)
         {
-            return new List<LinkDto>()
+            return new List<LinkDto>
             {
                 LinkDto.CreateLink(Url.Link(nameof(CreateTournament), null)),
                 LinkDto.SelfLink(Url.Link(nameof(GetTournamentById), new {tournamentId})),
                 LinkDto.DeleteLink(Url.Link(nameof(DeleteTournament), new {tournamentId})),
                 LinkDto.UpdateLink(Url.Link(nameof(UpdateTournament), new {tournamentId})),
-                LinkDto.UpdateLink(Url.Link(nameof(UpdateTournamentSteps), new {tournamentId})),
+                LinkDto.UpdateLink(Url.Link(nameof(UpdateTournamentSteps), new {tournamentId}))
             };
         }
 
         private IList<LinkDto> GetLinksForTournamentStep(Guid tournamentId, Guid stepId)
         {
-            return new List<LinkDto>()
+            return new List<LinkDto>
             {
                 LinkDto.DeleteLink(Url.Link(nameof(DeleteTournamentStep), new {tournamentId, stepId})),
-                LinkDto.SelfLink(Url.Link(nameof(GetTournamentStepById), new {tournamentId,stepId})),
-                LinkDto.AllLink(Url.Link(nameof(GetTournamentSteps), new {tournamentId})),
+                LinkDto.SelfLink(Url.Link(nameof(GetTournamentStepById), new {tournamentId, stepId})),
+                LinkDto.AllLink(Url.Link(nameof(GetTournamentSteps), new {tournamentId}))
             };
         }
-        
+
         private IList<LinkDto> GetLinksForTournamentParticipation(Guid tournamentId)
         {
-            return new List<LinkDto>()
+            return new List<LinkDto>
             {
-                LinkDto.AllLink(Url.Link(nameof(GetTournamentParticipations), new {tournamentId})),
+                LinkDto.AllLink(Url.Link(nameof(GetTournamentParticipations), new {tournamentId}))
             };
         }
 

@@ -21,6 +21,5 @@ namespace NeosCodingApi.Controllers
             Mapper = mapper;
             PropertyCheckerService = propertyCheckerService;
         }
-
     }
 }

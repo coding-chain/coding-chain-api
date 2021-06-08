@@ -2,7 +2,6 @@
 using System.Text;
 using System.Threading.Tasks;
 using Application;
-using Application.Common.Events;
 using Application.Common.Interceptors;
 using Application.Contracts.Dtos;
 using Application.Contracts.IService;
@@ -11,14 +10,12 @@ using Application.Write.Contracts;
 using CodingChainApi.Infrastructure.Common.Exceptions;
 using CodingChainApi.Infrastructure.Contexts;
 using CodingChainApi.Infrastructure.Hubs;
-using CodingChainApi.Infrastructure.MessageBroker;
 using CodingChainApi.Infrastructure.Repositories.AggregateRepositories;
 using CodingChainApi.Infrastructure.Repositories.ReadRepositories;
 using CodingChainApi.Infrastructure.Services;
 using CodingChainApi.Infrastructure.Services.Cache;
 using CodingChainApi.Infrastructure.Services.Messaging;
 using CodingChainApi.Infrastructure.Services.Parser;
-using CodingChainApi.Infrastructure.Services.Processes;
 using CodingChainApi.Infrastructure.Settings;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -69,7 +66,6 @@ namespace CodingChainApi.Infrastructure
                 typeof(EventPublisherInterceptor));
             services.AddProxiedScoped<IPlagiarizedFunctionRepository, PlagiarizedFunctionRepository>(
                 typeof(EventPublisherInterceptor));
-
         }
 
         private static void RegisterReadRepositories(IServiceCollection services)
@@ -113,15 +109,11 @@ namespace CodingChainApi.Infrastructure
             var settings = configuration.GetSection(settingsName).Get<TImplementation>();
             services.Configure<TImplementation>(configuration.GetSection(settingsName));
             if (singleton)
-            {
                 services.AddSingleton<TInterface>(sp =>
                     sp.GetRequiredService<IOptions<TImplementation>>().Value);
-            }
             else
-            {
                 services.AddScoped<TInterface>(sp =>
                     sp.GetRequiredService<IOptions<TImplementation>>().Value);
-            }
 
             return settings;
         }
@@ -150,11 +142,9 @@ namespace CodingChainApi.Infrastructure
                             // If the request is for our hub...
                             var path = context.HttpContext.Request.Path;
                             if (!string.IsNullOrEmpty(accessToken) &&
-                                (path.StartsWithSegments(ParticipationSessionsHub.Route)))
-                            {
+                                path.StartsWithSegments(ParticipationSessionsHub.Route))
                                 // Read the token out of the query string
                                 context.Token = accessToken;
-                            }
 
                             return Task.CompletedTask;
                         }
@@ -183,9 +173,7 @@ namespace CodingChainApi.Infrastructure
         {
             var dbSettings = configuration.GetSection(nameof(DatabaseSettings)).Get<DatabaseSettings>();
             if (dbSettings.ConnectionString is null)
-            {
                 throw new InfrastructureException("Please provide connection string");
-            }
 
             services.AddDbContext<CodingChainContext>(options =>
                 options.UseSqlServer(dbSettings.ConnectionString,

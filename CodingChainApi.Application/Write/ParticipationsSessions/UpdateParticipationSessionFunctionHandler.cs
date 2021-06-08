@@ -12,24 +12,28 @@ namespace Application.Write.ParticipationsSessions
 {
     [Authenticated]
     public record UpdateParticipationSessionFunctionCommand(Guid ParticipationId, Guid FunctionId, string Code,
-        int? Order): IRequest<string>;
-    public class UpdateParticipationSessionFunctionHandler: IRequestHandler<UpdateParticipationSessionFunctionCommand, string>
+        int? Order) : IRequest<string>;
+
+    public class
+        UpdateParticipationSessionFunctionHandler : IRequestHandler<UpdateParticipationSessionFunctionCommand, string>
     {
         private readonly IParticipationsSessionsRepository _repository;
-        private readonly ICurrentUserService _userService;
         private readonly ITimeService _timeService;
+        private readonly ICurrentUserService _userService;
 
-        public UpdateParticipationSessionFunctionHandler(IParticipationsSessionsRepository repository, ICurrentUserService userService, ITimeService timeService)
+        public UpdateParticipationSessionFunctionHandler(IParticipationsSessionsRepository repository,
+            ICurrentUserService userService, ITimeService timeService)
         {
             _repository = repository;
             _userService = userService;
             _timeService = timeService;
         }
 
-        public async Task<string> Handle(UpdateParticipationSessionFunctionCommand request, CancellationToken cancellationToken)
+        public async Task<string> Handle(UpdateParticipationSessionFunctionCommand request,
+            CancellationToken cancellationToken)
         {
             var participation = await _repository.FindByIdAsync(new ParticipationId(request.ParticipationId));
-            if(participation is null)
+            if (participation is null)
                 throw new NotFoundException(request.ParticipationId.ToString(), "ParticipationSession");
             var function = new FunctionEntity(
                 new FunctionId(request.FunctionId),

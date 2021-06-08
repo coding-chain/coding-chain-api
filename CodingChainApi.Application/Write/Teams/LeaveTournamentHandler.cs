@@ -15,8 +15,8 @@ namespace Application.Write.Teams
 
     public class LeaveTournamentHandler : IRequestHandler<LeaveTournamentCommand, string>
     {
-        private readonly ITeamRepository _teamRepository;
         private readonly ICurrentUserService _currentUserService;
+        private readonly ITeamRepository _teamRepository;
 
         public LeaveTournamentHandler(ITeamRepository teamRepository, ICurrentUserService currentUserService)
         {
@@ -30,7 +30,7 @@ namespace Application.Write.Teams
             if (team is null)
                 throw new ApplicationException($"Team with id {request.TeamId} doesn't exists");
             var tournamentId = new TournamentId(request.TournamentId);
-            team.LeaveTournament(tournamentId, this._currentUserService.UserId);
+            team.LeaveTournament(tournamentId, _currentUserService.UserId);
             await _teamRepository.SetAsync(team);
             return team.Id.ToString();
         }

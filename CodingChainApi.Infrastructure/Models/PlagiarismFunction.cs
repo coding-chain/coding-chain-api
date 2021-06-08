@@ -1,7 +1,4 @@
 using System;
-using System.Collections.Generic;
-using Domain.CodeAnalysis;
-using Domain.Participations;
 
 namespace CodingChainApi.Infrastructure.Models
 {

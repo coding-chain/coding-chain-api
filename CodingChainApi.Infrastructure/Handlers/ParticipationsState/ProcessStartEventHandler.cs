@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Application.Common.Events;
 using CodingChainApi.Infrastructure.Hubs;
-using Domain.ParticipationStates;
+using Domain.ParticipationSessions;
 using MediatR;
 using Microsoft.AspNetCore.SignalR;
 

@@ -15,13 +15,15 @@ namespace CodingChainApi.Infrastructure.Models
         public IList<Guid> ActiveParticipationsIds => ActiveParticipations
             .Select(p => p.Id)
             .ToList();
+
         public IList<Participation> ActiveParticipations => Participations
             .Where(p => !p.Deactivated && !p.Tournament.IsDeleted && p.Tournament.IsPublished && !p.Step.IsDeleted)
             .ToList();
-        
+
         public IList<Guid> ActiveMembersIds => ActiveMembers
             .Select(uT => uT.Id).ToList();
-        public IList<UserTeam> ActiveMembers => (UserTeams)
+
+        public IList<UserTeam> ActiveMembers => UserTeams
             .Where(uT => uT.LeaveDate == null && !uT.User.IsDeleted)
             .ToList();
     }

@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Linq;
 using CodingChainApi.Infrastructure.Models;
-using CodingChainApi.Infrastructure.Settings;
-using Domain.CodeAnalysis;
 using Domain.ProgrammingLanguages;
 using Domain.Users;
 using Microsoft.EntityFrameworkCore;
 using ProgrammingLanguage = CodingChainApi.Infrastructure.Models.ProgrammingLanguage;
 using Right = CodingChainApi.Infrastructure.Models.Right;
-using User = CodingChainApi.Infrastructure.Models.User;
 
 namespace CodingChainApi.Infrastructure.Contexts
 {
@@ -19,9 +16,6 @@ namespace CodingChainApi.Infrastructure.Contexts
         {
             Database.EnsureCreated();
         }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-            => optionsBuilder.UseSnakeCaseNamingConvention();
 
         public DbSet<User> Users { get; set; }
         public DbSet<ProgrammingLanguage> ProgrammingLanguages { get; set; }
@@ -37,6 +31,11 @@ namespace CodingChainApi.Infrastructure.Contexts
         public DbSet<Test> Tests { get; set; }
 
         public DbSet<PlagiarismFunction> PlagiarismFunctions { get; set; }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.UseSnakeCaseNamingConvention();
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -128,7 +127,7 @@ namespace CodingChainApi.Infrastructure.Contexts
                 .HasOne(bc => bc.Step)
                 .WithMany(c => c.TournamentSteps)
                 .HasForeignKey(bc => bc.StepId);
-            
+
             modelBuilder.Entity<PlagiarismFunction>()
                 .HasOne(bc => bc.CheatingFunction)
                 .WithMany(b => b.CheatingFunctions)

@@ -26,14 +26,28 @@ namespace Domain.Participations
 
     public class ParticipationAggregate : Aggregate<ParticipationId>
     {
-        public virtual TeamEntity Team { get; private set; }
-        public TournamentEntity TournamentEntity { get; private set; }
-        public virtual StepEntity StepEntity { get; private set; }
-        public DateTime StartDate { get; private set; }
+        private List<FunctionEntity> _functions;
+
+        protected ParticipationAggregate(ParticipationId id, TeamEntity team, TournamentEntity tournamentEntity,
+            StepEntity stepEntity,
+            DateTime startDate, DateTime? endDate, decimal calculatedScore, IList<FunctionEntity> functions) : base(id)
+        {
+            Team = team;
+            TournamentEntity = tournamentEntity;
+            StepEntity = stepEntity;
+            _functions = new List<FunctionEntity>(functions);
+            StartDate = startDate;
+            EndDate = endDate;
+            CalculatedScore = calculatedScore;
+        }
+
+        public virtual TeamEntity Team { get; }
+        public TournamentEntity TournamentEntity { get; }
+        public virtual StepEntity StepEntity { get; }
+        public DateTime StartDate { get; }
         public DateTime? EndDate { get; private set; }
         public decimal CalculatedScore { get; private set; }
         public IReadOnlyList<FunctionEntity> Functions => _functions.ToList().AsReadOnly();
-        private List<FunctionEntity> _functions;
 
 
         public static ParticipationAggregate CreateNew(ParticipationId id, TeamEntity team,
@@ -63,26 +77,13 @@ namespace Domain.Participations
                 functions);
         }
 
-        protected ParticipationAggregate(ParticipationId id, TeamEntity team, TournamentEntity tournamentEntity,
-            StepEntity stepEntity,
-            DateTime startDate, DateTime? endDate, decimal calculatedScore, IList<FunctionEntity> functions) : base(id)
-        {
-            Team = team;
-            TournamentEntity = tournamentEntity;
-            StepEntity = stepEntity;
-            _functions = new List<FunctionEntity>(functions);
-            StartDate = startDate;
-            EndDate = endDate;
-            CalculatedScore = calculatedScore;
-        }
-
         public void SetFunctions(IList<FunctionEntity> functions)
         {
             var orderedFunctions = new List<FunctionEntity>(functions);
-            orderedFunctions.Sort((f1,f2) => (f1.Order ?? 0) - (f2.Order ?? 0));
+            orderedFunctions.Sort((f1, f2) => (f1.Order ?? 0) - (f2.Order ?? 0));
             var i = 1;
             var errors = orderedFunctions
-                .SelectMany((function) =>
+                .SelectMany(function =>
                 {
                     var subErrors = new List<string>();
                     if (function.Order is not null)
@@ -91,6 +92,7 @@ namespace Domain.Participations
                             subErrors.Add($"Function {function.Id} and order {function.Order} isn't ordered");
                         i++;
                     }
+
                     var sameFunction = _functions.FirstOrDefault(oldFunction => function.Id == oldFunction.Id);
                     if (sameFunction?.LastModificationDate > function.LastModificationDate)
                         subErrors.Add($"Function {function.Id} have last modification date lower than before");
@@ -122,10 +124,8 @@ namespace Domain.Participations
         public void AddFunction(FunctionEntity function, UserId userId)
         {
             if (!Team.UserIds.Contains(userId))
-            {
                 throw new DomainException(
                     $"Function {function.Id} cannot be added by user : {userId} not in participation team");
-            }
 
             ValidateFunction(function);
             if (_functions.ToList().Any(f => f.Id == function.Id))
@@ -138,10 +138,8 @@ namespace Domain.Participations
         public void UpdateFunction(FunctionEntity function, UserId userId)
         {
             if (!Team.UserIds.Contains(userId))
-            {
                 throw new DomainException(
                     $"Function {function.Id} cannot be added by user : {userId} not in participation team");
-            }
 
             ValidateFunction(function);
             var existingFunction = _functions.FirstOrDefault(f => f.Id == function.Id);
@@ -152,14 +150,12 @@ namespace Domain.Participations
             if (otherFunctionWithSameOrder is not null && existingFunction.Order is not null)
             {
                 otherFunctionWithSameOrder.Order = existingFunction.Order;
-                RegisterEvent(new ParticipationFunctionsReordered(this.Id,
-                    new List<FunctionId>() {otherFunctionWithSameOrder.Id, function.Id}));
+                RegisterEvent(new ParticipationFunctionsReordered(Id,
+                    new List<FunctionId> {otherFunctionWithSameOrder.Id, function.Id}));
             }
 
             if (existingFunction.Order is null && function.Order is not null)
-            {
                 ShiftExistingFunctionsOrder(function.Order.Value);
-            } 
             existingFunction.Order = function.Order;
             existingFunction.Code = function.Code;
             existingFunction.LastModificationDate = function.LastModificationDate;
@@ -172,10 +168,8 @@ namespace Domain.Participations
         public void RemoveFunction(FunctionId functionId, UserId userId)
         {
             if (!Team.UserIds.Contains(userId))
-            {
                 throw new DomainException(
                     $"Function {functionId} cannot be deleted by user : {userId} not in participation team");
-            }
 
             var stepToRemove = Functions.FirstOrDefault(f => f.Id == functionId);
             if (stepToRemove is null)
@@ -196,10 +190,7 @@ namespace Domain.Participations
                     reorderedFunctions.Add(f.Id);
                 }
             });
-            if (reorderedFunctions.Any())
-            {
-                RegisterEvent(new ParticipationFunctionsReordered(this.Id, reorderedFunctions));
-            }
+            if (reorderedFunctions.Any()) RegisterEvent(new ParticipationFunctionsReordered(Id, reorderedFunctions));
         }
 
         private IList<FunctionId> ReorderFunctions()
@@ -214,9 +205,7 @@ namespace Domain.Participations
             }
 
             if (functionsWithDifferentIds.Any())
-            {
-                RegisterEvent(new ParticipationFunctionsReordered(this.Id, functionsWithDifferentIds));
-            }
+                RegisterEvent(new ParticipationFunctionsReordered(Id, functionsWithDifferentIds));
             return functionsWithDifferentIds;
         }
 

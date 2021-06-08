@@ -5,7 +5,7 @@ namespace CodingChainApi.Infrastructure.Common.Extensions
 {
     public static class DbSetExtensions
     {
-        public static void Upsert<T>(this DbSet<T> set, T entity ) where T : class
+        public static void Upsert<T>(this DbSet<T> set, T entity) where T : class
         {
             if (set.Contains(entity))
                 set.Update(entity);

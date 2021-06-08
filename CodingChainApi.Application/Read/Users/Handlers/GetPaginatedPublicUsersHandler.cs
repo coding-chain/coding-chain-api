@@ -12,9 +12,10 @@ namespace Application.Read.Users.Handlers
     {
         public string? UsernameFilter { get; set; }
         public string? EmailFilter { get; set; }
-        public IList<Guid>? WithoutIdsFilter { get; set; } 
+        public IList<Guid>? WithoutIdsFilter { get; set; }
     }
-    public class GetPaginatedPublicUsersHandler: IRequestHandler<GetPaginatedPublicUsersQuery, IPagedList<PublicUser>>
+
+    public class GetPaginatedPublicUsersHandler : IRequestHandler<GetPaginatedPublicUsersQuery, IPagedList<PublicUser>>
     {
         private readonly IReadUserRepository _readUserRepository;
 
@@ -23,7 +24,8 @@ namespace Application.Read.Users.Handlers
             _readUserRepository = readUserRepository;
         }
 
-        public Task<IPagedList<PublicUser>> Handle(GetPaginatedPublicUsersQuery request, CancellationToken cancellationToken)
+        public Task<IPagedList<PublicUser>> Handle(GetPaginatedPublicUsersQuery request,
+            CancellationToken cancellationToken)
         {
             return _readUserRepository.FindPaginatedPublicUsers(request);
         }

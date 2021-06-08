@@ -30,10 +30,6 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
                 .FromPaginationQueryAsync(paginationQuery);
         }
 
-        public static ProgrammingLanguageNavigation ToProgrammingLanguageNavigation(ProgrammingLanguage language) =>
-            new(
-                language.Id, language.Name);
-
         public async Task<ProgrammingLanguageNavigation?> GetOneLanguageNavigationByIdAsync(Guid id)
         {
             var language = await _context.ProgrammingLanguages.FirstOrDefaultAsync(l => l.Id == id && !l.IsDeleted);
@@ -52,6 +48,12 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
         {
             return await _context.ProgrammingLanguages.AnyAsync(
                 l => !l.IsDeleted && l.Name == name);
+        }
+
+        public static ProgrammingLanguageNavigation ToProgrammingLanguageNavigation(ProgrammingLanguage language)
+        {
+            return new(
+                language.Id, language.Name);
         }
     }
 }

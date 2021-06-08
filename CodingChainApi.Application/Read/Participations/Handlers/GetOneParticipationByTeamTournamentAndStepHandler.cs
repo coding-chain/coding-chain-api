@@ -3,7 +3,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Application.Common.Exceptions;
-using Application.Common.Pagination;
 using Application.Read.Contracts;
 using MediatR;
 
@@ -27,7 +26,7 @@ namespace Application.Read.Participations.Handlers
             CancellationToken cancellationToken)
         {
             var participations = await _readParticipationRepository.GetAllParticipationNavigationPaginated(
-                new GetAllParticipationNavigationPaginatedQuery()
+                new GetAllParticipationNavigationPaginatedQuery
                 {
                     StepIdFilter = request.StepId,
                     TeamIdFilter = request.TeamId,
@@ -35,7 +34,8 @@ namespace Application.Read.Participations.Handlers
                 });
             if (!participations.Any())
                 throw new NotFoundException(
-                    $" TeamId: {request.TeamId} TournamentId: {request.TournamentId} StepId :{request.StepId}", "Participation");
+                    $" TeamId: {request.TeamId} TournamentId: {request.TournamentId} StepId :{request.StepId}",
+                    "Participation");
             return participations.First();
         }
     }

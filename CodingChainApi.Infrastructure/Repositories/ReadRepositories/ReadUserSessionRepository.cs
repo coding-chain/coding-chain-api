@@ -3,14 +3,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using Application.Common.Pagination;
 using Application.Read.Contracts;
-using Application.Read.UserSessions.Handlers;
 using Application.Read.UserSessions;
 using Application.Read.UserSessions.Handlers;
 using CodingChainApi.Infrastructure.Common.Extensions;
 using CodingChainApi.Infrastructure.Common.Pagination;
 using CodingChainApi.Infrastructure.Services.Cache;
 using Domain.Participations;
-using Domain.ParticipationStates;
+using Domain.ParticipationSessions;
 
 namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
 {
@@ -22,12 +21,6 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
         {
             _cache = cache;
         }
-
-        private static UserSessionNavigation ToUserSessionNavigation(ConnectedUserEntity user) =>
-            new(
-                user.Id.Value,
-                user.IsAdmin
-            );
 
         public async Task<IPagedList<UserSessionNavigation>> GetAllUserNavigationPaginated(
             GetParticipationSessionUsersPaginatedQuery paginationQuery)
@@ -56,6 +49,14 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
             var user = participation?.ConnectedTeam.ConnectedUserEntities.FirstOrDefault(u => u.Id.Value == userId);
             if (user is null) return null;
             return await ToUserSessionNavigation(user).ToTask();
+        }
+
+        private static UserSessionNavigation ToUserSessionNavigation(ConnectedUserEntity user)
+        {
+            return new(
+                user.Id.Value,
+                user.IsAdmin
+            );
         }
     }
 }

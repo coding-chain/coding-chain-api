@@ -12,12 +12,12 @@ namespace Application.Read.Steps.Handlers
         IRequest<IPagedList<StepNavigation>>
     {
         public bool? IsPublishedFilter { get; set; }
-        public string? NameFilter {get; set; }
-        
-        public OrderEnum? NameOrder { get; set; } 
+        public string? NameFilter { get; set; }
+
+        public OrderEnum? NameOrder { get; set; }
         public Guid? LanguageIdFilter { get; set; }
-        public IList<Guid>? WithoutIdsFilter { get; set; } 
-    };
+        public IList<Guid>? WithoutIdsFilter { get; set; }
+    }
 
     public class GetPaginatedStepEditionNavigationHandler : IRequestHandler<GetPaginatedStepNavigationQuery,
         IPagedList<StepNavigation>>

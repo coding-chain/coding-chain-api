@@ -14,9 +14,9 @@ namespace Application.Write.Users.RegisterUser
 
     public class RegisterUserHandler : IRequestHandler<RegisterUserCommand, string>
     {
+        private readonly IReadUserRepository _readUserRepository;
         private readonly ISecurityService _securityService;
         private readonly IUserRepository _userRepository;
-        private readonly IReadUserRepository _readUserRepository;
 
         public RegisterUserHandler(
             ISecurityService securityService, IUserRepository userRepository, IReadUserRepository readUserRepository)
@@ -32,7 +32,7 @@ namespace Application.Write.Users.RegisterUser
             var userExists = await _readUserRepository.UserExistsByEmailAsync(request.Email);
             var users = await _userRepository.GetAllAsync();
             var id = await _userRepository.NextIdAsync();
-            if (userExists ) throw new ApplicationException("Username or email already exists");
+            if (userExists) throw new ApplicationException("Username or email already exists");
             var user = new UserAggregate(id, password, new List<Right>(), request.Email,
                 request.Username);
 

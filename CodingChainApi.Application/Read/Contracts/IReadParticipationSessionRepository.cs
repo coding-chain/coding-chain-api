@@ -8,8 +8,5 @@ namespace Application.Read.Contracts
     {
         public Task<bool> ExistsById(Guid id);
         public Task<ParticipationSessionNavigation?> GetOneById(Guid id);
-
     }
-    
-    
 }

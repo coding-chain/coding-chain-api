@@ -9,7 +9,8 @@ using MediatR;
 namespace Application.Write.StepEditions
 {
     public record DeleteStepCommand(Guid StepId) : IRequest<string>;
-    public class DeleteStepHandler: IRequestHandler<DeleteStepCommand, string>
+
+    public class DeleteStepHandler : IRequestHandler<DeleteStepCommand, string>
     {
         private readonly IStepEditionRepository _stepEditionRepository;
 

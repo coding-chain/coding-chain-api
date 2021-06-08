@@ -2,7 +2,7 @@ using System;
 
 namespace Application.Common.Exceptions
 {
-    public class NotFoundException: ApplicationException
+    public class NotFoundException : ApplicationException
     {
         public NotFoundException(string id, string searchedItem)
         {

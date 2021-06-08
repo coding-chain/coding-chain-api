@@ -13,10 +13,10 @@ namespace Application.Write.Users.LoginUser
 
     public class LoginUserHandler : IRequestHandler<LoginUserQuery, TokenResponse>
     {
+        private readonly IReadUserRepository _readUserRepository;
         private readonly ISecurityService _securityService;
         private readonly ITokenService _tokenService;
         private readonly IUserRepository _userRepository;
-        private readonly IReadUserRepository _readUserRepository;
 
         public LoginUserHandler(ISecurityService securityService, ITokenService tokenService,
             IUserRepository userRepository, IReadUserRepository readUserRepository)
@@ -33,8 +33,8 @@ namespace Application.Write.Users.LoginUser
             if (userId is null) throw new ApplicationException($"User {request.Email} not found");
             var user = await _userRepository.FindByIdAsync(new UserId(userId.Value));
             if (user is null) throw new ApplicationException($"User {request.Email} not found");
-            
-            
+
+
             if (!_securityService.ValidatePassword(request.Password, user.Password))
                 throw new ApplicationException("Invalid credentials");
 

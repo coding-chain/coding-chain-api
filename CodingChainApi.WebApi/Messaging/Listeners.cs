@@ -1,8 +1,6 @@
 ﻿using Application.Write.ParticipationsSessions;
 using Application.Write.Plagiarism;
-using CodingChainApi.Infrastructure.Hubs;
 using CodingChainApi.Infrastructure.Settings;
-using Domain.ParticipationStates;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -17,7 +15,7 @@ namespace NeosCodingApi.Messaging
             RoutingKey = settings.PlagiarismAnalyzeDoneRoutingKey;
         }
     }
-    
+
     public class ParticipationPreparedListener : NotifierListenerService<SetParticipationReadyStateNotification>
     {
         public ParticipationPreparedListener(IRabbitMqSettings settings,
@@ -27,6 +25,7 @@ namespace NeosCodingApi.Messaging
             RoutingKey = settings.PreparedExecutionRoutingKey;
         }
     }
+
     public class ParticipationDoneExecutionListener : NotifierListenerService<ProcessEndNotification>
     {
         public ParticipationDoneExecutionListener(IRabbitMqSettings settings,

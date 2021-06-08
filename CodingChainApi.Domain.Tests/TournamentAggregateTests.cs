@@ -3,18 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using Domain.Exceptions;
 using Domain.StepEditions;
-using Domain.Teams;
 using Domain.Tournaments;
-using Domain.Users;
 using NUnit.Framework;
 
 namespace CodingChainApi.Domain.Tests
 {
     public class TournamentAggregateTests
     {
-        private string _tournamentName;
         private string _tournamentDescription;
         private TournamentId _tournamentId;
+        private string _tournamentName;
 
         [SetUp]
         public void Setup()
@@ -24,29 +22,38 @@ namespace CodingChainApi.Domain.Tests
             _tournamentId = new TournamentId(Guid.NewGuid());
         }
 
-        private StepEntity GetStep(int order, bool isOptional) =>
-            new StepEntity(new StepId(Guid.NewGuid()), order, isOptional);
+        private StepEntity GetStep(int order, bool isOptional)
+        {
+            return new(new StepId(Guid.NewGuid()), order, isOptional);
+        }
 
-        private TournamentAggregate GetNewTournament() => TournamentAggregate.CreateNew(
-            _tournamentId,
-            _tournamentName,
-            _tournamentDescription);
+        private TournamentAggregate GetNewTournament()
+        {
+            return TournamentAggregate.CreateNew(
+                _tournamentId,
+                _tournamentName,
+                _tournamentDescription);
+        }
 
-        private TournamentAggregate GetNewTournamentWithSteps() => TournamentAggregate.Restore(
-            _tournamentId,
-            _tournamentName,
-            _tournamentDescription,
-            false,
-            null,
-            null,
-            new List<StepEntity>
-            {
-                GetStep(0, false),
-                GetStep(1, false)
-            });
+        private TournamentAggregate GetNewTournamentWithSteps()
+        {
+            return TournamentAggregate.Restore(
+                _tournamentId,
+                _tournamentName,
+                _tournamentDescription,
+                false,
+                null,
+                null,
+                new List<StepEntity>
+                {
+                    GetStep(0, false),
+                    GetStep(1, false)
+                });
+        }
 
-        private TournamentAggregate GetPublishedTournament(DateTime? startDate = null, DateTime? endDate = null) =>
-            TournamentAggregate.Restore(
+        private TournamentAggregate GetPublishedTournament(DateTime? startDate = null, DateTime? endDate = null)
+        {
+            return TournamentAggregate.Restore(
                 _tournamentId,
                 _tournamentName,
                 _tournamentDescription,
@@ -58,6 +65,7 @@ namespace CodingChainApi.Domain.Tests
                     GetStep(0, false),
                     GetStep(1, false)
                 });
+        }
 
         [Test]
         public void create_new_tournament_should_work()
@@ -147,7 +155,7 @@ namespace CodingChainApi.Domain.Tests
         public void set_unordered_steps_should_throw()
         {
             var tournament = GetNewTournament();
-            var steps = new List<StepEntity>()
+            var steps = new List<StepEntity>
             {
                 GetStep(0, false),
                 GetStep(3, false)
@@ -159,22 +167,19 @@ namespace CodingChainApi.Domain.Tests
         public void set_steps_should_works()
         {
             var tournament = GetNewTournament();
-            var steps = new List<StepEntity>()
+            var steps = new List<StepEntity>
             {
                 GetStep(1, false),
                 GetStep(2, false)
             };
             tournament.SetSteps(steps);
-            for (var i = 0; i < tournament.Steps.Count; i++)
-            {
-                Assert.AreEqual(steps[i], tournament.Steps[i]);
-            }
+            for (var i = 0; i < tournament.Steps.Count; i++) Assert.AreEqual(steps[i], tournament.Steps[i]);
         }
 
         [Test]
         public void publish_tournament_without_mandatory_steps_should_throw()
         {
-            var steps = new List<StepEntity>() {GetStep(0, true)};
+            var steps = new List<StepEntity> {GetStep(0, true)};
             var tournament = TournamentAggregate.Restore(_tournamentId, _tournamentName, _tournamentDescription, false,
                 DateTime.Now, DateTime.Now.AddDays(1), steps);
             Assert.Throws<DomainException>(() => tournament.Publish());
@@ -191,7 +196,7 @@ namespace CodingChainApi.Domain.Tests
         [Test]
         public void publish_tournament_without_end_date_should_throw()
         {
-            var steps = new List<StepEntity>() {GetStep(0, false)};
+            var steps = new List<StepEntity> {GetStep(0, false)};
             var tournament = TournamentAggregate.Restore(_tournamentId, _tournamentName, _tournamentDescription, false,
                 DateTime.Now, null, steps);
             Assert.Throws<DomainException>(() => tournament.Publish());
@@ -277,7 +282,7 @@ namespace CodingChainApi.Domain.Tests
         {
             var tournament = GetPublishedTournament();
             Assert.Throws<DomainException>(() =>
-                tournament.Update("name", "description",true, DateTime.Now, DateTime.Now.AddDays(2)));
+                tournament.Update("name", "description", true, DateTime.Now, DateTime.Now.AddDays(2)));
         }
 
         [Test]

@@ -1,7 +1,7 @@
 ﻿using Domain.Contracts;
 using Domain.StepEditions;
 
-namespace Domain.Participations
+namespace Domain.ParticipationSessions
 {
     public class TestEntity : Entity<TestId>
     {
@@ -9,6 +9,7 @@ namespace Domain.Participations
         {
             Score = score;
         }
+
         public decimal Score { get; set; }
     }
 }

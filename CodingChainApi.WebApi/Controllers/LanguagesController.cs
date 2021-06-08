@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -53,16 +52,11 @@ namespace NeosCodingApi.Controllers
 
         private IList<LinkDto> GetLinksForLanguage(Guid languageId)
         {
-            return new List<LinkDto>()
+            return new List<LinkDto>
             {
                 LinkDto.SelfLink(Url.Link(nameof(GetLanguageById), new {languageId})),
                 LinkDto.AllLink(Url.Link(nameof(GetLanguages), null))
             };
         }
-
-
-      
-
-       
     }
 }

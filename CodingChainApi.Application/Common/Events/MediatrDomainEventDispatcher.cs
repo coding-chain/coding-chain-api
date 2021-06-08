@@ -8,8 +8,9 @@ namespace Application.Common.Events
 {
     public class MediatrDomainEventDispatcher : IDomainEventDispatcher
     {
-        private readonly IMediator _mediator;
         private readonly ILogger<MediatrDomainEventDispatcher> _log;
+        private readonly IMediator _mediator;
+
         public MediatrDomainEventDispatcher(IMediator mediator, ILogger<MediatrDomainEventDispatcher> log)
         {
             _mediator = mediator;
@@ -18,16 +19,16 @@ namespace Application.Common.Events
 
         public async Task Dispatch(IDomainEvent domainEvent)
         {
-
             var domainEventNotification = CreateDomainEventNotification(domainEvent);
-            _log.LogDebug("Dispatching Domain Event as MediatR notification.  EventType: {eventType}", domainEvent.GetType());
+            _log.LogDebug("Dispatching Domain Event as MediatR notification.  EventType: {eventType}",
+                domainEvent.GetType());
             await _mediator.Publish(domainEventNotification);
         }
-       
+
         private static INotification CreateDomainEventNotification(IDomainEvent domainEvent)
         {
             var genericDispatcherType = typeof(DomainEventNotification<>).MakeGenericType(domainEvent.GetType());
-            return (INotification)Activator.CreateInstance(genericDispatcherType, domainEvent);
+            return (INotification) Activator.CreateInstance(genericDispatcherType, domainEvent);
         }
     }
 }

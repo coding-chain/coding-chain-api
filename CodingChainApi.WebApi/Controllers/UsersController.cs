@@ -87,8 +87,8 @@ namespace NeosCodingApi.Controllers
         {
             try
             {
-               await Mediator.Send(cmd);
-               return NoContent();
+                await Mediator.Send(cmd);
+                return NoContent();
             }
             catch (ApplicationException e)
             {
@@ -123,9 +123,9 @@ namespace NeosCodingApi.Controllers
 
         private IList<LinkDto> GetLinksForUser(Guid userId)
         {
-            return new List<LinkDto>()
+            return new List<LinkDto>
             {
-                LinkDto.SelfLink(Url.Link(nameof(GetUserById), new {userId})),
+                LinkDto.SelfLink(Url.Link(nameof(GetUserById), new {userId}))
             };
         }
     }

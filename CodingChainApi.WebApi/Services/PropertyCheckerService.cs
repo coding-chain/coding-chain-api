@@ -14,10 +14,7 @@ namespace NeosCodingApi.Services
                 var trimmedField = field.Trim();
                 var propertyInfo = typeof(T).GetProperty(trimmedField,
                     BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
-                if (propertyInfo == null)
-                {
-                    return false;
-                }
+                if (propertyInfo == null) return false;
             }
 
             return true;

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 
 namespace Application.Read.ParticipationSessions
@@ -18,5 +17,5 @@ namespace Application.Read.ParticipationSessions
         DateTime? ProcessStartTime,
         IList<Guid> PassedTestsIds,
         bool IsReady
-        );
+    );
 }

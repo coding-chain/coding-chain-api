@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
 {
-    public class ReadRightRepository: IReadRightRepository
+    public class ReadRightRepository : IReadRightRepository
     {
         private readonly CodingChainContext _context;
 
@@ -20,16 +20,21 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
             _context = context;
         }
 
-        private static RightNavigation ToRightNavigation(Right right) => new RightNavigation(right.Id, right.Name);
-        public async Task<IPagedList<RightNavigation>> GetAllRightNavigationPaginated(PaginationQueryBase paginationQuery)
+        public async Task<IPagedList<RightNavigation>> GetAllRightNavigationPaginated(
+            PaginationQueryBase paginationQuery)
         {
-            return await  _context.Rights.Select(r => ToRightNavigation(r)).FromPaginationQueryAsync(paginationQuery);
+            return await _context.Rights.Select(r => ToRightNavigation(r)).FromPaginationQueryAsync(paginationQuery);
         }
 
         public async Task<RightNavigation?> GetOneRightNavigationById(Guid id)
         {
             var right = await _context.Rights.FirstOrDefaultAsync(r => r.Id == id);
             return right is null ? null : ToRightNavigation(right);
+        }
+
+        private static RightNavigation ToRightNavigation(Right right)
+        {
+            return new(right.Id, right.Name);
         }
     }
 }

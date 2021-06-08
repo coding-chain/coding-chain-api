@@ -30,10 +30,8 @@ namespace Application.Write.Tournaments
         public async Task<string> Handle(SetTournamentStepsCommand request, CancellationToken cancellationToken)
         {
             foreach (var step in request.Steps)
-            {
                 if (!await _readStepRepository.StepExistsById(step.StepId))
                     throw new NotFoundException(step.StepId.ToString(), nameof(StepEntity));
-            }
             var tournament = await _tournamentRepository.FindByIdAsync(new TournamentId(request.TournamentId));
             if (tournament is null)
                 throw new NotFoundException(request.TournamentId.ToString(), nameof(TournamentAggregate));

@@ -17,8 +17,8 @@ namespace Application.Write.StepEditions
 
     public class SetStepTestsHandler : IRequestHandler<SetStepTestsCommand, string>
     {
-        private readonly IStepEditionRepository _stepEditionRepository;
         private readonly IReadTestRepository _readTestRepository;
+        private readonly IStepEditionRepository _stepEditionRepository;
 
         public SetStepTestsHandler(IStepEditionRepository stepEditionRepository, IReadTestRepository readTestRepository)
         {
@@ -33,7 +33,8 @@ namespace Application.Write.StepEditions
                 throw new NotFoundException(request.StepId.ToString(), "Step");
             var tests = request.Tests
                 .Where(t => t.Id is not null)
-                .Select(t => new TestEntity(new TestId(t.Id!.Value),t.Name, t.OutputValidator, t.InputGenerator, t.Score))
+                .Select(t =>
+                    new TestEntity(new TestId(t.Id!.Value), t.Name, t.OutputValidator, t.InputGenerator, t.Score))
                 .ToList();
             var newTests = request.Tests.Where(t => t.Id is null);
             tests.ForEach(existingTest =>
@@ -42,10 +43,9 @@ namespace Application.Write.StepEditions
                     throw new NotFoundException(existingTest.Id.ToString(), "Test");
             });
             foreach (var newTest in newTests)
-            {
-                tests.Add(new TestEntity(await _stepEditionRepository.GetNextTestIdAsync(), newTest.Name, newTest.OutputValidator,
+                tests.Add(new TestEntity(await _stepEditionRepository.GetNextTestIdAsync(), newTest.Name,
+                    newTest.OutputValidator,
                     newTest.InputGenerator, newTest.Score));
-            }
             step.SetTests(tests);
             return (await _stepEditionRepository.SetAsync(step)).ToString();
         }

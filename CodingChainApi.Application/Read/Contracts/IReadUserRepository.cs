@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using Application.Common.Pagination;
 using Application.Read.Users;
 using Application.Read.Users.Handlers;
-using Domain.Users;
 
 namespace Application.Read.Contracts
 {

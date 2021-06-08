@@ -56,7 +56,7 @@ namespace NeosCodingApi
             services.AddCors();
 
             ConfigureControllers(services);
-            
+
             services.AddSingleton<FluentValidationSchemaProcessor>();
             services.AddVersionedApiExplorer(setupAction => { setupAction.GroupNameFormat = "'v'VV"; });
 
@@ -111,7 +111,6 @@ namespace NeosCodingApi
             IApiVersionDescriptionProvider? apiVersionDescriptionProvider)
         {
             foreach (var apiVersionDescription in apiVersionDescriptionProvider.ApiVersionDescriptions)
-            {
                 services.AddSwaggerDocument((settings, serviceProvider) =>
                 {
                     var fluentValidationSchemaProcessor = serviceProvider.GetService<FluentValidationSchemaProcessor>();
@@ -124,7 +123,6 @@ namespace NeosCodingApi
                         document.Info.Description = "REST API for example.";
                     };
                 });
-            }
         }
 
         private void ConfigureAuthentication(IServiceCollection services)
@@ -167,18 +165,14 @@ namespace NeosCodingApi
                 .AllowAnyMethod()
                 .AllowAnyHeader()
                 .AllowCredentials()
-                .WithExposedHeaders(new []{"Location"})
+                .WithExposedHeaders("Location")
             );
 
             app.UseResponseCompression();
             if (env.IsDevelopment())
-            {
                 app.UseDeveloperExceptionPage();
-            }
             else
-            {
                 app.UseHttpsRedirection();
-            }
 
 
             app.UseRouting();
@@ -191,10 +185,8 @@ namespace NeosCodingApi
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapHub<ParticipationSessionsHub>(ParticipationSessionsHub.Route, options =>
-                {
-                    options.Transports = HttpTransportType.ServerSentEvents;
-                });
+                endpoints.MapHub<ParticipationSessionsHub>(ParticipationSessionsHub.Route,
+                    options => { options.Transports = HttpTransportType.ServerSentEvents; });
             });
 
             app.UseOpenApi();

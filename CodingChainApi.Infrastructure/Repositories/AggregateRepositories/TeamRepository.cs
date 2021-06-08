@@ -11,7 +11,6 @@ using Domain.Teams;
 using Domain.Tournaments;
 using Domain.Users;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query;
 
 namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
 {
@@ -24,6 +23,35 @@ namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
         {
             _context = context;
             _timeService = timeService;
+        }
+
+        public async Task<TeamId> SetAsync(TeamAggregate aggregate)
+        {
+            var team = await ToModel(aggregate);
+            _context.Teams.Upsert(team);
+            await _context.SaveChangesAsync();
+            return new TeamId(team.Id);
+        }
+
+        public async Task<TeamAggregate?> FindByIdAsync(TeamId id)
+        {
+            var team = await GetIncludeQuery(_context.Teams)
+                .FirstOrDefaultAsync(t => !t.IsDeleted && t.Id == id.Value);
+            return team is not null ? await ToEntity(team) : null;
+        }
+
+        public async Task RemoveAsync(TeamId id)
+        {
+            var team = await _context.Teams
+                .FirstOrDefaultAsync(t => !t.IsDeleted && t.Id == id.Value);
+            if (team is not null)
+                team.IsDeleted = true;
+            await _context.SaveChangesAsync();
+        }
+
+        public Task<TeamId> NextIdAsync()
+        {
+            return new TeamId(Guid.NewGuid()).ToTask();
         }
 
         private async Task<Team> ToModel(TeamAggregate aggregate)
@@ -60,8 +88,9 @@ namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
 
         private async Task<Team> GetTeam(TeamAggregate aggregate)
         {
-            return await GetIncludeQuery(_context.Teams)                
-                .FirstOrDefaultAsync(t => !t.IsDeleted && t.Id == aggregate.Id.Value) ?? new Team{Id =  aggregate.Id.Value};
+            return await GetIncludeQuery(_context.Teams)
+                       .FirstOrDefaultAsync(t => !t.IsDeleted && t.Id == aggregate.Id.Value) ??
+                   new Team {Id = aggregate.Id.Value};
         }
 
         private static List<UserTeam> GetLeavingMembers(TeamAggregate aggregate, Team team)
@@ -97,50 +126,22 @@ namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
                     .Select(uT => new MemberEntity(new UserId(uT.UserId), uT.IsAdmin))
                     .ToList(),
                 team.ActiveParticipations
-                    .Select(p =>new TournamentId(p.Tournament.Id))
+                    .Select(p => new TournamentId(p.Tournament.Id))
                     .Distinct()
                     .ToList()
             );
             return aggregate.ToTask();
         }
 
-        public async Task<TeamId> SetAsync(TeamAggregate aggregate)
-        {
-            var team = await ToModel(aggregate);
-            _context.Teams.Upsert(team);
-            await _context.SaveChangesAsync();
-            return new TeamId(team.Id);
-        }
-
         private static IQueryable<Team> GetIncludeQuery(IQueryable<Team> teams)
         {
             return teams
                 .Include(t => t.UserTeams)
-                .ThenInclude(uT => uT.User)
+                .ThenInclude<Team, UserTeam, User>(uT => uT.User)
                 .Include(t => t.Participations)
-                .ThenInclude(p => p.Tournament)
+                .ThenInclude<Team, Participation, Tournament>(p => p.Tournament)
                 .Include(t => t.Participations)
-                .ThenInclude(p => p.Step);
-        }
-        public async Task<TeamAggregate?> FindByIdAsync(TeamId id)
-        {
-            var team = await GetIncludeQuery(_context.Teams)
-                .FirstOrDefaultAsync(t => !t.IsDeleted && t.Id == id.Value);
-            return team is not null ? await ToEntity(team) : null;
-        }
-
-        public async Task RemoveAsync(TeamId id)
-        {
-            var team = await _context.Teams
-                .FirstOrDefaultAsync(t => !t.IsDeleted && t.Id == id.Value);
-            if(team is not null)
-                team.IsDeleted = true;
-            await _context.SaveChangesAsync();
-        }
-
-        public Task<TeamId> NextIdAsync()
-        {
-            return new TeamId(Guid.NewGuid()).ToTask();
+                .ThenInclude<Team, Participation, Step>(p => p.Step);
         }
     }
 }

@@ -26,7 +26,8 @@ namespace Application
                 var actual = serviceProvider.GetRequiredService<TImplementation>();
                 var interceptors = serviceProvider
                     .GetServices<IInterceptor>()
-                    .Where(interceptor => interceptorsType.IsNullOrEmpty() || interceptorsType.Contains(interceptor.GetType()))
+                    .Where(interceptor =>
+                        interceptorsType.IsNullOrEmpty() || interceptorsType.Contains(interceptor.GetType()))
                     .ToArray();
                 return proxyGenerator.CreateInterfaceProxyWithTarget(typeof(TInterface), actual, interceptors);
             });
