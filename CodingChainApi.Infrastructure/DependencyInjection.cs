@@ -210,6 +210,7 @@ namespace CodingChainApi.Infrastructure
 
         private static void ConfigureCronManagement(IServiceCollection serviceCollection, IConfiguration configuration)
         {
+            var settings = ConfigureInjectableSettings<IQuartzSettings, QuartzSettings>(serviceCollection, configuration);
             serviceCollection.AddQuartz(q =>
             {
                 serviceCollection.AddQuartz(q =>
@@ -217,7 +218,7 @@ namespace CodingChainApi.Infrastructure
                     q.UseMicrosoftDependencyInjectionScopedJobFactory();
 
                     // Register the job, loading the schedule from configuration
-                    q.AddJobAndTrigger<PlagiarismAnalysisCronJob>(configuration);
+                    q.AddJobAndTrigger<PlagiarismAnalysisCronJob>(nameof(settings.PlagiarismAnalysisCronJob),settings.PlagiarismAnalysisCronJob);
                 });
 
                 serviceCollection.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);

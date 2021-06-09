@@ -28,13 +28,13 @@ namespace CodingChainApi.Infrastructure.CronManagement
             return _serviceProvider.CreateScope();
         }
 
-        public async void BeforeProcess(IJobExecutionContext context)
+        public void BeforeProcess(IJobExecutionContext context)
         {
             CronId = new CronId(GetScope().ServiceProvider.GetRequiredService<IMediator>()
                 .Send(new CronRegisteredRequest(context.JobDetail.Key.Name, DateTime.Now)).Result);
         }
 
-        public async void AfterProcess(CronStatus newStatus)
+        public async void AfterProcess(CronStatusEnum newStatus)
         {
             await GetScope().ServiceProvider.GetRequiredService<IMediator>()
                 .Send(new UpdateCronHandlerRequest(CronId.Value, newStatus));
@@ -48,14 +48,14 @@ namespace CodingChainApi.Infrastructure.CronManagement
             {
                 BeforeProcess(context);
                 Process();
-                AfterProcess(new CronStatus(CronStatusEnum.Success));
+                AfterProcess(CronStatusEnum.Success);
 
                 return Task.CompletedTask;
             }
             catch (Exception exception)
             {
                 _logger.LogCritical($"Error running cron {context.JobDetail.Key.Name} : {exception.Message}");
-                AfterProcess(new CronStatus(CronStatusEnum.Error));
+                AfterProcess(CronStatusEnum.Error);
                 return Task.FromCanceled(new CancellationToken(true));
             }
         }

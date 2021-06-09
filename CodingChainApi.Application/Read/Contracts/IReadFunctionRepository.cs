@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Application.Common.Pagination;
 using Application.Contracts.Dtos;
 using Application.Read.Functions;
+using Application.Read.Plagiarism;
 
 namespace Application.Read.Contracts
 {

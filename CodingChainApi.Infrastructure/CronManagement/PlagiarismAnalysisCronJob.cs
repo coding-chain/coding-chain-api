@@ -23,6 +23,7 @@ namespace CodingChainApi.Infrastructure.CronManagement
         {
             var mediator = GetScope().ServiceProvider.GetRequiredService<IMediator>();
             var functionsToCompare = await mediator.Send(new GetFunctionsToCompareRequest());
+            
             _logger.LogInformation("oui");
         }
     }

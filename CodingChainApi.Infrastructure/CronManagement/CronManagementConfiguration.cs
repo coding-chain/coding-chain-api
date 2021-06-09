@@ -8,15 +8,13 @@ namespace CodingChainApi.Infrastructure.CronManagement
     {
         public static void AddJobAndTrigger<T>(
             this IServiceCollectionQuartzConfigurator quartz,
-            IConfiguration config)
+            string configKey, string cronSchedule)
             where T : IJob
         {
             // Use the name of the IJob as the appsettings.json key
             string jobName = typeof(T).Name;
 
             // Try and load the schedule from configuration
-            var configKey = $"Quartz:{jobName}";
-            var cronSchedule = config[configKey];
 
             // Some minor validation
             if (string.IsNullOrEmpty(cronSchedule))

@@ -21,7 +21,7 @@ namespace Application.Write.Cron.Handlers.RegisterCron
         public async Task<Guid> Handle(CronRegisteredRequest request, CancellationToken cancellationToken)
         {
             var cronId = await _cronRepository.NextIdAsync();
-            var cron = new CronAggregate(cronId, request.CronName, request.ExecutedAt,
+            var cron = CronAggregate.CreateNew(cronId, request.CronName, request.ExecutedAt,
                 new CronStatus(CronStatusEnum.Executing), null);
             await _cronRepository.SetAsync(cron);
             return cronId.Value;

@@ -31,7 +31,7 @@ namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
 
         public async Task<CronAggregate?> FindByIdAsync(CronId id)
         {
-            return ToEntity(await _context.Crons
+            return ToAggregate(await _context.Crons
                 .Include(c => c.Status)
                 .FirstOrDefaultAsync(cr => cr.Id == id.Value));
         }
@@ -53,7 +53,7 @@ namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
         {
             return await _context.Crons
                 .Include(cr => cr.Status)
-                .Select(cr => ToEntity(cr))
+                .Select(cr => ToAggregate(cr))
                 .ToListAsync();
         }
 
@@ -62,7 +62,7 @@ namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
             var statusFilter = _context.CronStatus.FirstOrDefault(cr => cr.Code == filterStatus.Status);
             var cron = await _context.Crons.LastOrDefaultAsync(cr =>
                 statusFilter != null && cr.Code == cronName && cr.Status.Id == statusFilter.Id);
-            return ToEntity(cron);
+            return ToAggregate(cron);
         }
 
         private async Task<Cron?> FindAsync(Guid id)
@@ -80,21 +80,18 @@ namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
                 cron.Status = _context.CronStatus.FirstOrDefault(stat => cronStatus == stat.Code) ??
                               throw new InvalidOperationException();
                 cron.FinishedAt = aggregate.FinishedAt;
-                //user.Rights = await _context.Rights.Where(r => rightsNames.Contains(r.Name)).ToListAsync();
 
                 return cron;
             }
         }
 
-        private static CronAggregate ToEntity(Cron model)
+        private static CronAggregate ToAggregate(Cron model)
         {
-            return new(
-                new CronId(model.Id),
+            return CronAggregate.Restore(new CronId(model.Id),
                 model.Code,
                 model.ExecutedAt,
                 new CronStatus(model.Status.Code),
-                model.FinishedAt
-            );
+                model.FinishedAt);
         }
     }
 }
