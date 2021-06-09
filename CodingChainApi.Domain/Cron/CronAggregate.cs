@@ -16,13 +16,15 @@ namespace Domain.Cron
         public string Code;
         public DateTime ExecutedAt;
         public CronStatus Status;
+        public DateTime? FinishedAt;
 
-        public CronAggregate(CronId id, string code, DateTime executedAt, CronStatus status) : base(id)
+        public CronAggregate(CronId id, string code, DateTime executedAt, CronStatus status, DateTime? finishedAt) : base(id)
         {
             Id = id;
             Code = code;
             ExecutedAt = executedAt;
             Status = status;
+            FinishedAt = finishedAt;
         }
     }
 }

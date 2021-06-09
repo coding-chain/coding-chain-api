@@ -152,7 +152,6 @@ namespace CodingChainApi.Infrastructure.Contexts
                 .HasOne(c => c.Status)
                 .WithMany(c => c.Crons);
 
-
             modelBuilder.Entity<Right>()
                 .Property(c => c.Name)
                 .HasConversion<string>();

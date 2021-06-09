@@ -22,7 +22,7 @@ namespace Application.Write.Cron.Handlers.RegisterCron
         {
             var cronId = await _cronRepository.NextIdAsync();
             var cron = new CronAggregate(cronId, request.CronName, request.ExecutedAt,
-                new CronStatus(CronStatusEnum.Executing));
+                new CronStatus(CronStatusEnum.Executing), null);
             await _cronRepository.SetAsync(cron);
             return cronId.Value;
         }

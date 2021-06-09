@@ -9,6 +9,7 @@ namespace CodingChainApi.Infrastructure.Models
         public string Code;
         public CronStatus Status;
         public DateTime ExecutedAt;
+        public DateTime? FinishedAt;
 
     }
 }
