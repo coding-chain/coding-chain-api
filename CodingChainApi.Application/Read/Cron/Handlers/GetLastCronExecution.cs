@@ -7,9 +7,9 @@ using MediatR;
 
 namespace Application.Read.Cron.Handlers
 {
-    public record GetLastCronExecutionRequest(string CronCode, CronStatus StatusFilter) : IRequest<CronAggregate?>;
+    public record GetLastCronExecutionRequest(string CronCode, CronStatusEnum StatusFilter) : IRequest<DateTime?>;
 
-    public class GetLastCronExecution : IRequestHandler<GetLastCronExecutionRequest, CronAggregate?>
+    public class GetLastCronExecution : IRequestHandler<GetLastCronExecutionRequest, DateTime?>
     {
         private readonly ICronRepository _cronRepository;
 
@@ -18,10 +18,10 @@ namespace Application.Read.Cron.Handlers
             _cronRepository = cronRepository;
         }
 
-        public async Task<CronAggregate?> Handle(GetLastCronExecutionRequest request,
+        public async Task<DateTime?> Handle(GetLastCronExecutionRequest request,
             CancellationToken cancellationToken)
         {
-            return await _cronRepository.GetCronLastExecution(request.CronCode, request.StatusFilter);
+            return await _cronRepository.GetCronLastExecution(request.CronCode, new CronStatus(request.StatusFilter));
         }
     }
 }

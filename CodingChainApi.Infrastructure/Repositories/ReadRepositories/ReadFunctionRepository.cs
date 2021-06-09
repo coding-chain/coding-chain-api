@@ -39,7 +39,7 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
                 .ToListAsync();
         }
 
-        public async Task<IList<Function>> GetAllFunctionFilterOnModifiedDate(DateTime dateFilter)
+        public async Task<IList<Function>> GetAllFunctionFilterOnModifiedDate(DateTime? dateFilter)
         {
             return await _context.UserFunctions.Where(userFunc => userFunc.LastModificationDate > dateFilter)
                 .Select(userFunc =>

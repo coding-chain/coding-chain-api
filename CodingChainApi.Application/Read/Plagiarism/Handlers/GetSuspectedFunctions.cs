@@ -14,7 +14,7 @@ using MediatR;
 
 namespace Application.Read.Plagiarism.Handlers
 {
-    public record GetSuspectedFunctionRequest(DateTime DateFilter) : IRequest<IList<Function>>;
+    public record GetSuspectedFunctionRequest(DateTime? DateFilter) : IRequest<IList<Function>>;
 
     public class GetSuspectedFunctions : IRequestHandler<GetSuspectedFunctionRequest, IList<Function>>
     {

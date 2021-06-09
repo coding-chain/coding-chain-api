@@ -28,13 +28,13 @@ namespace CodingChainApi.Infrastructure.CronManagement
             return _serviceProvider.CreateScope();
         }
 
-        public void BeforeProcess(IJobExecutionContext context)
+        public virtual void BeforeProcess(IJobExecutionContext context)
         {
             CronId = new CronId(GetScope().ServiceProvider.GetRequiredService<IMediator>()
-                .Send(new CronRegisteredRequest(context.JobDetail.Key.Name, DateTime.Now)).Result);
+                .Send(new CronRegisteredRequest(context.JobDetail.Key.Name)).Result);
         }
 
-        public async void AfterProcess(CronStatusEnum newStatus)
+        public virtual async void AfterProcess(CronStatusEnum newStatus)
         {
             await GetScope().ServiceProvider.GetRequiredService<IMediator>()
                 .Send(new UpdateCronHandlerRequest(CronId.Value, newStatus));

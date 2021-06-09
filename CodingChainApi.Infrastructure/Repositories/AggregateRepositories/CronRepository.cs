@@ -57,12 +57,12 @@ namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
                 .ToListAsync();
         }
 
-        public async Task<CronAggregate> GetCronLastExecution(string cronName, CronStatus filterStatus)
+        public async Task<DateTime?> GetCronLastExecution(string cronName, CronStatus filterStatus)
         {
             var statusFilter = _context.CronStatus.FirstOrDefault(cr => cr.Code == filterStatus.Status);
-            var cron = await _context.Crons.LastOrDefaultAsync(cr =>
+            var cron = await _context.Crons.OrderBy(c => c.FinishedAt).LastOrDefaultAsync(cr =>
                 statusFilter != null && cr.Code == cronName && cr.Status.Id == statusFilter.Id);
-            return ToAggregate(cron);
+            return cron?.FinishedAt;
         }
 
         private async Task<Cron?> FindAsync(Guid id)
@@ -77,6 +77,7 @@ namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
                 var cron = await FindAsync(aggregate.Id.Value) ?? new Cron();
                 cron.Id = aggregate.Id.Value;
                 cron.Code = aggregate.Code;
+                cron.ExecutedAt = aggregate.ExecutedAt;
                 cron.Status = _context.CronStatus.FirstOrDefault(stat => cronStatus == stat.Code) ??
                               throw new InvalidOperationException();
                 cron.FinishedAt = aggregate.FinishedAt;

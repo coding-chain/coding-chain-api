@@ -12,7 +12,7 @@ namespace Application.Read.Contracts
     {
         public Task<IPagedList<FunctionNavigation>> GetAllFunctionsPaginated(PaginationQueryBase paginationQueryBase);
         public Task<FunctionNavigation?> GetOneFunctionNavigationByIdAsync(Guid functionId);
-        public Task<IList<Function>> GetAllFunctionFilterOnModifiedDate(DateTime dateFilter);
+        public Task<IList<Function>> GetAllFunctionFilterOnModifiedDate(DateTime? dateFilter);
         public Task<IList<Function>> GetAllFunctionsNotPaginated();
     }
 }
