@@ -37,14 +37,11 @@ namespace Application.Write.ParticipationsSessions
                 await participationsSessionsRepository.FindByIdAsync(
                     new ParticipationId(notification.ParticipationId));
             if (participation is null)
-            {
                 throw new NotFoundException(notification.ParticipationId.ToString(), "Participation");
-            }
 
             var testsPassedIds = notification.TestsPassedIds.Select(id => new TestId(id)).ToList();
             participation.SetProcessResult(notification.Error, notification.Output, testsPassedIds, timeService.Now());
             await participationsSessionsRepository.SetAsync(participation);
         }
-        
     }
 }

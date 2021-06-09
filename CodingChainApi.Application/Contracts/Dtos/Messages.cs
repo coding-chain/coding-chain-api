@@ -17,8 +17,8 @@ namespace Application.Contracts.Dtos
 
     public record PlagiarismAnalyzeExecutionDto
         (Function SuspectedFunction, IList<Function> ComparedFunctions);
-    
-    public record PrepareParticipationExecutionDto(Guid Id, LanguageEnum Language);
-    public record CleanParticipationExecutionDto(Guid Id, LanguageEnum Language);
 
+    public record PrepareParticipationExecutionDto(Guid Id, LanguageEnum Language);
+
+    public record CleanParticipationExecutionDto(Guid Id, LanguageEnum Language);
 }

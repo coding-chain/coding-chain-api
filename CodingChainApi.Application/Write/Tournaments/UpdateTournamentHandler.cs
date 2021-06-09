@@ -2,9 +2,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Application.Common.Exceptions;
-using Application.Contracts.IService;
 using Application.Write.Contracts;
-using Application.Write.StepEditions;
 using Domain.Tournaments;
 using MediatR;
 

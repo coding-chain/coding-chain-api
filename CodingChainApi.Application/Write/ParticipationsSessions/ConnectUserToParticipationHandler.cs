@@ -7,9 +7,8 @@ using Application.Contracts.Dtos;
 using Application.Contracts.IService;
 using Application.Read.Contracts;
 using Application.Write.Contracts;
-using Application.Write.Users.LoginUser;
 using Domain.Participations;
-using Domain.ParticipationStates;
+using Domain.ParticipationSessions;
 using MediatR;
 
 namespace Application.Write.ParticipationsSessions
@@ -19,14 +18,15 @@ namespace Application.Write.ParticipationsSessions
 
     public class ConnectUserToParticipationHandler : IRequestHandler<ConnectUserToParticipation, int>
     {
-        private readonly IParticipationsSessionsRepository _participationsSessionsRepository;
         private readonly ICurrentUserService _currentUserService;
+        private readonly IParticipationsSessionsRepository _participationsSessionsRepository;
         private readonly IDispatcher<PrepareParticipationExecutionDto> _prepareParticipationExecutionService;
         private readonly IReadParticipationRepository _readParticipationRepository;
 
         public ConnectUserToParticipationHandler(
             IParticipationsSessionsRepository participationsSessionsRepository, ICurrentUserService currentUserService,
-            IDispatcher<PrepareParticipationExecutionDto> prepareParticipationExecutionService, IReadParticipationRepository readParticipationRepository)
+            IDispatcher<PrepareParticipationExecutionDto> prepareParticipationExecutionService,
+            IReadParticipationRepository readParticipationRepository)
         {
             _participationsSessionsRepository = participationsSessionsRepository;
             _currentUserService = currentUserService;
@@ -38,18 +38,12 @@ namespace Application.Write.ParticipationsSessions
         {
             var participation =
                 await _participationsSessionsRepository.FindByIdAsync(new ParticipationId(request.ParticipationId));
-            if (participation is null)
-            {
-                throw new NotFoundException(request.ParticipationId.ToString(), "Participation");
-            }
+            if (participation is null) throw new NotFoundException(request.ParticipationId.ToString(), "Participation");
 
             var isFreshParticipation = !participation.HasConnectedUsers;
             var connectionCount = participation.AddConnectedUser(_currentUserService.UserId);
             await _participationsSessionsRepository.SetAsync(participation);
-            if (isFreshParticipation)
-            {
-                await PrepareParticipation(participation);
-            }
+            if (isFreshParticipation) await PrepareParticipation(participation);
 
             return connectionCount;
         }

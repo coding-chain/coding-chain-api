@@ -8,7 +8,7 @@ namespace CodingChainApi.Infrastructure.Models
     {
         public Guid Id { get; set; }
         public RightEnum Name { get; set; }
-        
+
         public IList<User> Users { get; set; }
     }
 }

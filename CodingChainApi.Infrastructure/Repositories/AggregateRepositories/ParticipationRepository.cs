@@ -25,6 +25,44 @@ namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
             _context = context;
         }
 
+        public async Task<ParticipationId> SetAsync(ParticipationAggregate aggregate)
+        {
+            var participation = await ToModel(aggregate);
+            _context.Participations.Upsert(participation);
+            await _context.SaveChangesAsync();
+            return new ParticipationId(participation.Id);
+        }
+
+        public async Task<ParticipationAggregate?> FindByIdAsync(ParticipationId id)
+        {
+            var participation = await _context.Participations
+                .Include(p => p.Step)
+                .ThenInclude(p => p.TournamentSteps)
+                .Include(p => p.Tournament)
+                .Include(p => p.Functions)
+                .ThenInclude<Participation, Function, IList<UserFunction>>(f => f.UserFunctions)
+                .Include(p => p.Team)
+                .ThenInclude(t => t.UserTeams)
+                .FirstOrDefaultAsync(p =>
+                    !p.Tournament.IsDeleted && !p.Step.IsDeleted && !p.Team.IsDeleted && p.Id == id.Value);
+            return participation is null ? null : ToAggregate(participation);
+        }
+
+
+        public async Task RemoveAsync(ParticipationId id)
+        {
+            var participation = await _context.Participations
+                .FirstOrDefaultAsync(t => t.Id == id.Value);
+            if (participation is not null)
+                _context.Remove(participation);
+            await _context.SaveChangesAsync();
+        }
+
+        public Task<ParticipationId> NextIdAsync()
+        {
+            return new ParticipationId(Guid.NewGuid()).ToTask();
+        }
+
         private static ParticipationAggregate ToAggregate(Participation participation)
         {
             return ParticipationAggregate.Restore(
@@ -39,17 +77,26 @@ namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
             );
         }
 
-        private static TeamEntity ToTeamEntity(Team team) => new(
-            new TeamId(team.Id),
-            team.UserTeams.Select(t => new UserId(t.UserId)).ToList()
-        );
+        private static TeamEntity ToTeamEntity(Team team)
+        {
+            return new(
+                new TeamId(team.Id),
+                team.UserTeams.Select(t => new UserId(t.UserId)).ToList()
+            );
+        }
 
-        private static TournamentEntity ToTournamentEntity(Tournament tournament) => new(
-            new TournamentId(tournament.Id), tournament.IsPublished);
+        private static TournamentEntity ToTournamentEntity(Tournament tournament)
+        {
+            return new(
+                new TournamentId(tournament.Id), tournament.IsPublished);
+        }
 
-        private static StepEntity ToStepEntity(Step step) => new(
-            new StepId(step.Id),
-            step.TournamentSteps.Select(tS => new TournamentId(tS.TournamentId)).ToList());
+        private static StepEntity ToStepEntity(Step step)
+        {
+            return new(
+                new StepId(step.Id),
+                step.TournamentSteps.Select(tS => new TournamentId(tS.TournamentId)).ToList());
+        }
 
         private static FunctionEntity ToFunctionEntity(Function function)
         {
@@ -93,12 +140,10 @@ namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
                 var userFunction =
                     currentFunction.UserFunctions.FirstOrDefault(uF => uF.UserId == function.UserId.Value);
                 if (userFunction is null)
-                    currentFunction.UserFunctions.Add(new UserFunction()
+                    currentFunction.UserFunctions.Add(new UserFunction
                         {UserId = function.UserId.Value, LastModificationDate = function.LastModificationDate});
                 else
-                {
                     userFunction.LastModificationDate = function.LastModificationDate;
-                }
             });
             newFunctions.ForEach(function => participation.Functions.Add(function));
         }
@@ -150,40 +195,5 @@ namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
                 .Where(function => aggregate.Functions.All(f => f.Id.Value != function.Id))
                 .ToList();
         }
-
-        public async Task<ParticipationId> SetAsync(ParticipationAggregate aggregate)
-        {
-            var participation = await ToModel(aggregate);
-            _context.Participations.Upsert(participation);
-            await _context.SaveChangesAsync();
-            return new ParticipationId(participation.Id);
-        }
-
-        public async Task<ParticipationAggregate?> FindByIdAsync(ParticipationId id)
-        {
-            var participation = await _context.Participations
-                .Include(p => p.Step)
-                .ThenInclude(p => p.TournamentSteps)
-                .Include(p => p.Tournament)
-                .Include(p => p.Functions)
-                .ThenInclude<Participation, Function, IList<UserFunction>>(f => f.UserFunctions)
-                .Include(p => p.Team)
-                .ThenInclude(t => t.UserTeams)
-                .FirstOrDefaultAsync(p =>
-                    !p.Tournament.IsDeleted && !p.Step.IsDeleted && !p.Team.IsDeleted && p.Id == id.Value);
-            return participation is null ? null : ToAggregate(participation);
-        }
-
-
-        public async Task RemoveAsync(ParticipationId id)
-        {
-            var participation = await _context.Participations
-                .FirstOrDefaultAsync(t =>  t.Id == id.Value);
-            if (participation is not null)
-                _context.Remove(participation);
-            await _context.SaveChangesAsync();
-        }
-
-        public Task<ParticipationId> NextIdAsync() =>  new ParticipationId(Guid.NewGuid()).ToTask();
     }
 }

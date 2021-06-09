@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Domain.Participations;
-using Domain.Users;
 
 namespace Application.Contracts.IService
 {

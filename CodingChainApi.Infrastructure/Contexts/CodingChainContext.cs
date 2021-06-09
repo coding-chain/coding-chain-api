@@ -8,7 +8,6 @@ using Microsoft.EntityFrameworkCore;
 using CronStatus = CodingChainApi.Infrastructure.Models.CronStatus;
 using ProgrammingLanguage = CodingChainApi.Infrastructure.Models.ProgrammingLanguage;
 using Right = CodingChainApi.Infrastructure.Models.Right;
-using User = CodingChainApi.Infrastructure.Models.User;
 
 namespace CodingChainApi.Infrastructure.Contexts
 {
@@ -19,9 +18,6 @@ namespace CodingChainApi.Infrastructure.Contexts
         {
             Database.EnsureCreated();
         }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-            => optionsBuilder.UseSnakeCaseNamingConvention();
 
         public DbSet<User> Users { get; set; }
         public DbSet<ProgrammingLanguage> ProgrammingLanguages { get; set; }
@@ -39,6 +35,11 @@ namespace CodingChainApi.Infrastructure.Contexts
         public DbSet<PlagiarismFunction> PlagiarismFunctions { get; set; }
         public DbSet<CronStatus> CronStatus { get; set; }
         public DbSet<Cron> Crons { get; set; }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.UseSnakeCaseNamingConvention();
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

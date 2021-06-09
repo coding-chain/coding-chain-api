@@ -12,7 +12,9 @@ namespace Application.Read.Tournaments.Handlers
     {
         public Guid TournamentId { get; set; }
     }
-    public class GetPaginatedTournamentStepNavigationHandler: IRequestHandler<GetPaginatedTournamentStepNavigationQuery, IPagedList<TournamentStepNavigation>>
+
+    public class GetPaginatedTournamentStepNavigationHandler : IRequestHandler<GetPaginatedTournamentStepNavigationQuery
+        , IPagedList<TournamentStepNavigation>>
     {
         private readonly IReadTournamentRepository _readTournamentRepository;
 
@@ -21,7 +23,8 @@ namespace Application.Read.Tournaments.Handlers
             _readTournamentRepository = readTournamentRepository;
         }
 
-        public Task<IPagedList<TournamentStepNavigation>> Handle(GetPaginatedTournamentStepNavigationQuery request, CancellationToken cancellationToken)
+        public Task<IPagedList<TournamentStepNavigation>> Handle(GetPaginatedTournamentStepNavigationQuery request,
+            CancellationToken cancellationToken)
         {
             return _readTournamentRepository.GetAllTournamentStepNavigationPaginated(request);
         }

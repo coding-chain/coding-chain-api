@@ -13,7 +13,7 @@ namespace Application.Read.Participations.Handlers
         public Guid? TeamIdFilter { get; set; }
         public Guid? TournamentIdFilter { get; set; }
         public Guid? StepIdFilter { get; set; }
-        
+
         public bool? EndTournamentStepFilter { get; set; }
         public OrderEnum? EndDateOrder { get; set; }
     }
@@ -35,6 +35,4 @@ namespace Application.Read.Participations.Handlers
             return _readParticipationRepository.GetAllParticipationNavigationPaginated(request);
         }
     }
-
-   
 }

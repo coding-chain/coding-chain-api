@@ -1,9 +1,5 @@
-using System;
-using System.Threading.Tasks;
-using Application.Write.ParticipationsSessions;
 using AutoMapper;
 using MediatR;
-using Microsoft.AspNetCore.Mvc;
 using NeosCodingApi.Services;
 
 namespace NeosCodingApi.Controllers

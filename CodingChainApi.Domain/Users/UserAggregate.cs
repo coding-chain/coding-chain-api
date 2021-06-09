@@ -15,8 +15,6 @@ namespace Domain.Users
 
     public class UserAggregate : Aggregate<UserId>
     {
-        public string Email { get; private set; }
-        public string Username { get; private set; }
         private List<Right> _rights;
 
         public UserAggregate(UserId id, string password, IList<Right> rights, string email, string username) : base(id)
@@ -26,6 +24,9 @@ namespace Domain.Users
             Email = email;
             Username = username;
         }
+
+        public string Email { get; private set; }
+        public string Username { get; private set; }
 
         public string Password { get; private set; }
 

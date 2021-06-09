@@ -6,8 +6,11 @@ using MediatR;
 
 namespace Application.Read.Rights.Handlers
 {
-    public record GetPaginatedRightNavigationsQuery() : PaginationQueryBase, IRequest<IPagedList<RightNavigation>>;
-    public class GetPaginatedRightNavigationsHandler: IRequestHandler<GetPaginatedRightNavigationsQuery, IPagedList<RightNavigation>>
+    public record GetPaginatedRightNavigationsQuery : PaginationQueryBase, IRequest<IPagedList<RightNavigation>>;
+
+    public class
+        GetPaginatedRightNavigationsHandler : IRequestHandler<GetPaginatedRightNavigationsQuery,
+            IPagedList<RightNavigation>>
     {
         private readonly IReadRightRepository _readRightRepository;
 
@@ -16,7 +19,8 @@ namespace Application.Read.Rights.Handlers
             _readRightRepository = readRightRepository;
         }
 
-        public Task<IPagedList<RightNavigation>> Handle(GetPaginatedRightNavigationsQuery request, CancellationToken cancellationToken)
+        public Task<IPagedList<RightNavigation>> Handle(GetPaginatedRightNavigationsQuery request,
+            CancellationToken cancellationToken)
         {
             return _readRightRepository.GetAllRightNavigationPaginated(request);
         }

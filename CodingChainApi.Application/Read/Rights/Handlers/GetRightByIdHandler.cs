@@ -8,7 +8,8 @@ using MediatR;
 namespace Application.Read.Rights.Handlers
 {
     public record GetRightByIdQuery(Guid RightId) : IRequest<RightNavigation>;
-    public class GetRightByIdHandler: IRequestHandler<GetRightByIdQuery, RightNavigation>
+
+    public class GetRightByIdHandler : IRequestHandler<GetRightByIdQuery, RightNavigation>
     {
         private readonly IReadRightRepository _readRightRepository;
 

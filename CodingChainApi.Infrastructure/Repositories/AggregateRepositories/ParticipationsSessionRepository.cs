@@ -7,18 +7,18 @@ using CodingChainApi.Infrastructure.Common.Extensions;
 using CodingChainApi.Infrastructure.Services.Cache;
 using CodingChainApi.Infrastructure.Settings;
 using Domain.Participations;
-using Domain.ParticipationStates;
+using Domain.ParticipationSessions;
 using Domain.StepEditions;
-using TestEntity = Domain.Participations.TestEntity;
+using TestEntity = Domain.ParticipationSessions.TestEntity;
 
 namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
 {
     public class ParticipationsSessionRepository : IParticipationsSessionsRepository
     {
-        private readonly IParticipationRepository _participationRepository;
         private readonly ICache _cache;
-        private readonly ICacheSettings _settings;
+        private readonly IParticipationRepository _participationRepository;
         private readonly IReadTestRepository _readTestRepository;
+        private readonly ICacheSettings _settings;
 
         public ParticipationsSessionRepository(
             IParticipationRepository participationRepository, ICache cache, ICacheSettings settings,
@@ -43,10 +43,7 @@ namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
             if (participationSession is null)
             {
                 var participation = await _participationRepository.FindByIdAsync(id);
-                if (participation is null)
-                {
-                    return null;
-                }
+                if (participation is null) return null;
 
                 var tests = await _readTestRepository.GetAllTestNavigationByStepId(participation.StepEntity.Id.Value);
                 var testsEntities = tests.Select(t => new TestEntity(new TestId(t.Id), t.Score)).ToList();

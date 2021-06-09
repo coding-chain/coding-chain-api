@@ -4,8 +4,6 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Application.Common.Pagination;
-using Application.Read.Steps;
-using Application.Read.Steps.Handlers;
 using Application.Read.Tests;
 using Application.Read.Tests.Handlers;
 using AutoMapper;
@@ -25,6 +23,20 @@ namespace NeosCodingApi.Controllers
         {
         }
 
+        #region Links
+
+        private IList<LinkDto> GetLinksForTest(Guid stepId, Guid testId)
+        {
+            return new List<LinkDto>
+            {
+                LinkDto.SelfLink(Url.Link(nameof(GetTestById), new {testId})),
+                LinkDto.CreateLink(Url.Link(nameof(StepsController.AddTest), new {stepId, testId})),
+                LinkDto.AllLink(Url.Link(nameof(GetTests), null))
+            };
+        }
+
+        #endregion
+
         #region Tests
 
         [HttpGet("{testId:guid}", Name = nameof(GetTestById))]
@@ -38,12 +50,13 @@ namespace NeosCodingApi.Controllers
             return Ok(testWithLinks);
         }
 
-        public record GetPaginatedTestNavigationQueryParams() : PaginationQueryBase;
+        public record GetPaginatedTestNavigationQueryParams : PaginationQueryBase;
+
         [HttpGet(Name = nameof(GetTests))]
         [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasPageResponse<HateoasResponse<TestNavigation>>))]
         public async Task<IActionResult> GetTests([FromQuery] GetPaginatedTestNavigationQueryParams query)
         {
-            var test = await Mediator.Send(new GetPaginatedTestNavigationQuery(){Page = query.Page,Size = query.Size});
+            var test = await Mediator.Send(new GetPaginatedTestNavigationQuery {Page = query.Page, Size = query.Size});
             var testWithLinks = test.Select(test =>
                 new HateoasResponse<TestNavigation>(test, GetLinksForTest(test.StepId, test.Id)));
             return Ok(HateoasResponseBuilder.FromPagedList(
@@ -53,23 +66,7 @@ namespace NeosCodingApi.Controllers
                 nameof(GetTests))
             );
         }
-        
 
         #endregion
-
-        #region Links
-        private IList<LinkDto> GetLinksForTest(Guid stepId, Guid testId)
-        {
-            return new List<LinkDto>()
-            {
-                LinkDto.SelfLink(Url.Link(nameof(GetTestById), new {testId})),
-                LinkDto.CreateLink(Url.Link(nameof(StepsController.AddTest), new {stepId, testId})),
-                LinkDto.AllLink(Url.Link(nameof(GetTests), null))
-            };
-        }
-        
-
-        #endregion
-       
     }
 }

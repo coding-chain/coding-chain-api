@@ -5,7 +5,7 @@ using Domain.Users;
 
 namespace Application.Write.Contracts
 {
-    public interface IUserRepository :IAggregateRepository<UserId, UserAggregate>
+    public interface IUserRepository : IAggregateRepository<UserId, UserAggregate>
     {
         Task<IList<UserAggregate>> GetAllAsync();
     }

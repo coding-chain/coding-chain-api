@@ -2,17 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Security.Policy;
 using System.Threading.Tasks;
 using Application.Read.Participations;
 using Application.Read.Participations.Handlers;
 using Application.Write.Participations;
-using Application.Write.ParticipationsSessions;
 using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http;
 using NeosCodingApi.Helpers;
 using NeosCodingApi.Services;
 using NSwag.Annotations;
@@ -25,6 +22,20 @@ namespace NeosCodingApi.Controllers
             IPropertyCheckerService propertyCheckerService) : base(mediator, mapper, propertyCheckerService)
         {
         }
+
+        #region Links
+
+        private IList<LinkDto> GetLinksForParticipation(Guid participationId)
+        {
+            return new List<LinkDto>
+            {
+                LinkDto.CreateLink(Url.Link(nameof(CreateParticipation), null)),
+                LinkDto.SelfLink(Url.Link(nameof(GetParticipationById), new {participationId})),
+                LinkDto.AllLink(Url.Link(nameof(GetParticipations), null))
+            };
+        }
+
+        #endregion
 
         #region Participations
 
@@ -71,20 +82,6 @@ namespace NeosCodingApi.Controllers
         #endregion
 
         #region Functions
-
-        #endregion
-
-        #region Links
-
-        private IList<LinkDto> GetLinksForParticipation(Guid participationId)
-        {
-            return new List<LinkDto>()
-            {
-                LinkDto.CreateLink(Url.Link(nameof(CreateParticipation), null)),
-                LinkDto.SelfLink(Url.Link(nameof(GetParticipationById), new {participationId})),
-                LinkDto.AllLink(Url.Link(nameof(GetParticipations), null))
-            };
-        }
 
         #endregion
     }

@@ -2,14 +2,13 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Application.Read.Contracts;
-using Application.Read.Teams.Handlers;
 using MediatR;
 
 namespace Application.Read.Users.Handlers
-{ 
+{
     public record GetPublicUserByIdQuery(Guid UserId) : IRequest<PublicUser>;
 
-    public class GetPublicUserByIdHandler: IRequestHandler<GetPublicUserByIdQuery, PublicUser>
+    public class GetPublicUserByIdHandler : IRequestHandler<GetPublicUserByIdQuery, PublicUser>
     {
         private readonly IReadUserRepository _readUserRepository;
 

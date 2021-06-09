@@ -1,7 +1,4 @@
 ﻿using System;
-using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
-using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 
@@ -9,8 +6,8 @@ namespace CodingChainApi.Infrastructure.Services.Cache
 {
     public class Cache : ICache
     {
-        private readonly ILogger<Cache> _logger;
         private readonly IMemoryCache _cache;
+        private readonly ILogger<Cache> _logger;
 
 
         public Cache(ILogger<Cache> logger, IMemoryCache cache)
@@ -27,8 +24,9 @@ namespace CodingChainApi.Infrastructure.Services.Cache
             }
             catch (Exception ex)
             {
-                _logger.LogError("{Message}",ex.Message);
+                _logger.LogError("{Message}", ex.Message);
             }
+
             return null;
         }
 
@@ -44,8 +42,9 @@ namespace CodingChainApi.Infrastructure.Services.Cache
             }
             catch (Exception ex)
             {
-                _logger.LogError("{Message}",ex.Message);
+                _logger.LogError("{Message}", ex.Message);
             }
+
             return false;
         }
 
@@ -59,8 +58,9 @@ namespace CodingChainApi.Infrastructure.Services.Cache
             }
             catch (Exception ex)
             {
-                _logger.LogError("{Message}",ex.Message);
+                _logger.LogError("{Message}", ex.Message);
             }
+
             return false;
         }
     }

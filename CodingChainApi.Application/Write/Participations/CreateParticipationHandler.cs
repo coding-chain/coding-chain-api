@@ -24,9 +24,9 @@ namespace Application.Write.Participations
     {
         private readonly IParticipationRepository _participationRepository;
         private readonly IReadParticipationRepository _readParticipationRepository;
-        private readonly IReadTournamentRepository _readTournamentRepository;
-        private readonly IReadTeamRepository _readTeamRepository;
         private readonly IReadStepRepository _readStepRepository;
+        private readonly IReadTeamRepository _readTeamRepository;
+        private readonly IReadTournamentRepository _readTournamentRepository;
         private readonly ITimeService _timeService;
 
         public CreateParticipationHandler(IParticipationRepository participationRepository,
@@ -62,8 +62,8 @@ namespace Application.Write.Participations
                     $"Participation for team : {request.TeamId} on tournament : {request.TournamentId} on step : {request.StepId} already exists");
 
             if (!await CanAddParticipation(request.TeamId, request.TournamentId, request.StepId))
-                throw new ApplicationException($"Participation cannot be created, finish previous first");
-            
+                throw new ApplicationException("Participation cannot be created, finish previous first");
+
             var team = new TeamEntity(new TeamId(request.TeamId),
                 teamNavigation.MembersIds.Select(memberId => new UserId(memberId)).ToList());
             var step = new StepEntity(new StepId(request.StepId),
@@ -96,6 +96,7 @@ namespace Application.Write.Participations
                 if (previousParticipation?.EndDate is null)
                     return false;
             }
+
             return true;
         }
     }

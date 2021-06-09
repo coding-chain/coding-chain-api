@@ -7,11 +7,13 @@ using MediatR;
 
 namespace Application.Read.Teams.Handlers
 {
-    public record GetPaginatedTeamMembersQuery:  PaginationQueryBase, IRequest<IPagedList<MemberNavigation>>
+    public record GetPaginatedTeamMembersQuery : PaginationQueryBase, IRequest<IPagedList<MemberNavigation>>
     {
-       public Guid TeamId { get; set; } 
+        public Guid TeamId { get; set; }
     }
-    public class GetPaginatedTeamMembersHandler: IRequestHandler<GetPaginatedTeamMembersQuery, IPagedList<MemberNavigation>>
+
+    public class
+        GetPaginatedTeamMembersHandler : IRequestHandler<GetPaginatedTeamMembersQuery, IPagedList<MemberNavigation>>
     {
         private readonly IReadTeamRepository _readTeamRepository;
 
@@ -20,9 +22,10 @@ namespace Application.Read.Teams.Handlers
             _readTeamRepository = readTeamRepository;
         }
 
-        public Task<IPagedList<MemberNavigation>> Handle(GetPaginatedTeamMembersQuery request, CancellationToken cancellationToken)
+        public Task<IPagedList<MemberNavigation>> Handle(GetPaginatedTeamMembersQuery request,
+            CancellationToken cancellationToken)
         {
-            return this._readTeamRepository.GetAllMembersNavigationPaginated(request);
+            return _readTeamRepository.GetAllMembersNavigationPaginated(request);
         }
     }
 }

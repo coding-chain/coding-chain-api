@@ -10,8 +10,10 @@ namespace Application.Read.Contracts
     {
         public Task<bool> StepExistsById(Guid stepId);
         public Task<bool> StepExistsByIds(Guid[] stepIds);
+
         public Task<IPagedList<StepNavigation>> GetAllStepNavigationPaginated(
             GetPaginatedStepNavigationQuery paginationQuery);
+
         public Task<StepNavigation?> GetOneStepNavigationById(Guid id);
     }
 }

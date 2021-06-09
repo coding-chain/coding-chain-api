@@ -7,15 +7,21 @@ namespace NeosCodingApi
     {
         private TypescriptCodeAnalyzer? _analyzer;
 
-        private string GetOutputValidator(string type) => $@"
+        private string GetOutputValidator(string type)
+        {
+            return $@"
 export function outputValidator(test: {type}): boolean {{
     return 1;
 }}";
+        }
 
-        private string GetInputGenerator(string type) => $@"
+        private string GetInputGenerator(string type)
+        {
+            return $@"
 export function inputGenerator(): {type} {{
     return ""1"";
 }}";
+        }
 
 
         [SetUp]
@@ -33,7 +39,7 @@ export function inputGenerator(): {type} {{
             var res = _analyzer?.GetInputType(GetOutputValidator(expectedType));
             Assert.AreEqual(expectedType, res);
         }
-        
+
         [Test]
         [TestCase("string")]
         [TestCase("{test:boolean, test2: string}")]
@@ -43,6 +49,5 @@ export function inputGenerator(): {type} {{
             var res = _analyzer?.GetReturnType(GetInputGenerator(expectedType));
             Assert.AreEqual(expectedType, res);
         }
-        
     }
 }

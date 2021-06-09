@@ -4,7 +4,7 @@ using Domain.StepEditions;
 
 namespace Application.Write.Contracts
 {
-    public interface IStepEditionRepository: IAggregateRepository<StepId,StepEditionAggregate>
+    public interface IStepEditionRepository : IAggregateRepository<StepId, StepEditionAggregate>
     {
         public Task<TestId> GetNextTestIdAsync();
     }

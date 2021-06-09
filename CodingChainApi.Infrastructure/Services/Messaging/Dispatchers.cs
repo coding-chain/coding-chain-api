@@ -1,5 +1,4 @@
 ﻿using Application.Contracts.Dtos;
-using CodingChainApi.Infrastructure.Services.Processes;
 using CodingChainApi.Infrastructure.Settings;
 using Microsoft.Extensions.Logging;
 
@@ -34,7 +33,7 @@ namespace CodingChainApi.Infrastructure.Services.Messaging
             RoutingKey = settings.PrepareExecutionRoutingKey;
         }
     }
-    
+
     public class CleanParticipationExecutionService : BaseDispatcherService<CleanParticipationExecutionDto>
     {
         public CleanParticipationExecutionService(IRabbitMqSettings settings,
@@ -43,6 +42,5 @@ namespace CodingChainApi.Infrastructure.Services.Messaging
             Exchange = settings.ParticipationExchange;
             RoutingKey = settings.CleanExecutionRoutingKey;
         }
-
     }
 }

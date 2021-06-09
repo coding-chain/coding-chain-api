@@ -4,6 +4,7 @@ using Application;
 using Application.Contracts.IService;
 using CodingChainApi.Infrastructure;
 using CodingChainApi.Infrastructure.Hubs;
+using CodingChainApi.Infrastructure.Settings;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -43,11 +44,11 @@ namespace NeosCodingApi
 
 
             services.AddInfrastructure(Configuration);
+            AddCors(services);
             services.AddApplication();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
             services.AddScoped<IPropertyCheckerService, PropertyCheckerService>();
             services.AddHttpContextAccessor();
-            ConfigureAuthentication(services);
             services.AddSignalR();
             services.AddHostedService<ParticipationPreparedListener>();
             services.AddHostedService<ParticipationDoneExecutionListener>();
@@ -56,7 +57,7 @@ namespace NeosCodingApi
             services.AddCors();
 
             ConfigureControllers(services);
-            
+
             services.AddSingleton<FluentValidationSchemaProcessor>();
             services.AddVersionedApiExplorer(setupAction => { setupAction.GroupNameFormat = "'v'VV"; });
 
@@ -68,6 +69,22 @@ namespace NeosCodingApi
             {
                 opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
                     new[] {"application/octet-stream"});
+            });
+        }
+
+        private void AddCors(IServiceCollection services)
+        {
+            var corsSettings = services.ConfigureInjectableSettings<ICorsSettings, CorsSettings>(Configuration);
+            services.AddCors(options =>
+            {
+                options.AddPolicy(PolicyName, builder =>
+                {
+                    builder.WithOrigins(corsSettings.FrontEndUrl)
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials()
+                        .WithExposedHeaders("Location");
+                });
             });
         }
 
@@ -111,7 +128,6 @@ namespace NeosCodingApi
             IApiVersionDescriptionProvider? apiVersionDescriptionProvider)
         {
             foreach (var apiVersionDescription in apiVersionDescriptionProvider.ApiVersionDescriptions)
-            {
                 services.AddSwaggerDocument((settings, serviceProvider) =>
                 {
                     var fluentValidationSchemaProcessor = serviceProvider.GetService<FluentValidationSchemaProcessor>();
@@ -124,66 +140,24 @@ namespace NeosCodingApi
                         document.Info.Description = "REST API for example.";
                     };
                 });
-            }
         }
 
-        private void ConfigureAuthentication(IServiceCollection services)
-        {
-            // var settingsName = nameof(JwtSettings);
-            // var jwtSettings = Configuration.GetSection(settingsName).Get<JwtSettings>();
-            // services.AddAuthentication(opt =>
-            // {
-            //     opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            //     opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            // }).AddJwtBearer(opt =>
-            // {
-            //     opt.Authority = jwtSettings.Issuer;
-            //     opt.Events = new JwtBearerEvents
-            //     {
-            //         OnMessageReceived = context =>
-            //         {
-            //             var accessToken = context.Request.Query["access_token"];
-            //
-            //             // If the request is for our hub...
-            //             var path = context.HttpContext.Request.Path;
-            //             if (!string.IsNullOrEmpty(accessToken) &&
-            //                 (path.StartsWithSegments("/hubs/chat")))
-            //             {
-            //                 // Read the token out of the query string
-            //                 context.Token = accessToken;
-            //             }
-            //
-            //             return Task.CompletedTask;
-            //         }
-            //     };
-            // });
-        }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            app.UseCors(builder => builder
-                .WithOrigins("http://localhost:4200")
-                .AllowAnyMethod()
-                .AllowAnyHeader()
-                .AllowCredentials()
-                .WithExposedHeaders(new []{"Location"})
-            );
+
 
             app.UseResponseCompression();
             if (env.IsDevelopment())
-            {
                 app.UseDeveloperExceptionPage();
-            }
             else
-            {
                 app.UseHttpsRedirection();
-            }
 
 
             app.UseRouting();
 
-
+            app.UseCors(PolicyName);
             app.UseAuthentication();
 
             app.UseAuthorization();
@@ -191,10 +165,8 @@ namespace NeosCodingApi
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapHub<ParticipationSessionsHub>(ParticipationSessionsHub.Route, options =>
-                {
-                    options.Transports = HttpTransportType.ServerSentEvents;
-                });
+                endpoints.MapHub<ParticipationSessionsHub>(ParticipationSessionsHub.Route,
+                    options => { options.Transports = HttpTransportType.ServerSentEvents; });
             });
 
             app.UseOpenApi();

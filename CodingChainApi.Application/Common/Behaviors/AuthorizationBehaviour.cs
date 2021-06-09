@@ -4,7 +4,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Application.Common.Exceptions;
 using Application.Common.Security;
-using Application.Contracts;
 using Application.Contracts.IService;
 using Application.Write.Contracts;
 using Domain.Users;

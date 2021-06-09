@@ -13,9 +13,9 @@ namespace Application.Write.Users.EditUser
 
     public class EditUserHandler : IRequestHandler<EditUserCommand, string>
     {
+        private readonly ICurrentUserService _currentUserService;
         private readonly ISecurityService _securityService;
         private readonly IUserRepository _userRepository;
-        private readonly ICurrentUserService _currentUserService;
 
         public EditUserHandler(
             ISecurityService securityService, IUserRepository userRepository, ICurrentUserService currentUserService)
@@ -29,16 +29,10 @@ namespace Application.Write.Users.EditUser
         {
             string? hashedPassword = null;
             var (username, password, email) = request;
-            if (password is not null)
-            {
-                hashedPassword = _securityService.HashPassword(password);
-            }
+            if (password is not null) hashedPassword = _securityService.HashPassword(password);
 
             var user = await _userRepository.FindByIdAsync(_currentUserService.UserId);
-            if (user is null)
-            {
-                throw new NotFoundException(_currentUserService.UserId.Value.ToString(), "user");
-            }
+            if (user is null) throw new NotFoundException(_currentUserService.UserId.Value.ToString(), "user");
 
             user.UpdateUser(email, username, hashedPassword);
             await _userRepository.SetAsync(user);

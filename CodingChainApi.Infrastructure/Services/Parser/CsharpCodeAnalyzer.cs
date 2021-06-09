@@ -6,13 +6,14 @@ namespace CodingChainApi.Infrastructure.Services.Parser
 {
     public class CsharpCodeAnalyzer : ICodeAnalyzer
     {
+        public int StartParamIdx { get; set; }
+
+        public int EndParamIdx { get; set; }
+
         public string? GetInputType(string code)
         {
             var functionName = FindFunctionName(code);
-            if (functionName is null)
-            {
-                return null;
-            }
+            if (functionName is null) return null;
 
             var parameters = code.Substring(StartParamIdx, EndParamIdx - StartParamIdx).Trim();
             parameters = parameters.Substring(1, parameters.Length - 1);
@@ -24,10 +25,7 @@ namespace CodingChainApi.Infrastructure.Services.Parser
         public string? GetReturnType(string code)
         {
             var functionName = FindFunctionName(code);
-            if (functionName is null)
-            {
-                return null;
-            }
+            if (functionName is null) return null;
 
             var startIdx = code.IndexOf("static", StringComparison.Ordinal) + "static".Length;
             return code.Substring(startIdx, code.IndexOf(functionName, StringComparison.Ordinal) - startIdx).Trim();
@@ -62,9 +60,5 @@ namespace CodingChainApi.Infrastructure.Services.Parser
             StartParamIdx = nameMatch.Index + nameMatch.Value.Length;
             return nameMatch.Value;
         }
-
-        public int StartParamIdx { get; set; }
-
-        public int EndParamIdx { get; set; }
     }
 }

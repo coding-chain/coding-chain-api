@@ -55,6 +55,8 @@ namespace CodingChainApi.Infrastructure
             return services;
         }
 
+
+
         private static void RegisterAggregateRepositories(IServiceCollection services)
         {
             services.AddProxiedScoped<IUserRepository, UserRepository>(typeof(EventPublisherInterceptor));
@@ -104,9 +106,9 @@ namespace CodingChainApi.Infrastructure
             ConfigureInjectableSettings<IAppDataSettings, AppDataSettings>(services, configuration);
         }
 
-
-        private static TImplementation ConfigureInjectableSettings<TInterface, TImplementation>(
-            IServiceCollection services,
+        
+        public static TImplementation ConfigureInjectableSettings<TInterface, TImplementation>(
+            this IServiceCollection services,
             IConfiguration configuration, bool singleton = true) where TImplementation : class, TInterface
             where TInterface : class
         {
@@ -114,15 +116,11 @@ namespace CodingChainApi.Infrastructure
             var settings = configuration.GetSection(settingsName).Get<TImplementation>();
             services.Configure<TImplementation>(configuration.GetSection(settingsName));
             if (singleton)
-            {
                 services.AddSingleton<TInterface>(sp =>
                     sp.GetRequiredService<IOptions<TImplementation>>().Value);
-            }
             else
-            {
                 services.AddScoped<TInterface>(sp =>
                     sp.GetRequiredService<IOptions<TImplementation>>().Value);
-            }
 
             return settings;
         }
@@ -151,11 +149,9 @@ namespace CodingChainApi.Infrastructure
                             // If the request is for our hub...
                             var path = context.HttpContext.Request.Path;
                             if (!string.IsNullOrEmpty(accessToken) &&
-                                (path.StartsWithSegments(ParticipationSessionsHub.Route)))
-                            {
+                                path.StartsWithSegments(ParticipationSessionsHub.Route))
                                 // Read the token out of the query string
                                 context.Token = accessToken;
-                            }
 
                             return Task.CompletedTask;
                         }
@@ -184,9 +180,7 @@ namespace CodingChainApi.Infrastructure
         {
             var dbSettings = configuration.GetSection(nameof(DatabaseSettings)).Get<DatabaseSettings>();
             if (dbSettings.ConnectionString is null)
-            {
                 throw new InfrastructureException("Please provide connection string");
-            }
 
             services.AddDbContext<CodingChainContext>(options =>
                 options.UseSqlServer(dbSettings.ConnectionString,

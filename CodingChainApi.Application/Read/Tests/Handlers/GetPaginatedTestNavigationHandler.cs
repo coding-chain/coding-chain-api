@@ -11,16 +11,19 @@ namespace Application.Read.Tests.Handlers
     {
         public Guid? StepId { get; set; }
     }
-    public class GetPaginatedTestNavigationHandler : IRequestHandler<GetPaginatedTestNavigationQuery, IPagedList<TestNavigation>>
+
+    public class
+        GetPaginatedTestNavigationHandler : IRequestHandler<GetPaginatedTestNavigationQuery, IPagedList<TestNavigation>>
     {
-        private IReadTestRepository _readTestRepository;
+        private readonly IReadTestRepository _readTestRepository;
 
         public GetPaginatedTestNavigationHandler(IReadTestRepository readTestRepository)
         {
             _readTestRepository = readTestRepository;
         }
 
-        public Task<IPagedList<TestNavigation>> Handle(GetPaginatedTestNavigationQuery request, CancellationToken cancellationToken)
+        public Task<IPagedList<TestNavigation>> Handle(GetPaginatedTestNavigationQuery request,
+            CancellationToken cancellationToken)
         {
             return _readTestRepository.GetPaginatedTestNavigation(request);
         }

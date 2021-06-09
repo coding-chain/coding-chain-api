@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Application.Common.Events;
 using CodingChainApi.Infrastructure.Hubs;
-using Domain.ParticipationStates;
+using Domain.ParticipationSessions;
 using MediatR;
 using Microsoft.AspNetCore.SignalR;
 
@@ -21,7 +21,7 @@ namespace CodingChainApi.Infrastructure.Handlers.ParticipationsState
             CancellationToken cancellationToken)
         {
             await _hub.Clients.Group(notification.DomainEvent.ParticipationId.ToString())
-                .OnUpdatedConnectedUser(new(notification.DomainEvent.UserId.Value));
+                .OnUpdatedConnectedUser(new UpdatedConnectedUserEvent(notification.DomainEvent.UserId.Value));
         }
     }
 }

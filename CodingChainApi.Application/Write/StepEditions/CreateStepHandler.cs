@@ -11,12 +11,14 @@ namespace Application.Write.StepEditions
 {
     public record CreateStepCommand(Guid LanguageId, string HeaderCode, string Name, string Description, decimal Score,
         int Difficulty, int? MinFunctionsCount = null, int? MaxFunctionsCount = null) : IRequest<string>;
-    
-    public class CreateStepHandler: IRequestHandler<CreateStepCommand, string>
+
+    public class CreateStepHandler : IRequestHandler<CreateStepCommand, string>
     {
-        private readonly IStepEditionRepository _stepEditionRepository;
         private readonly IReadProgrammingLanguageRepository _languageRepository;
-        public CreateStepHandler(IStepEditionRepository stepEditionRepository, IReadProgrammingLanguageRepository languageRepository)
+        private readonly IStepEditionRepository _stepEditionRepository;
+
+        public CreateStepHandler(IStepEditionRepository stepEditionRepository,
+            IReadProgrammingLanguageRepository languageRepository)
         {
             _stepEditionRepository = stepEditionRepository;
             _languageRepository = languageRepository;

@@ -7,15 +7,15 @@ using Application.Contracts.IService;
 using CodingChainApi.Infrastructure.Common.Exceptions;
 using CodingChainApi.Infrastructure.Settings;
 using Domain.Participations;
-using Domain.Users;
 using Microsoft.IdentityModel.Tokens;
 
 namespace CodingChainApi.Infrastructure.Services
 {
     public class TokenService : ITokenService
     {
+        private const int DefaultMinutesDuration = 120;
         private readonly IJwtSettings _settings;
-        private const int DefaultMinutesDuration = 120; 
+
         public TokenService(IJwtSettings settings)
         {
             _settings = settings;
@@ -38,11 +38,11 @@ namespace CodingChainApi.Infrastructure.Services
             var claims = new[]
             {
                 new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
-                new Claim(nameof(ParticipationId), participationId.ToString()),
+                new Claim(nameof(ParticipationId), participationId.ToString())
             };
             return GenerateToken(claims, credentials);
         }
-        
+
         private Task<string> GenerateToken(Claim[] claims, SigningCredentials? credentials)
         {
             var token = new JwtSecurityToken(_settings.Issuer,

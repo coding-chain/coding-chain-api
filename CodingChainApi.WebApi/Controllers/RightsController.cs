@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -22,7 +21,7 @@ namespace NeosCodingApi.Controllers
             IPropertyCheckerService propertyCheckerService) : base(mediator, mapper, propertyCheckerService)
         {
         }
-        
+
         [HttpGet("{rightId}", Name = nameof(GetRightById))]
         [Produces(typeof(HateoasResponse<RightNavigation>))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -52,7 +51,7 @@ namespace NeosCodingApi.Controllers
 
         private IList<LinkDto> GetLinksForRight(Guid rightId)
         {
-            return new List<LinkDto>()
+            return new List<LinkDto>
             {
                 LinkDto.SelfLink(Url.Link(nameof(GetRightById), new {rightId})),
                 LinkDto.AllLink(Url.Link(nameof(GetRights), null))

@@ -21,12 +21,13 @@ namespace Application.Write.StepEditions
         int Difficulty,
         Guid LanguageId) : IRequest<string>;
 
-    public class UpdateStepHandler: IRequestHandler<UpdateStepCommand, string>
+    public class UpdateStepHandler : IRequestHandler<UpdateStepCommand, string>
     {
-        private readonly IStepEditionRepository _stepEditionRepository;
         private readonly IReadProgrammingLanguageRepository _languageRepository;
+        private readonly IStepEditionRepository _stepEditionRepository;
 
-        public UpdateStepHandler(IStepEditionRepository stepEditionRepository, IReadProgrammingLanguageRepository languageRepository)
+        public UpdateStepHandler(IStepEditionRepository stepEditionRepository,
+            IReadProgrammingLanguageRepository languageRepository)
         {
             _stepEditionRepository = stepEditionRepository;
             _languageRepository = languageRepository;
@@ -40,7 +41,8 @@ namespace Application.Write.StepEditions
             if (step is null) throw new NotFoundException(request.StepId.ToString(), nameof(StepEditionAggregate));
             step.ValidateEdition();
             step.Update(request.Name, request.Description, request.HeaderCode, request.MinFunctionsCount,
-                request.MaxFunctionsCount, request.Score, request.Difficulty, new ProgrammingLanguageId(request.LanguageId));
+                request.MaxFunctionsCount, request.Score, request.Difficulty,
+                new ProgrammingLanguageId(request.LanguageId));
             await _stepEditionRepository.SetAsync(step);
             return step.Id.ToString();
         }

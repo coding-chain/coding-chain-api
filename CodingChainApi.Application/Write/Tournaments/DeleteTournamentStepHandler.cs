@@ -10,7 +10,8 @@ using MediatR;
 namespace Application.Write.Tournaments
 {
     public record DeleteTournamentStepCommand(Guid TournamentId, Guid StepId) : IRequest<string>;
-    public class DeleteTournamentStepHandler:IRequestHandler<DeleteTournamentStepCommand, string>
+
+    public class DeleteTournamentStepHandler : IRequestHandler<DeleteTournamentStepCommand, string>
     {
         private readonly ITournamentRepository _tournamentRepository;
 

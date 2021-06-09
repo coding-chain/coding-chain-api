@@ -9,6 +9,7 @@
   &lt;TestAncestor&gt;&#xD;
     &lt;TestId&gt;NUnit3x::E293AD77-084B-43A7-8469-BCAF9C859399::net5.0::NeosCodingApi.TypescriptCodeAnalyzerTests.simple_input_type_should_works&lt;/TestId&gt;&#xD;
     &lt;TestId&gt;NUnit3x::E293AD77-084B-43A7-8469-BCAF9C859399::net5.0::NeosCodingApi.TypescriptCodeAnalyzerTests.simple_output_type_should_works&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::9A248A17-39EF-467E-B736-429BCD05DB83::net5.0::CodingChainApi.Domain.Tests.SuspectFunctionAggregateTests.add_existing_function_should_throw&lt;/TestId&gt;&#xD;
   &lt;/TestAncestor&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
 	

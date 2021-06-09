@@ -9,7 +9,7 @@ namespace CodingChainApi.Infrastructure.Services.Parser
         private readonly Dictionary<LanguageEnum, ICodeAnalyzer> _codeAnalyzers = new()
         {
             {LanguageEnum.CSharp, new CsharpCodeAnalyzer()},
-            {LanguageEnum.Typescript, new TypescriptCodeAnalyzer()},
+            {LanguageEnum.Typescript, new TypescriptCodeAnalyzer()}
         };
 
         public string? GetReturnType(string code, LanguageEnum language)

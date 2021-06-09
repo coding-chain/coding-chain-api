@@ -1,7 +1,6 @@
 namespace Domain.Contracts
 {
-    
-    public interface IDomainEvent 
+    public interface IDomainEvent
     {
     }
 }

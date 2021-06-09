@@ -1,16 +1,11 @@
-using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Application.Common.Exceptions;
 using Application.Common.Security;
 using Application.Contracts.IService;
 using Application.Read.Contracts;
 using Application.Write.Contracts;
 using Domain.Teams;
-using Domain.Users;
 using MediatR;
-using ApplicationException = Application.Common.Exceptions.ApplicationException;
 
 namespace Application.Write.Teams
 {
@@ -19,9 +14,9 @@ namespace Application.Write.Teams
 
     public class CreateTeamHandler : IRequestHandler<CreateTeamCommand, string>
     {
-        private readonly ITeamRepository _teamRepository;
-        private readonly IReadUserRepository _readUserRepository;
         private readonly ICurrentUserService _currentUserService;
+        private readonly IReadUserRepository _readUserRepository;
+        private readonly ITeamRepository _teamRepository;
 
         public CreateTeamHandler(ITeamRepository teamRepository, IReadUserRepository readUserRepository,
             ICurrentUserService currentUserService)

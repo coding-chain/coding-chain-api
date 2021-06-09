@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -32,7 +31,7 @@ namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
 
         public async Task<SuspectFunctionAggregate?> FindByIdAsync(FunctionId id)
         {
-            var functionEntity = await  GetIncludeQueryable()
+            var functionEntity = await GetIncludeQueryable()
                 .FirstOrDefaultAsync(f => f.Id == id.Value && f.IsDeleted == false);
             return functionEntity is not null ? ToEntity(functionEntity) : null;
         }
@@ -52,17 +51,18 @@ namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
 
         public async Task<IList<SuspectFunctionAggregate>> GetAllAsync()
         {
-            return await  GetIncludeQueryable()
+            return await GetIncludeQueryable()
                 .Select(f => ToEntity(f))
                 .ToListAsync();
         }
 
-        private  IQueryable<Function> GetIncludeQueryable()
+        private IQueryable<Function> GetIncludeQueryable()
         {
             return _context.Functions
                 .Include(f => f.PlagiarizedFunctions)
-                .ThenInclude(pF => pF.PlagiarizedFunction);
+                .ThenInclude<Function, PlagiarismFunction, Function>(pF => pF.PlagiarizedFunction);
         }
+
         private async Task<Function?> FindAsync(Guid id)
         {
             return await GetIncludeQueryable()
@@ -87,7 +87,7 @@ namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
                 .Where(pF => currentPlagiarizedFunctions.All(f =>
                     f.PlagiarizedFunction.Id != pF.Id.Value
                 ))
-                .Select(pF => new PlagiarismFunction()
+                .Select(pF => new PlagiarismFunction
                 {
                     CheatingFunctionId = aggregate.Id.Value, PlagiarizedFunctionId = pF.Id.Value, Rate = pF.Rate,
                     DetectionDate = pF.DetectionDate

@@ -7,14 +7,11 @@ using Application.Common.Pagination;
 using Application.Read.Participations;
 using Application.Read.Participations.Handlers;
 using Application.Read.Teams;
-using Application.Read.Teams;
 using Application.Read.Teams.Handlers;
 using Application.Read.Tournaments;
 using Application.Read.Tournaments.Handlers;
 using Application.Write.Teams;
 using AutoMapper;
-using CodingChainApi.Infrastructure.Common.Pagination;
-using CodingChainApi.Infrastructure.Models;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -42,8 +39,6 @@ namespace NeosCodingApi.Controllers
             return CreatedAtAction(nameof(GetTeamById), new {teamId}, null);
         }
 
-        public record AddMemberToTeamBodyCommand(Guid MemberId);
-
         [HttpPost("{teamId:guid}/members", Name = nameof(AddMemberToTeam))]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
@@ -68,8 +63,6 @@ namespace NeosCodingApi.Controllers
             await Mediator.Send(new ElevateTeamMemberCommand(teamId, memberId));
             return NoContent();
         }
-
-        public record RenameTeamCommandBody(string Name);
 
         [HttpPut("{teamId:guid}", Name = nameof(RenameTeam))]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -136,8 +129,6 @@ namespace NeosCodingApi.Controllers
             return Ok(memberWithLinks);
         }
 
-        public record GetPaginatedTeamMembersQueryParameters : PaginationQueryBase;
-
         [HttpGet("{teamId:guid}/members", Name = nameof(GetMembers))]
         [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasPageResponse<HateoasResponse<TeamNavigation>>))]
         public async Task<IActionResult> GetMembers(Guid teamId,
@@ -160,7 +151,7 @@ namespace NeosCodingApi.Controllers
         public async Task<IActionResult> GetTeamTournaments(Guid teamId,
             [FromQuery] PaginationQueryBase query)
         {
-            var tournaments = await Mediator.Send(new GetTournamentNavigationPaginatedQuery()
+            var tournaments = await Mediator.Send(new GetTournamentNavigationPaginatedQuery
                 {TeamId = teamId, Page = query.Page, Size = query.Size});
             var tournamentsWithLinks = tournaments.Select(tournament =>
                 new HateoasResponse<TournamentNavigation>(tournament, GetLinksForTournament(tournament.Id, teamId)));
@@ -178,7 +169,7 @@ namespace NeosCodingApi.Controllers
         public async Task<IActionResult> GetTeamParticipationsByTournament(Guid teamId, Guid tournamentId,
             [FromQuery] PaginationQueryBase query)
         {
-            var participations = await Mediator.Send(new GetAllParticipationNavigationPaginatedQuery()
+            var participations = await Mediator.Send(new GetAllParticipationNavigationPaginatedQuery
                 {TeamIdFilter = teamId, TournamentIdFilter = tournamentId, Page = query.Page, Size = query.Size});
             var participationsWithLinks = participations.Select(participation =>
                 new HateoasResponse<ParticipationNavigation>(participation,
@@ -205,7 +196,7 @@ namespace NeosCodingApi.Controllers
 
         private IList<LinkDto> GetLinksForTournament(Guid tournamentId, Guid teamId)
         {
-            return new List<LinkDto>()
+            return new List<LinkDto>
             {
                 LinkDto.DeleteLink(Url.Link(nameof(LeaveTournament), new {teamId, tournamentId})),
                 LinkDto.AllLink(Url.Link(nameof(GetTeamTournaments), new {teamId}))
@@ -214,7 +205,7 @@ namespace NeosCodingApi.Controllers
 
         private IList<LinkDto> GetLinksForParticipation(Guid tournamentId, Guid teamId, Guid stepId)
         {
-            return new List<LinkDto>()
+            return new List<LinkDto>
             {
                 LinkDto.AllLink(Url.Link(nameof(GetTeamParticipationsByTournament), new {teamId, tournamentId})),
                 LinkDto.SelfLink(Url.Link(nameof(GetTeamParticipationsByTournamentAndStep),
@@ -239,7 +230,7 @@ namespace NeosCodingApi.Controllers
 
         private IList<LinkDto> GetLinksForTeam(Guid teamId)
         {
-            return new List<LinkDto>()
+            return new List<LinkDto>
             {
                 LinkDto.CreateLink(Url.Link(nameof(CreateTeam), null)),
                 LinkDto.SelfLink(Url.Link(nameof(GetTeamById), new {teamId}))
@@ -248,7 +239,7 @@ namespace NeosCodingApi.Controllers
 
         private IList<LinkDto> GetLinksForMember(Guid memberId, Guid teamId)
         {
-            return new List<LinkDto>()
+            return new List<LinkDto>
             {
                 LinkDto.CreateLink(Url.Link(nameof(AddMemberToTeam), new {teamId})),
                 LinkDto.DeleteLink(Url.Link(nameof(RemoveMemberFromTeam), new {teamId, memberId})),
@@ -256,5 +247,11 @@ namespace NeosCodingApi.Controllers
                 new(Url.Link(nameof(GetMembers), new {teamId}), "all", HttpMethod.Get)
             };
         }
+
+        public record AddMemberToTeamBodyCommand(Guid MemberId);
+
+        public record RenameTeamCommandBody(string Name);
+
+        public record GetPaginatedTeamMembersQueryParameters : PaginationQueryBase;
     }
 }
