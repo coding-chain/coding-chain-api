@@ -27,10 +27,7 @@ namespace CodingChainApi.Domain.Tests
             return new(new UserId(Guid.NewGuid()), false);
         }
 
-        private TournamentId GetTournamentId()
-        {
-            return new(Guid.NewGuid());
-        }
+
 
         private TeamAggregate GetValidTeam()
         {
@@ -195,15 +192,15 @@ namespace CodingChainApi.Domain.Tests
         public void leave_not_joined_tournament_should_throw()
         {
             var team = TeamAggregate.Restore(_teamId, _teamName, new List<MemberEntity> {_adminMember},
-                new List<TournamentId> {GetTournamentId()});
-            Assert.Throws<DomainException>(() => team.LeaveTournament(GetTournamentId(), _adminMember.Id));
+                new List<TournamentId> {TestsHelper.GetTournamentId()});
+            Assert.Throws<DomainException>(() => team.LeaveTournament(TestsHelper.GetTournamentId(), _adminMember.Id));
         }
 
         [Test]
         public void leave_tournament_without_admin_account_should_throw()
         {
             var commonMember = GetCommonMember();
-            var existingTournamentId = GetTournamentId();
+            var existingTournamentId = TestsHelper.GetTournamentId();
             var team = TeamAggregate.Restore(_teamId, _teamName, new List<MemberEntity> {_adminMember, commonMember},
                 new List<TournamentId> {existingTournamentId});
             Assert.Throws<DomainException>(() => team.LeaveTournament(existingTournamentId, commonMember.Id));
@@ -212,7 +209,7 @@ namespace CodingChainApi.Domain.Tests
         [Test]
         public void leave_tournament_should_work()
         {
-            var existingTournamentId = GetTournamentId();
+            var existingTournamentId = TestsHelper.GetTournamentId();
             var team = TeamAggregate.Restore(_teamId, _teamName, new List<MemberEntity> {_adminMember},
                 new List<TournamentId> {existingTournamentId});
             team.LeaveTournament(existingTournamentId, _adminMember.Id);

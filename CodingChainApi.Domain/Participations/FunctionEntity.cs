@@ -10,6 +10,7 @@ namespace Domain.Participations
         {
             return Value.ToString();
         }
+
     }
 
     public class FunctionEntity : Entity<FunctionId>, IComparable<FunctionEntity>

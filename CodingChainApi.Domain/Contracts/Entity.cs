@@ -1,33 +1,36 @@
+using System;
 using System.Collections.Generic;
 
 namespace Domain.Contracts
 {
-    public class Entity<TId> where TId : IEntityId
+    public abstract class Entity<TId> : IEquatable<Entity<TId>> where TId : IEntityId
     {
         public Entity(TId id)
         {
             Id = id;
         }
 
-        public TId Id { get; set; }
+        public TId Id { get; init; }
 
-        protected bool Equals(Entity<TId> other)
+
+        public bool Equals(Entity<TId>? other)
         {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
             return EqualityComparer<TId>.Default.Equals(Id, other.Id);
         }
 
-
-        public sealed override bool Equals(object? obj)
+        public override bool Equals(object? obj)
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != GetType()) return false;
+            if (obj.GetType() != this.GetType()) return false;
             return Equals((Entity<TId>) obj);
         }
 
-        public sealed override int GetHashCode()
+        public override int GetHashCode()
         {
-            return EqualityComparer<TId>.Default.GetHashCode(Id);
+            return Id.GetHashCode();
         }
     }
 }
