@@ -37,6 +37,8 @@ namespace CodingChainApi.Infrastructure.Contexts
         public DbSet<Test> Tests { get; set; }
 
         public DbSet<PlagiarismFunction> PlagiarismFunctions { get; set; }
+        public DbSet<CronStatus> CronStatus { get; set; }
+        public DbSet<Cron> Crons { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

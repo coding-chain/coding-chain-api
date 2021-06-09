@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Application.Write.Cron.Handlers.RegisterCron;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Quartz;
@@ -33,14 +34,13 @@ namespace CodingChainApi.Infrastructure.CronManagement
 
         protected IServiceScope GetScope()
         {
-            return  _serviceProvider.CreateScope();
+            return _serviceProvider.CreateScope();
         }
 
         public void Register(IJobExecutionContext context)
         {
-            var cronEvent = new CronEvent(context.JobDetail.Key.Name, new DateTime());
-            
-            GetScope().ServiceProvider.GetRequiredService<IMediator>().Publish(cronEvent);
+            GetScope().ServiceProvider.GetRequiredService<IMediator>()
+                .Send(new CronRegisteredRequest(context.JobDetail.Key.Name, new DateTime()));
         }
 
         protected abstract void Process();

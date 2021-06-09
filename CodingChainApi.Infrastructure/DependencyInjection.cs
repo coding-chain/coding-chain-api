@@ -69,6 +69,7 @@ namespace CodingChainApi.Infrastructure
                 typeof(EventPublisherInterceptor));
             services.AddProxiedScoped<IPlagiarizedFunctionRepository, PlagiarizedFunctionRepository>(
                 typeof(EventPublisherInterceptor));
+            services.AddProxiedScoped<ICronRepository, CronRepository>(typeof(EventPublisherInterceptor));
         }
 
         private static void RegisterReadRepositories(IServiceCollection services)

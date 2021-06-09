@@ -8,6 +8,7 @@ namespace CodingChainApi.Infrastructure.Models
         public Guid Id;
         public string Code;
         public CronStatus Status;
+        public DateTime ExecutedAt;
 
     }
 }

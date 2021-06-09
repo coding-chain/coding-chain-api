@@ -10,8 +10,19 @@ namespace Domain.Cron
             return Value.ToString();
         }
     }
-    public class CronAggregate
+
+    public class CronAggregate : Aggregate<CronId>
     {
-        
+        public string Code;
+        public DateTime ExecutedAt;
+        public CronStatus Status;
+
+        public CronAggregate(CronId id, string code, DateTime executedAt, CronStatus status) : base(id)
+        {
+            Id = id;
+            Code = code;
+            ExecutedAt = executedAt;
+            Status = status;
+        }
     }
 }
