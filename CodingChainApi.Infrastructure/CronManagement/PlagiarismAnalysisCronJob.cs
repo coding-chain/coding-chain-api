@@ -1,11 +1,9 @@
 using System;
-using Application.Contracts.Dtos;
 using Application.Read.Cron.Handlers;
 using Microsoft.Extensions.Logging;
 using Quartz;
 using Application.Read.Plagiarism.Handlers;
 using Application.Write.Plagiarism;
-using CodingChainApi.Infrastructure.Services.Messaging;
 using Domain.Cron;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
