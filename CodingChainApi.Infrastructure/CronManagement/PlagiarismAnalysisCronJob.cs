@@ -1,8 +1,11 @@
 using System;
+using Application.Contracts.Dtos;
 using Application.Read.Cron.Handlers;
 using Microsoft.Extensions.Logging;
 using Quartz;
 using Application.Read.Plagiarism.Handlers;
+using Application.Write.Plagiarism;
+using CodingChainApi.Infrastructure.Services.Messaging;
 using Domain.Cron;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
@@ -35,6 +38,11 @@ namespace CodingChainApi.Infrastructure.CronManagement
             var mediator = GetScope().ServiceProvider.GetRequiredService<IMediator>();
             var functionsToCompare = await mediator.Send(new GetFunctionsToCompareRequest());
             var suspectedFunctions = await mediator.Send(new GetSuspectedFunctionRequest(LastExecutionDate));
+            foreach (var function in suspectedFunctions)
+            {
+                await mediator.Send(new CodePlagiarismPendingExecutionRequest(function, functionsToCompare));
+            }
+
             _logger.LogInformation("oui");
         }
     }
