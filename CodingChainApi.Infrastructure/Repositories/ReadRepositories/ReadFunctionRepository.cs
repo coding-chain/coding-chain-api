@@ -32,6 +32,11 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
 
         public async Task<IList<Function>> GetAllFunctionFilterOnModifiedDate(DateTime? dateFilter)
         {
+            if (dateFilter is null)
+            {
+                return await GetAllFunctionsNotPaginated();
+            }
+
             return await _context.UserFunctions.Where(userFunc => userFunc.LastModificationDate > dateFilter)
                 .Select(userFunc =>
                     new Function(userFunc.FunctionId, userFunc.Function.Code))
