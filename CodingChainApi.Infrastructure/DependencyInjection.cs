@@ -9,6 +9,7 @@ using Application.Read.Contracts;
 using Application.Write.Contracts;
 using CodingChainApi.Infrastructure.Common.Exceptions;
 using CodingChainApi.Infrastructure.Contexts;
+using CodingChainApi.Infrastructure.CronManagement;
 using CodingChainApi.Infrastructure.Hubs;
 using CodingChainApi.Infrastructure.Repositories.AggregateRepositories;
 using CodingChainApi.Infrastructure.Repositories.ReadRepositories;
@@ -24,6 +25,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Quartz;
 
 namespace CodingChainApi.Infrastructure
 {
@@ -40,6 +42,7 @@ namespace CodingChainApi.Infrastructure
             ConfigureBcrypt(services, configuration);
             ConfigureProcess(services, configuration);
             ConfigureAppData(services, configuration);
+            ConfigureCronManagement(services, configuration);
             ConfigureRabbitMq(services, configuration);
             //
             services.AddScoped<ISecurityService, SecurityService>();
@@ -68,6 +71,7 @@ namespace CodingChainApi.Infrastructure
                 typeof(EventPublisherInterceptor));
             services.AddProxiedScoped<IPlagiarizedFunctionRepository, PlagiarizedFunctionRepository>(
                 typeof(EventPublisherInterceptor));
+            services.AddProxiedScoped<ICronRepository, CronRepository>(typeof(EventPublisherInterceptor));
         }
 
         private static void RegisterReadRepositories(IServiceCollection services)
@@ -83,6 +87,7 @@ namespace CodingChainApi.Infrastructure
             services.AddScoped<IReadParticipationSessionRepository, ReadParticipationSessionRepository>();
             services.AddScoped<IReadFunctionSessionRepository, ReadFunctionSessionRepository>();
             services.AddScoped<IReadUserSessionRepository, ReadUserSessionRepository>();
+            services.AddScoped<IReadFunctionRepository, ReadFunctionRepository>();
         }
 
         private static void ConfigureCache(IServiceCollection services, IConfiguration configuration)
@@ -195,6 +200,24 @@ namespace CodingChainApi.Infrastructure
                 .AddScoped<IDispatcher<PrepareParticipationExecutionDto>, PrepareParticipationExecutionService>();
             ConfigureInjectableSettings<IRabbitMqSettings, RabbitMqSettings>(serviceCollection, configuration);
             // End RabbitMQ Configuration
+        }
+
+        private static void ConfigureCronManagement(IServiceCollection serviceCollection, IConfiguration configuration)
+        {
+            var settings = ConfigureInjectableSettings<IQuartzSettings, QuartzSettings>(serviceCollection, configuration);
+            serviceCollection.AddQuartz(q =>
+            {
+                serviceCollection.AddQuartz(q =>
+                {
+                    q.UseMicrosoftDependencyInjectionScopedJobFactory();
+
+                    // Register the job, loading the schedule from configuration
+                    q.AddJobAndTrigger<PlagiarismAnalysisCronJob>(nameof(settings.PlagiarismAnalysisCronJob),settings.PlagiarismAnalysisCronJob);
+                });
+
+                serviceCollection.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
+            });
+            serviceCollection.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
         }
     }
 }

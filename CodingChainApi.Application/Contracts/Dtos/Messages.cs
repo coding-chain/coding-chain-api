@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Application.Read.Plagiarism;
 using Domain.ProgrammingLanguages;
 
 namespace Application.Contracts.Dtos
@@ -12,8 +13,7 @@ namespace Application.Contracts.Dtos
 
         public record Function(Guid Id, string Code, int Order);
     }
-
-    public record Function(Guid Id, string Code);
+    
 
     public record PlagiarismAnalyzeExecutionDto
         (Function SuspectedFunction, IList<Function> ComparedFunctions);

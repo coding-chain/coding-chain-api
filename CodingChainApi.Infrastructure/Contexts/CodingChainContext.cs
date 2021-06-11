@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Linq;
 using CodingChainApi.Infrastructure.Models;
+using Domain.Cron;
 using Domain.ProgrammingLanguages;
 using Domain.Users;
 using Microsoft.EntityFrameworkCore;
+using CronStatus = CodingChainApi.Infrastructure.Models.CronStatus;
 using ProgrammingLanguage = CodingChainApi.Infrastructure.Models.ProgrammingLanguage;
 using Right = CodingChainApi.Infrastructure.Models.Right;
 
@@ -31,6 +33,8 @@ namespace CodingChainApi.Infrastructure.Contexts
         public DbSet<Test> Tests { get; set; }
 
         public DbSet<PlagiarismFunction> PlagiarismFunctions { get; set; }
+        public DbSet<CronStatus> CronStatus { get; set; }
+        public DbSet<Cron> Crons { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -79,7 +83,13 @@ namespace CodingChainApi.Infrastructure.Contexts
                 .ValueGeneratedNever();
             modelBuilder.Entity<PlagiarismFunction>()
                 .ToTable("plagiarism_function");
-
+            modelBuilder.Entity<CronStatus>().ToTable("cron_status")
+                .Property(p => p.Id)
+                .ValueGeneratedNever();
+            modelBuilder.Entity<Cron>()
+                .ToTable("cron")
+                .Property(c => c.Id)
+                .ValueGeneratedNever();
 
             modelBuilder.Entity<User>()
                 .HasMany(s => s.Rights)
@@ -138,10 +148,16 @@ namespace CodingChainApi.Infrastructure.Contexts
                 .WithMany(b => b.PlagiarizedFunctions)
                 .HasForeignKey(bc => bc.PlagiarizedFunctionId)
                 .OnDelete(DeleteBehavior.NoAction);
-
+            modelBuilder
+                .Entity<Cron>()
+                .HasOne(c => c.Status)
+                .WithMany(c => c.Crons);
 
             modelBuilder.Entity<Right>()
                 .Property(c => c.Name)
+                .HasConversion<string>();
+            modelBuilder.Entity<CronStatus>()
+                .Property(s => s.Code)
                 .HasConversion<string>();
 
             modelBuilder.Entity<ProgrammingLanguage>()
@@ -152,6 +168,7 @@ namespace CodingChainApi.Infrastructure.Contexts
             InitRights(modelBuilder);
             InitLanguages(modelBuilder);
             InitDecimalPrecisions(modelBuilder);
+            InitCronStatus(modelBuilder);
             base.OnModelCreating(modelBuilder);
         }
 
@@ -182,6 +199,14 @@ namespace CodingChainApi.Infrastructure.Contexts
                     property.SetPrecision(18);
                     property.SetScale(6);
                 });
+        }
+
+        public void InitCronStatus(ModelBuilder modelBuilder)
+        {
+            var status = Enum.GetValues(typeof(CronStatusEnum)) as CronStatusEnum[];
+            modelBuilder.Entity<CronStatus>().HasData(
+                (status ?? Array.Empty<CronStatusEnum>()).Select(r => new CronStatus()
+                    {Id = Guid.NewGuid(), Code = r}));
         }
     }
 }
