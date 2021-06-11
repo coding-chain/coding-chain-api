@@ -6,9 +6,9 @@ using Domain.Users;
 
 namespace Domain.ParticipationSessions
 {
-    public class TeamStateEntity : TeamEntity
+    public class TeamSessionEntity : TeamEntity
     {
-        public TeamStateEntity(TeamId id, IList<UserId> userIds, IList<ConnectedUserEntity> connectedUserEntities) :
+        public TeamSessionEntity(TeamId id, IList<UserId> userIds, IList<ConnectedUserEntity> connectedUserEntities) :
             base(id, userIds)
         {
             ConnectedUserEntities = connectedUserEntities.ToHashSet();

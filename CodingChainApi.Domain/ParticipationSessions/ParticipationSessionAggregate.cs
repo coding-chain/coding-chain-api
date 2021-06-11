@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Domain.Contracts;
@@ -25,7 +26,7 @@ namespace Domain.ParticipationSessions
     {
         private List<TestId> _passedTestsIds = new();
 
-        protected ParticipationSessionAggregate(ParticipationId id, TeamStateEntity team,
+        protected ParticipationSessionAggregate(ParticipationId id, TeamSessionEntity team,
             TournamentEntity tournamentEntity, StepSessionEntity stepSessionEntity, DateTime startDate,
             DateTime? endDate,
             decimal calculatedScore, IList<FunctionEntity> functions, bool isReady) : base(id, team, tournamentEntity,
@@ -38,7 +39,7 @@ namespace Domain.ParticipationSessions
         }
 
         public IReadOnlyCollection<TestId> PassedTestsIds => _passedTestsIds.AsReadOnly();
-        public TeamStateEntity ConnectedTeam { get; }
+        public TeamSessionEntity ConnectedTeam { get; }
         public override TeamEntity Team => ConnectedTeam;
         public StepSessionEntity StepSessionEntity { get; }
 
@@ -54,23 +55,22 @@ namespace Domain.ParticipationSessions
 
         public bool HasConnectedUsers => ConnectedTeam.ConnectedUserEntities.Any();
 
-        public static ParticipationSessionAggregate FromParticipationAggregate(ParticipationAggregate participation,
-            IList<TestEntity> testEntities)
-        {
-            var team = new TeamStateEntity(participation.Team.Id, participation.Team.UserIds,
-                new List<ConnectedUserEntity>());
 
-            return new ParticipationSessionAggregate(
-                participation.Id,
+        public static ParticipationSessionAggregate Restore(
+            ParticipationId id, TeamSessionEntity team, TournamentEntity tournament, StepSessionEntity step,
+            DateTime startDate, DateTime? endDate, decimal calculatedScore, bool isReady,  
+            IList<FunctionEntity> functions)
+        {
+            return new(
+                id,
                 team,
-                participation.TournamentEntity,
-                new StepSessionEntity(participation.StepEntity.Id, participation.StepEntity.TournamentIds,
-                    testEntities),
-                participation.StartDate,
-                participation.EndDate,
-                participation.CalculatedScore,
-                participation.Functions.ToList(),
-                false);
+                tournament,
+                step,
+                startDate,
+                endDate,
+                calculatedScore,
+                functions,
+                isReady);
         }
 
         public int AddConnectedUser(UserId userId)

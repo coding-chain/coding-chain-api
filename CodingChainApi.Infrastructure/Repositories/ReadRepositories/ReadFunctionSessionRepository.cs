@@ -8,6 +8,7 @@ using Application.Read.FunctionSessions;
 using Application.Read.FunctionSessions.Handlers;
 using CodingChainApi.Infrastructure.Common.Extensions;
 using CodingChainApi.Infrastructure.Common.Pagination;
+using CodingChainApi.Infrastructure.Models.Cache;
 using CodingChainApi.Infrastructure.Services.Cache;
 using Domain.Participations;
 using Domain.ParticipationSessions;
@@ -27,13 +28,13 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
             GetParticipationSessionFunctionsPaginatedQuery paginationQuery)
         {
             var participation =
-                _cache.GetCache<ParticipationSessionAggregate>(new ParticipationId(paginationQuery.ParticipationId));
+                await _cache.GetCache<ParticipationSession>(
+                    new ParticipationId(paginationQuery.ParticipationId));
             if (participation is null)
-                return await PagedList<FunctionSessionNavigation>.Empty(paginationQuery.Page, paginationQuery.Size)
-                    .ToTask();
+                return PagedList<FunctionSessionNavigation>.Empty(paginationQuery.Page, paginationQuery.Size);
             var functions = participation.Functions
                 .Where(f => paginationQuery.FunctionsIdsFilter is null ||
-                            paginationQuery.FunctionsIdsFilter.Contains(f.Id.Value))
+                            paginationQuery.FunctionsIdsFilter.Contains(f.Id))
                 .Skip((paginationQuery.Page - 1) * paginationQuery.Size)
                 .Take(paginationQuery.Size)
                 .Select(ToFunctionSessionNavigation)
@@ -46,26 +47,26 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
             Guid functionId)
         {
             var participation =
-                _cache.GetCache<ParticipationSessionAggregate>(new ParticipationId(participationId));
-            var function = participation?.Functions.FirstOrDefault(f => f.Id.Value == functionId);
+                await _cache.GetCache<ParticipationSession>(participationId);
+            var function = participation?.Functions.FirstOrDefault(f => f.Id == functionId);
             if (function is null) return null;
-            return await ToFunctionSessionNavigation(function).ToTask();
+            return ToFunctionSessionNavigation(function);
         }
 
         public async Task<IList<FunctionSessionNavigation>> GetAllAsync(Guid participationId)
         {
             var participation =
-                _cache.GetCache<ParticipationSessionAggregate>(new ParticipationId(participationId));
+                await _cache.GetCache<ParticipationSession>(new ParticipationId(participationId));
             var functions = participation?.Functions.Select(ToFunctionSessionNavigation).ToList() ??
                             new List<FunctionSessionNavigation>();
-            return await functions.ToTask();
+            return functions;
         }
 
-        private static FunctionSessionNavigation ToFunctionSessionNavigation(FunctionEntity function)
+        private static FunctionSessionNavigation ToFunctionSessionNavigation(Function function)
         {
             return new(
-                function.Id.Value,
-                function.UserId.Value,
+                function.Id,
+                function.UserId,
                 function.Code,
                 function.LastModificationDate,
                 function.Order
