@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Application;
@@ -24,6 +25,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using StackExchange.Redis;
 
 namespace CodingChainApi.Infrastructure
 {
@@ -46,14 +48,11 @@ namespace CodingChainApi.Infrastructure
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<ITimeService, TimeService>();
             services.AddScoped<IFunctionTypeParserService, FunctionTypeParserService>();
-            services.AddScoped<ICache, Cache>();
             RegisterAggregateRepositories(services);
             RegisterReadRepositories(services);
             return services;
         }
-
-
-
+        
         private static void RegisterAggregateRepositories(IServiceCollection services)
         {
             services.AddProxiedScoped<IUserRepository, UserRepository>(typeof(EventPublisherInterceptor));
@@ -85,10 +84,19 @@ namespace CodingChainApi.Infrastructure
             services.AddScoped<IReadUserSessionRepository, ReadUserSessionRepository>();
         }
 
-        private static void ConfigureCache(IServiceCollection services, IConfiguration configuration)
+        private static void ConfigureCache(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddMemoryCache();
+
             ConfigureInjectableSettings<ICacheSettings, CacheSettings>(services, configuration);
+            // services.AddMemoryCache();
+            // services.AddScoped<ICache, Cache>();
+            var redisSettings =
+                ConfigureInjectableSettings<IRedisCacheSettings, RedisCacheSettings>(services, configuration);
+            services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = redisSettings.ConnectionString;
+            });
+            services.AddScoped<ICache, RedisCache>();
         }
 
         private static void ConfigureProcess(IServiceCollection services, IConfiguration configuration)

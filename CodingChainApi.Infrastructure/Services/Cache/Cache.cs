@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Threading.Tasks;
+using CodingChainApi.Infrastructure.Common.Extensions;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 
@@ -16,52 +18,53 @@ namespace CodingChainApi.Infrastructure.Services.Cache
             _cache = cache;
         }
 
-        public T? GetCache<T>(object key) where T : class
+        public Task<T?> GetCache<T>(object key) where T : class
         {
             try
             {
-                return _cache.Get<T>(key);
+                var result = _cache.Get<T?>(key);
+                return Task.FromResult(result);
             }
             catch (Exception ex)
             {
                 _logger.LogError("{Message}", ex.Message);
             }
 
-            return null;
+            return Task.FromResult<T?>(null);
         }
 
 
-        public bool SetCache<T>(T values, object key, int durationSeconds = 120)
+        public Task<bool> SetCache<T>(T values, object key, int durationSeconds)
         {
             try
             {
                 var cacheEntryOptions = new MemoryCacheEntryOptions()
                     .SetSlidingExpiration(TimeSpan.FromSeconds(durationSeconds));
                 _cache.Set(key, values, cacheEntryOptions);
-                return true;
+                return true.ToTask();
             }
             catch (Exception ex)
             {
                 _logger.LogError("{Message}", ex.Message);
             }
 
-            return false;
+            return false.ToTask();
         }
 
 
-        public bool RemoveCache(object key)
+        public Task<bool> RemoveCache(object key)
         {
             try
             {
                 _cache.Remove(key);
-                return true;
+                return true.ToTask();
             }
             catch (Exception ex)
             {
                 _logger.LogError("{Message}", ex.Message);
             }
 
-            return false;
+            return false.ToTask();
         }
     }
 }
