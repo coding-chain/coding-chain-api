@@ -14,12 +14,12 @@ namespace CodingChainApi.Infrastructure.CronManagement
     public abstract class CronJob : IJob
     {
         private readonly IServiceProvider _serviceProvider;
-        private readonly ILogger _logger;
+        protected readonly ILogger<CronJob> Logger;
         private CronId CronId { get; set; }
 
         public CronJob(ILogger<CronJob> logger, IServiceProvider serviceProvider)
         {
-            _logger = logger;
+            Logger = logger;
             _serviceProvider = serviceProvider;
         }
 
@@ -28,35 +28,45 @@ namespace CodingChainApi.Infrastructure.CronManagement
             return _serviceProvider.CreateScope();
         }
 
-        public virtual void BeforeProcess(IJobExecutionContext context)
+        public virtual async Task BeforeProcess(IJobExecutionContext context)
         {
-            CronId = new CronId(GetScope().ServiceProvider.GetRequiredService<IMediator>()
-                .Send(new CronRegisteredRequest(context.JobDetail.Key.Name)).Result);
+            using var scope = GetScope();
+            var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+            var id = await mediator.Send(new CronRegisteredRequest(context.JobDetail.Key.Name));
+            CronId = new CronId(id);
         }
 
         public virtual async void AfterProcess(CronStatusEnum newStatus)
         {
-            await GetScope().ServiceProvider.GetRequiredService<IMediator>()
-                .Send(new UpdateCronHandlerRequest(CronId.Value, newStatus));
+            using var scope = GetScope();
+            var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+            await mediator.Send(new UpdateCronHandlerRequest(CronId.Value, newStatus));
         }
 
         protected abstract void Process();
 
-        public Task Execute(IJobExecutionContext context)
+        public async Task Execute(IJobExecutionContext context)
         {
             try
             {
-                BeforeProcess(context);
+                Logger.LogInformation("Before cron job name : {JobName} execution triggered", context.JobDetail.Key.Name);
+                await BeforeProcess(context);
+                Logger.LogInformation("Before cron job name : {JobName} execution done", context.JobDetail.Key.Name);
+                
+                Logger.LogInformation("Process cron job name : {JobName} execution triggered", context.JobDetail.Key.Name);
                 Process();
+                Logger.LogInformation("Process cron job name : {JobName} execution triggered", context.JobDetail.Key.Name);
+                
+                Logger.LogInformation("After cron job name : {JobName} execution triggered", context.JobDetail.Key.Name);
                 AfterProcess(CronStatusEnum.Success);
-
-                return Task.CompletedTask;
+                Logger.LogInformation("After cron job name : {JobName} execution triggered", context.JobDetail.Key.Name);
             }
             catch (Exception exception)
             {
-                _logger.LogCritical($"Error running cron {context.JobDetail.Key.Name} : {exception.Message}");
+                Logger.LogCritical("Error running cron {CronName} : {Error}", context.JobDetail.Key.Name,
+                    exception.Message);
                 AfterProcess(CronStatusEnum.Error);
-                return Task.FromCanceled(new CancellationToken(true));
+                // return Task.FromCanceled(new CancellationToken(true));
             }
         }
     }

@@ -21,6 +21,7 @@
 
     <ItemGroup>
       <Folder Include="Read\Functions\Handlers" />
+      <Folder Include="Read\PlagiarismFunctions" />
     </ItemGroup>
 
 </Project>

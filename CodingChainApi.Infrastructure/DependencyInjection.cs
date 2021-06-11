@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Application;
@@ -9,6 +10,7 @@ using Application.Read.Contracts;
 using Application.Write.Contracts;
 using CodingChainApi.Infrastructure.Common.Exceptions;
 using CodingChainApi.Infrastructure.Contexts;
+using CodingChainApi.Infrastructure.CronManagement;
 using CodingChainApi.Infrastructure.Hubs;
 using CodingChainApi.Infrastructure.Repositories.AggregateRepositories;
 using CodingChainApi.Infrastructure.Repositories.ReadRepositories;
@@ -53,7 +55,7 @@ namespace CodingChainApi.Infrastructure
             RegisterReadRepositories(services);
             return services;
         }
-        
+
         private static void RegisterAggregateRepositories(IServiceCollection services)
         {
             services.AddProxiedScoped<IUserRepository, UserRepository>(typeof(EventPublisherInterceptor));
@@ -85,20 +87,17 @@ namespace CodingChainApi.Infrastructure
             services.AddScoped<IReadFunctionSessionRepository, ReadFunctionSessionRepository>();
             services.AddScoped<IReadUserSessionRepository, ReadUserSessionRepository>();
             services.AddScoped<IReadFunctionRepository, ReadFunctionRepository>();
+            services.AddScoped<IReadCronRepository, ReadCronRepository>();
         }
 
         private static void ConfigureCache(this IServiceCollection services, IConfiguration configuration)
         {
-
             ConfigureInjectableSettings<ICacheSettings, CacheSettings>(services, configuration);
             // services.AddMemoryCache();
             // services.AddScoped<ICache, Cache>();
             var redisSettings =
                 ConfigureInjectableSettings<IRedisCacheSettings, RedisCacheSettings>(services, configuration);
-            services.AddStackExchangeRedisCache(options =>
-            {
-                options.Configuration = redisSettings.ConnectionString;
-            });
+            services.AddStackExchangeRedisCache(options => { options.Configuration = redisSettings.ConnectionString; });
             services.AddScoped<ICache, RedisCache>();
         }
 
@@ -112,7 +111,7 @@ namespace CodingChainApi.Infrastructure
             ConfigureInjectableSettings<IAppDataSettings, AppDataSettings>(services, configuration);
         }
 
-        
+
         public static TImplementation ConfigureInjectableSettings<TInterface, TImplementation>(
             this IServiceCollection services,
             IConfiguration configuration, bool singleton = true) where TImplementation : class, TInterface
@@ -210,7 +209,8 @@ namespace CodingChainApi.Infrastructure
 
         private static void ConfigureCronManagement(IServiceCollection serviceCollection, IConfiguration configuration)
         {
-            var settings = ConfigureInjectableSettings<IQuartzSettings, QuartzSettings>(serviceCollection, configuration);
+            var settings =
+                ConfigureInjectableSettings<IQuartzSettings, QuartzSettings>(serviceCollection, configuration);
             serviceCollection.AddQuartz(q =>
             {
                 serviceCollection.AddQuartz(q =>
@@ -218,12 +218,40 @@ namespace CodingChainApi.Infrastructure
                     q.UseMicrosoftDependencyInjectionScopedJobFactory();
 
                     // Register the job, loading the schedule from configuration
-                    q.AddJobAndTrigger<PlagiarismAnalysisCronJob>(nameof(settings.PlagiarismAnalysisCronJob),settings.PlagiarismAnalysisCronJob);
+                    q.AddJobAndTrigger<PlagiarismAnalysisCronJob>(nameof(settings.PlagiarismAnalysisCronJob),
+                        settings.PlagiarismAnalysisCronJob);
                 });
 
                 serviceCollection.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
             });
             serviceCollection.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
         }
+
+        private static void AddJobAndTrigger<T>(
+            this IServiceCollectionQuartzConfigurator quartz,
+            string configKey, string cronSchedule)
+            where T : IJob
+        {
+            // Use the name of the IJob as the appsettings.json key
+            string jobName = typeof(T).Name;
+
+            // Try and load the schedule from configuration
+
+            // Some minor validation
+            if (string.IsNullOrEmpty(cronSchedule))
+            {
+                throw new Exception($"No Quartz.NET Cron schedule found for job in configuration at {configKey}");
+            }
+
+            // register the job as before
+            var jobKey = new JobKey(jobName);
+            quartz.AddJob<T>(opts => opts.WithIdentity(jobKey));
+
+            quartz.AddTrigger(opts => opts
+                .ForJob(jobKey)
+                .WithIdentity(jobName + "-trigger")
+                .WithCronSchedule(cronSchedule)); // use the schedule from configuration
+        }
     }
 }
+

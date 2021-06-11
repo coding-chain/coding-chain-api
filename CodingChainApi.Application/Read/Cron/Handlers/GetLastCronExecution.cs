@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Application.Read.Contracts;
 using Application.Write.Contracts;
 using Domain.Cron;
 using MediatR;
@@ -11,17 +12,17 @@ namespace Application.Read.Cron.Handlers
 
     public class GetLastCronExecution : IRequestHandler<GetLastCronExecutionRequest, DateTime?>
     {
-        private readonly ICronRepository _cronRepository;
+        private readonly IReadCronRepository _readCronRepository;
 
-        public GetLastCronExecution(ICronRepository cronRepository)
+        public GetLastCronExecution(IReadCronRepository readCronRepository)
         {
-            _cronRepository = cronRepository;
+            _readCronRepository = readCronRepository;
         }
 
         public async Task<DateTime?> Handle(GetLastCronExecutionRequest request,
             CancellationToken cancellationToken)
         {
-            return await _cronRepository.GetCronLastExecution(request.CronCode, new CronStatus(request.StatusFilter));
+            return await _readCronRepository.GetLastExecution(request.CronCode, new CronStatus(request.StatusFilter));
         }
     }
 }

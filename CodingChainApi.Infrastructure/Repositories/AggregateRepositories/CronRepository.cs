@@ -31,38 +31,24 @@ namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
 
         public async Task<CronAggregate?> FindByIdAsync(CronId id)
         {
-            return ToAggregate(await _context.Crons
+            var cron = await _context.Crons
                 .Include(c => c.Status)
-                .FirstOrDefaultAsync(cr => cr.Id == id.Value));
+                .FirstOrDefaultAsync(cr => cr.Id == id.Value);
+            return cron is null ? null : ToAggregate(cron);
         }
 
         public async Task RemoveAsync(CronId id)
         {
-            var cronToBeRemoved = ToModel(await FindByIdAsync(id) ??
-                                          throw new InvalidOperationException("cron To be removed not found"));
-            _context.Remove(cronToBeRemoved.Result);
+            var cron = await _context.Crons
+                .FirstOrDefaultAsync(c => c.Id == id.Value);
+            if (cron is not null)
+                _context.Remove(cron);
             await _context.SaveChangesAsync();
         }
 
         public Task<CronId> NextIdAsync()
         {
             return new CronId(Guid.NewGuid()).ToTask();
-        }
-
-        public async Task<IList<CronAggregate>> GetAllAsync()
-        {
-            return await _context.Crons
-                .Include(cr => cr.Status)
-                .Select(cr => ToAggregate(cr))
-                .ToListAsync();
-        }
-
-        public async Task<DateTime?> GetCronLastExecution(string cronName, CronStatus filterStatus)
-        {
-            var statusFilter = _context.CronStatus.FirstOrDefault(cr => cr.Code == filterStatus.Status);
-            var cron = await _context.Crons.OrderBy(c => c.FinishedAt).LastOrDefaultAsync(cr =>
-                statusFilter != null && cr.Code == cronName && cr.Status.Id == statusFilter.Id);
-            return cron?.FinishedAt;
         }
 
         private async Task<Cron?> FindAsync(Guid id)
