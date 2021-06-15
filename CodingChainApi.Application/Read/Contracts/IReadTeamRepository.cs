@@ -21,5 +21,7 @@ namespace Application.Read.Contracts
         public Task<bool> TeamExistsById(Guid id);
 
         public Task<IPagedList<MemberNavigation>> GetAllMembersNavigationPaginated(GetPaginatedTeamMembersQuery query);
+
+        public Task<IPagedList<LeaderBoardTeamNavigation>> GetAllLeaderBoardTeamNavigationPaginated(GetLeaderBoardTeamsPaginatedQuery query);
     }
 }

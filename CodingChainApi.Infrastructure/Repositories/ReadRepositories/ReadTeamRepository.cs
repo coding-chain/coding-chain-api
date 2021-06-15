@@ -76,6 +76,51 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
                 .FromPaginationQueryAsync(query);
         }
 
+        public async Task<IPagedList<LeaderBoardTeamNavigation>> GetAllLeaderBoardTeamNavigationPaginated(GetLeaderBoardTeamsPaginatedQuery query)
+        {
+            var teams = await GetTeamIncludeQueryable()
+                .Where(ToPredicate(query))
+                .Select(t => ToTeamLeaderBoardNavigation(t, query.TournamentIdFilter))
+                .ToListAsync();
+            return GetOrderByQuery(teams, query).FromEnumerable(query);
+        }
+
+        private static LeaderBoardTeamNavigation ToTeamLeaderBoardNavigation(Team team, Guid? tournamentIdFilter)
+        {
+            return new LeaderBoardTeamNavigation(
+                team.Id,
+                team.Name,
+                team.ActiveMembersIds,
+                team.ActiveParticipationsIds,
+                team.Participations.Where(p =>
+                        tournamentIdFilter == null || p.Tournament.Id == tournamentIdFilter)
+                    .Sum(p => p.CalculatedScore),
+                team.Participations.Any(p =>
+                    !p.Deactivated && !p.Tournament.IsDeleted && p.Tournament.IsPublished &&
+                    p.Tournament.Id == tournamentIdFilter
+                    && p.Step == p.Tournament.TournamentSteps.OrderByDescending(tS => tS.Order).First().Step
+                    && p.EndDate != null)
+            );
+
+        }
+
+        private static IEnumerable<LeaderBoardTeamNavigation> GetOrderByQuery(IEnumerable<LeaderBoardTeamNavigation> teamQuery,
+            GetLeaderBoardTeamsPaginatedQuery paginationQuery)
+        {
+            if (paginationQuery.ScoreOrder == OrderEnum.Asc)
+                return teamQuery.OrderBy(t => t.Score);
+            return teamQuery.OrderByDescending(t => t.Score);
+        }
+        
+        private static Expression<Func<Team, bool>> ToPredicate(GetLeaderBoardTeamsPaginatedQuery query)
+        {
+            return team =>
+                !team.IsDeleted
+                && (query.TournamentIdFilter == null || team.Participations.Any(p =>
+                    !p.Deactivated && !p.Tournament.IsDeleted && p.Tournament.IsPublished &&
+                    p.Tournament.Id == query.TournamentIdFilter));
+        }
+
         private static TeamNavigation ToTeamNavigation(Team team)
         {
             return new(
@@ -112,10 +157,12 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
                 .Include(t => t.UserTeams)
                 .Include(t => t.Participations)
                 .ThenInclude<Team, Participation, Tournament>(p => p.Tournament)
+                .ThenInclude(t => t.TournamentSteps)
                 .Include(t => t.Participations)
                 .ThenInclude<Team, Participation, Step>(p => p.Step)
                 .Include(t => t.UserTeams)
                 .ThenInclude<Team, UserTeam, User>(uT => uT.User);
+
         }
 
 

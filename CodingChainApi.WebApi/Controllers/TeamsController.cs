@@ -227,7 +227,7 @@ namespace CodingChainApi.Controllers
                 nameof(GetTeams))
             );
         }
-
+        
         private IList<LinkDto> GetLinksForTeam(Guid teamId)
         {
             return new List<LinkDto>

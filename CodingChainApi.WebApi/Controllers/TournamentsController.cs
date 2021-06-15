@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using Application.Common.Pagination;
 using Application.Read.Participations;
 using Application.Read.Participations.Handlers;
+using Application.Read.Teams;
+using Application.Read.Teams.Handlers;
 using Application.Read.Tournaments;
 using Application.Read.Tournaments.Handlers;
 using Application.Write.Tournaments;
@@ -159,6 +161,42 @@ namespace CodingChainApi.Controllers
                 stepsWithLinks.ToList(),
                 nameof(GetTournamentSteps))
             );
+        }
+        
+        public record GetLeaderBoardTeamsPaginatedQueryParams: PaginationQueryBase
+        {
+            public OrderEnum? ScoreOrder { get; set; }
+            public bool? HasFinishedFilter { get; set; }
+        }
+        [HttpGet("{tournamentId:guid}/teams",Name = nameof(GetLeaderBoardTeams))]
+        [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasPageResponse<HateoasResponse<LeaderBoardTeamNavigation>>))]
+        public async Task<IActionResult> GetLeaderBoardTeams(Guid tournamentId, [FromQuery] GetLeaderBoardTeamsPaginatedQueryParams query)
+        {
+            var teams = await Mediator.Send(new GetLeaderBoardTeamsPaginatedQuery()
+            {
+                HasFinishedFilter = query.HasFinishedFilter,
+                ScoreOrder = query.ScoreOrder,
+                Page = query.Page,
+                Size = query.Size,
+                TournamentIdFilter = tournamentId
+            });
+            var teamsWithLinks = teams.Select(team =>
+                new HateoasResponse<LeaderBoardTeamNavigation>(team, GetLinksForTeam(team.Id)));
+            return Ok(HateoasResponseBuilder.FromPagedList(
+                Url,
+                teams.ToPagedListResume(),
+                teamsWithLinks.ToList(),
+                nameof(GetLeaderBoardTeams))
+            );
+        }
+
+        private IList<LinkDto> GetLinksForTeam(Guid teamId)
+        {
+            return new List<LinkDto>
+            {
+                LinkDto.CreateLink(Url.Link(nameof(TeamsController.CreateTeam), null)),
+                LinkDto.SelfLink(Url.Link(nameof(TeamsController.GetTeamById), new {teamId}))
+            };
         }
 
         [HttpGet("{tournamentId:guid}/participations", Name = nameof(GetTournamentParticipations))]
