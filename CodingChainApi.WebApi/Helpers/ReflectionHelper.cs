@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace NeosCodingApi.Helpers
+namespace CodingChainApi.Helpers
 {
     public static class ReflectionHelper
     {

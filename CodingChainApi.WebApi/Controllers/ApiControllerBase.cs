@@ -1,9 +1,9 @@
 ﻿using AutoMapper;
+using CodingChainApi.Services;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using NeosCodingApi.Services;
 
-namespace NeosCodingApi.Controllers
+namespace CodingChainApi.Controllers
 {
     [ApiController]
     [Route("api/v{version:apiVersion}/" + TemplateControllerName)]

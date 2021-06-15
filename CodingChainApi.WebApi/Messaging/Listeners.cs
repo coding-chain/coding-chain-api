@@ -2,10 +2,9 @@
 using Application.Write.ParticipationsSessions;
 using Application.Write.Plagiarism;
 using CodingChainApi.Infrastructure.Settings;
-using MediatR;
 using Microsoft.Extensions.Logging;
 
-namespace NeosCodingApi.Messaging
+namespace CodingChainApi.Messaging
 {
     public class PlagiarismExecutionDoneListener : NotifierListenerService<PlagiarismDoneAnalyzeNotification>
     {

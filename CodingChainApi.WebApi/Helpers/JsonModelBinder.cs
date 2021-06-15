@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Newtonsoft.Json;
 
-namespace NeosCodingApi.Helpers
+namespace CodingChainApi.Helpers
 {
     public class JsonModelBinder : IModelBinder
     {

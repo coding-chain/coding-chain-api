@@ -2,7 +2,7 @@ using System;
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
-namespace NeosCodingApi.Controllers
+namespace CodingChainApi.Controllers
 {
     [Route("[controller]")]
     [ApiController]

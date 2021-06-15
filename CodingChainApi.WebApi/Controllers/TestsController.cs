@@ -7,14 +7,14 @@ using Application.Common.Pagination;
 using Application.Read.Tests;
 using Application.Read.Tests.Handlers;
 using AutoMapper;
+using CodingChainApi.Helpers;
+using CodingChainApi.Services;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using NeosCodingApi.Helpers;
-using NeosCodingApi.Services;
 using NSwag.Annotations;
 
-namespace NeosCodingApi.Controllers
+namespace CodingChainApi.Controllers
 {
     public class TestsController : ApiControllerBase
     {

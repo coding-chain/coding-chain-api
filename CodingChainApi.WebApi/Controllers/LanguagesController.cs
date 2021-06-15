@@ -6,14 +6,14 @@ using System.Threading.Tasks;
 using Application.Read.ProgrammingLanguages;
 using Application.Read.ProgrammingLanguages.Handlers;
 using AutoMapper;
+using CodingChainApi.Helpers;
+using CodingChainApi.Services;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using NeosCodingApi.Helpers;
-using NeosCodingApi.Services;
 using NSwag.Annotations;
 
-namespace NeosCodingApi.Controllers
+namespace CodingChainApi.Controllers
 {
     public class LanguagesController : ApiControllerBase
     {

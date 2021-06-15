@@ -1,4 +1,4 @@
-﻿namespace NeosCodingApi.Services
+﻿namespace CodingChainApi.Services
 {
     public interface IPropertyCheckerService
     {

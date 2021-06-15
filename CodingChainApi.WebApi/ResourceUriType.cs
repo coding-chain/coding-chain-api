@@ -1,4 +1,4 @@
-﻿namespace NeosCodingApi
+﻿namespace CodingChainApi
 {
     public enum ResourceUriType
     {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Dynamic;
 using System.Reflection;
 
-namespace NeosCodingApi.Helpers
+namespace CodingChainApi.Helpers
 {
     public static class IEnumerableExtensions
     {

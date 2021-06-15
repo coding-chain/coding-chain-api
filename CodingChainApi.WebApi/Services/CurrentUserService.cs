@@ -4,7 +4,7 @@ using Application.Contracts.IService;
 using Domain.Users;
 using Microsoft.AspNetCore.Http;
 
-namespace NeosCodingApi.Services
+namespace CodingChainApi.Services
 {
     public class CurrentUserService : ICurrentUserService
     {

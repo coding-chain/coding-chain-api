@@ -14,7 +14,7 @@ namespace Application.Contracts.Dtos
         public record Function(Guid Id, string Code, int Order);
     }
     
-
+    public record Function(Guid Id, string Code);
     public record PlagiarismAnalyzeExecutionDto
         (Function SuspectedFunction, IList<Function> ComparedFunctions);
 

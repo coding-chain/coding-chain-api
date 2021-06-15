@@ -3,7 +3,7 @@
     <PropertyGroup>
         <TargetFramework>net5.0</TargetFramework>
         <DockerDefaultTargetOS>Windows</DockerDefaultTargetOS>
-        <RootNamespace>NeosCodingApi</RootNamespace>
+        <RootNamespace>CodingChainApi</RootNamespace>
         <Nullable>enable</Nullable>
         <GenerateCode>True</GenerateCode>
     </PropertyGroup>

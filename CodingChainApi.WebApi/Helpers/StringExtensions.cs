@@ -1,6 +1,6 @@
 using System;
 
-namespace NeosCodingApi.Helpers
+namespace CodingChainApi.Helpers
 {
     public static class StringExtensions
     {
