@@ -36,14 +36,14 @@ namespace CodingChainApi.Infrastructure.CronManagement
             CronId = new CronId(id);
         }
 
-        public virtual async void AfterProcess(CronStatusEnum newStatus)
+        public virtual async Task AfterProcess(CronStatusEnum newStatus)
         {
             using var scope = GetScope();
             var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
             await mediator.Send(new UpdateCronHandlerRequest(CronId.Value, newStatus));
         }
 
-        protected abstract void Process();
+        protected abstract Task Process();
 
         public async Task Execute(IJobExecutionContext context)
         {
@@ -58,14 +58,13 @@ namespace CodingChainApi.Infrastructure.CronManagement
                 Logger.LogInformation("Process cron job name : {JobName} execution triggered", context.JobDetail.Key.Name);
                 
                 Logger.LogInformation("After cron job name : {JobName} execution triggered", context.JobDetail.Key.Name);
-                AfterProcess(CronStatusEnum.Success);
+                await AfterProcess(CronStatusEnum.Success);
                 Logger.LogInformation("After cron job name : {JobName} execution triggered", context.JobDetail.Key.Name);
             }
             catch (Exception exception)
             {
-                Logger.LogCritical("Error running cron {CronName} : {Error}", context.JobDetail.Key.Name,
+                Logger.LogError("Error running cron {CronName} : {Error}", context.JobDetail.Key.Name,
                     exception.Message);
-                AfterProcess(CronStatusEnum.Error);
                 // return Task.FromCanceled(new CancellationToken(true));
             }
         }

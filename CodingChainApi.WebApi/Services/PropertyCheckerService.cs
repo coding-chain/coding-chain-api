@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace NeosCodingApi.Services
+namespace CodingChainApi.Services
 {
     public class PropertyCheckerService : IPropertyCheckerService
     {

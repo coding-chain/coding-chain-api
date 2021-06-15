@@ -38,25 +38,25 @@ namespace CodingChainApi.Infrastructure
         {
             services.AddMediatR(typeof(DependencyInjection).GetTypeInfo().Assembly);
             services.AddAutoMapper(Assembly.GetExecutingAssembly());
-            ConfigureCache(services, configuration);
-            ConfigureSqlServer(services, configuration);
-            ConfigureJwt(services, configuration);
-            ConfigureBcrypt(services, configuration);
-            ConfigureProcess(services, configuration);
-            ConfigureAppData(services, configuration);
-            ConfigureCronManagement(services, configuration);
-            ConfigureRabbitMq(services, configuration);
+            services.ConfigureCache(configuration);
+            services.ConfigureSqlServer(configuration);
+            services.ConfigureJwt(configuration);
+            services.ConfigureBcrypt(configuration);
+            services.ConfigureProcess(configuration);
+            services.ConfigureAppData(configuration);
+            services.ConfigureCronManagement(configuration);
+            services.ConfigureRabbitMq(configuration);
             //
             services.AddScoped<ISecurityService, SecurityService>();
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<ITimeService, TimeService>();
             services.AddScoped<IFunctionTypeParserService, FunctionTypeParserService>();
-            RegisterAggregateRepositories(services);
-            RegisterReadRepositories(services);
+            services.RegisterAggregateRepositories();
+            services.RegisterReadRepositories();
             return services;
         }
 
-        private static void RegisterAggregateRepositories(IServiceCollection services)
+        private static void RegisterAggregateRepositories(this IServiceCollection services)
         {
             services.AddProxiedScoped<IUserRepository, UserRepository>(typeof(EventPublisherInterceptor));
             services.AddProxiedScoped<IProgrammingLanguageRepository, ProgrammingLanguageRepository>(
@@ -73,7 +73,7 @@ namespace CodingChainApi.Infrastructure
             services.AddProxiedScoped<ICronRepository, CronRepository>(typeof(EventPublisherInterceptor));
         }
 
-        private static void RegisterReadRepositories(IServiceCollection services)
+        private static void RegisterReadRepositories(this IServiceCollection services)
         {
             services.AddScoped<IReadProgrammingLanguageRepository, ReadProgrammingLanguageRepository>();
             services.AddScoped<IReadUserRepository, ReadUserRepository>();
@@ -93,25 +93,22 @@ namespace CodingChainApi.Infrastructure
         private static void ConfigureCache(this IServiceCollection services, IConfiguration configuration)
         {
             ConfigureInjectableSettings<ICacheSettings, CacheSettings>(services, configuration);
-            // services.AddMemoryCache();
-            // services.AddScoped<ICache, Cache>();
             var redisSettings =
                 ConfigureInjectableSettings<IRedisCacheSettings, RedisCacheSettings>(services, configuration);
             services.AddStackExchangeRedisCache(options => { options.Configuration = redisSettings.ConnectionString; });
             services.AddScoped<ICache, RedisCache>();
         }
 
-        private static void ConfigureProcess(IServiceCollection services, IConfiguration configuration)
+        private static void ConfigureProcess(this IServiceCollection services, IConfiguration configuration)
         {
             ConfigureInjectableSettings<IProcessSettings, ProcessSettings>(services, configuration);
         }
 
-        private static void ConfigureAppData(IServiceCollection services, IConfiguration configuration)
+        private static void ConfigureAppData(this IServiceCollection services, IConfiguration configuration)
         {
             ConfigureInjectableSettings<IAppDataSettings, AppDataSettings>(services, configuration);
         }
-
-
+        
         public static TImplementation ConfigureInjectableSettings<TInterface, TImplementation>(
             this IServiceCollection services,
             IConfiguration configuration, bool singleton = true) where TImplementation : class, TInterface
@@ -130,7 +127,7 @@ namespace CodingChainApi.Infrastructure
             return settings;
         }
 
-        private static void ConfigureJwt(IServiceCollection services, IConfiguration configuration)
+        private static void ConfigureJwt(this IServiceCollection services, IConfiguration configuration)
         {
             var jwtSettings = ConfigureInjectableSettings<IJwtSettings, JwtSettings>(services, configuration);
             if (jwtSettings.Key is null)
@@ -174,14 +171,14 @@ namespace CodingChainApi.Infrastructure
                 });
         }
 
-        private static void ConfigureBcrypt(IServiceCollection services, IConfiguration configuration)
+        private static void ConfigureBcrypt(this IServiceCollection services, IConfiguration configuration)
         {
             services.Configure<BcryptSettings>(configuration.GetSection(nameof(BcryptSettings)));
             services.AddSingleton<IBcryptSettings>(sp =>
                 sp.GetRequiredService<IOptions<BcryptSettings>>().Value);
         }
 
-        private static void ConfigureSqlServer(IServiceCollection services, IConfiguration configuration)
+        private static void ConfigureSqlServer(this IServiceCollection services, IConfiguration configuration)
         {
             var dbSettings = configuration.GetSection(nameof(DatabaseSettings)).Get<DatabaseSettings>();
             if (dbSettings.ConnectionString is null)
@@ -193,7 +190,7 @@ namespace CodingChainApi.Infrastructure
             );
         }
 
-        private static void ConfigureRabbitMq(IServiceCollection serviceCollection, IConfiguration configuration)
+        private static void ConfigureRabbitMq(this IServiceCollection serviceCollection, IConfiguration configuration)
         {
             // RabbitMQ
             serviceCollection.AddScoped<IDispatcher<RunParticipationTestsDto>, ParticipationPendingExecutionService>();
@@ -207,7 +204,8 @@ namespace CodingChainApi.Infrastructure
             // End RabbitMQ Configuration
         }
 
-        private static void ConfigureCronManagement(IServiceCollection serviceCollection, IConfiguration configuration)
+        private static void ConfigureCronManagement(this IServiceCollection serviceCollection,
+            IConfiguration configuration)
         {
             var settings =
                 ConfigureInjectableSettings<IQuartzSettings, QuartzSettings>(serviceCollection, configuration);
@@ -254,4 +252,3 @@ namespace CodingChainApi.Infrastructure
         }
     }
 }
-

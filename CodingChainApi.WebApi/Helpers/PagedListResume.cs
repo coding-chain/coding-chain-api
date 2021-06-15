@@ -1,6 +1,6 @@
 using Application.Common.Pagination;
 
-namespace NeosCodingApi.Helpers
+namespace CodingChainApi.Helpers
 {
     public static class IPageListExtensions
     {

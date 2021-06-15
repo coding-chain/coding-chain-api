@@ -5,6 +5,8 @@ using Application.Contracts.IService;
 using CodingChainApi.Infrastructure;
 using CodingChainApi.Infrastructure.Hubs;
 using CodingChainApi.Infrastructure.Settings;
+using CodingChainApi.Messaging;
+using CodingChainApi.Services;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -15,14 +17,12 @@ using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using NeosCodingApi.Messaging;
-using NeosCodingApi.Services;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using ZymLabs.NSwag.FluentValidation;
 using DependencyInjection = Application.DependencyInjection;
 
-namespace NeosCodingApi
+namespace CodingChainApi
 {
     public class Startup
     {
@@ -166,6 +166,8 @@ namespace NeosCodingApi
             {
                 endpoints.MapControllers();
                 endpoints.MapHub<ParticipationSessionsHub>(ParticipationSessionsHub.Route,
+                    options => { options.Transports = HttpTransportType.ServerSentEvents; });
+                endpoints.MapHub<PlagiarismHub>(PlagiarismHub.Route,
                     options => { options.Transports = HttpTransportType.ServerSentEvents; });
             });
 

@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
-namespace NeosCodingApi.Helpers
+namespace CodingChainApi.Helpers
 {
     public class JsonWithFilesFormDataModelBinder : IModelBinder
     {

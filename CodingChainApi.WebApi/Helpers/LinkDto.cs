@@ -1,7 +1,7 @@
 using System;
 using Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http;
 
-namespace NeosCodingApi.Helpers
+namespace CodingChainApi.Helpers
 {
     public class LinkDto
     {

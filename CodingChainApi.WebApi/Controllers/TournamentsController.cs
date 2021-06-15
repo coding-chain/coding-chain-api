@@ -10,14 +10,14 @@ using Application.Read.Tournaments;
 using Application.Read.Tournaments.Handlers;
 using Application.Write.Tournaments;
 using AutoMapper;
+using CodingChainApi.Helpers;
+using CodingChainApi.Services;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using NeosCodingApi.Helpers;
-using NeosCodingApi.Services;
 using NSwag.Annotations;
 
-namespace NeosCodingApi.Controllers
+namespace CodingChainApi.Controllers
 {
     public class TournamentsController : ApiControllerBase
     {

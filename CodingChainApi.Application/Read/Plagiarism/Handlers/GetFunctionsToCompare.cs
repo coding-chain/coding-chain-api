@@ -7,9 +7,9 @@ using MediatR;
 
 namespace Application.Read.Plagiarism.Handlers
 {
-    public record GetFunctionsToCompareRequest() : IRequest<IList<Function>>;
+    public record GetFunctionsToCompareRequest() : IRequest<IList<SuspectFunctionNavigation>>;
 
-    public class GetFunctionsToCompare : IRequestHandler<GetFunctionsToCompareRequest, IList<Function>>
+    public class GetFunctionsToCompare : IRequestHandler<GetFunctionsToCompareRequest, IList<SuspectFunctionNavigation>>
     {
         private readonly IReadFunctionRepository _readFunctionRepository;
 
@@ -18,10 +18,10 @@ namespace Application.Read.Plagiarism.Handlers
             _readFunctionRepository = readFunctionRepository;
         }
 
-        public async Task<IList<Function>> Handle(GetFunctionsToCompareRequest request,
+        public async Task<IList<SuspectFunctionNavigation>> Handle(GetFunctionsToCompareRequest request,
             CancellationToken cancellationToken)
         {
-            return await _readFunctionRepository.GetAllFunctionsNotPaginated();
+            return await _readFunctionRepository.GetAllLastFunctionFiltered(new GetFunctionsQuery());
         }
     }
 }

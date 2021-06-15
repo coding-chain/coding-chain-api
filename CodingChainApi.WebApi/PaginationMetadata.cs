@@ -1,6 +1,6 @@
 ﻿using Application.Common.Pagination;
 
-namespace NeosCodingApi
+namespace CodingChainApi
 {
     public class PaginationMetadata
     {
