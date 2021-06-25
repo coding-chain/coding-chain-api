@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -47,7 +48,7 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
         }
 
 
-        public async Task<IPagedList<PublicUser>> FindPaginatedPublicUsers(GetPaginatedPublicUsersQuery query)
+        public async Task<IPagedList<PublicUser>> FindPaginatedPublicUsers(GetPublicUsersQuery query)
         {
             return await GetPublicUserIncludeQueryable()
                 .Where(ToPredicate(query))
@@ -55,12 +56,21 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
                 .FromPaginationQueryAsync(query);
         }
 
-        private static Expression<Func<User, bool>> ToPredicate(GetPaginatedPublicUsersQuery query)
+        public async Task<IList<PublicUser>> FindAllPublicUsers(GetPublicUsersQuery query)
+        {
+            return await GetPublicUserIncludeQueryable()
+                .Where(ToPredicate(query))
+                .Select(u => ToPublicUser(u))
+                .ToListAsync();
+        }
+
+        private static Expression<Func<User, bool>> ToPredicate(GetPublicUsersQuery query)
         {
             return user =>
                 !user.IsDeleted
                 && (query.UsernameFilter == null || user.Username.Contains(query.UsernameFilter))
                 && (query.EmailFilter == null || user.Email.Contains(query.EmailFilter))
+                && (query.RightIdFilter == null || user.Rights.Any(r => r.Id == query.RightIdFilter))
                 && (query.WithoutIdsFilter == null || query.WithoutIdsFilter.All(id => id != user.Id));
         }
 

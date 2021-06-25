@@ -28,6 +28,7 @@ namespace CodingChainApi.Infrastructure.Hubs
     public record ParticipationProcessStartEvent(Guid ParticipationId);
 
     public record ParticipationReadyEvent(Guid ParticipationId);
+    public record ParticipationScoreChangedEvent(Guid ParticipationId);
 
     public interface IParticipationsClient
     {
@@ -39,6 +40,7 @@ namespace CodingChainApi.Infrastructure.Hubs
         Task OnFunctionRemoved(ParticipationFunctionRemovedEvent serverEvent);
         Task OnFunctionsReordered(ParticipationFunctionsReorderedEvent serverEvent);
 
+        Task OnScoreChanged(ParticipationScoreChangedEvent serverEvent);
         Task OnProcessStart(ParticipationProcessStartEvent serverEvent);
         Task OnProcessEnd(ParticipationProcessEndEvent serverEvent);
         Task OnReady(ParticipationReadyEvent serverEvent);

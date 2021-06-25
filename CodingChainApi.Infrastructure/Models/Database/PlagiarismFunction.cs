@@ -14,7 +14,9 @@ namespace CodingChainApi.Infrastructure.Models
 
         public DateTime DetectionDate { get; set; }
 
+        public string PlagiarizedFunctionHash { get; set; }
+        public string CheatingFunctionHash { get; set; }
+        public bool? IsValid { get; set; }
         public double Rate { get; set; }
-        public bool IsDeleted { get; set; }
     }
 }

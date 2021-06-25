@@ -11,6 +11,7 @@ using Application.Write.Contracts;
 using CodingChainApi.Infrastructure.Common.Exceptions;
 using CodingChainApi.Infrastructure.Contexts;
 using CodingChainApi.Infrastructure.CronManagement;
+using CodingChainApi.Infrastructure.Emailing;
 using CodingChainApi.Infrastructure.Hubs;
 using CodingChainApi.Infrastructure.Repositories.AggregateRepositories;
 using CodingChainApi.Infrastructure.Repositories.ReadRepositories;
@@ -46,16 +47,22 @@ namespace CodingChainApi.Infrastructure
             services.ConfigureAppData(configuration);
             services.ConfigureCronManagement(configuration);
             services.ConfigureRabbitMq(configuration);
-            //
             services.AddScoped<ISecurityService, SecurityService>();
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<ITimeService, TimeService>();
+            services.AddSingleton<IHashService, HashService>();
             services.AddScoped<IFunctionTypeParserService, FunctionTypeParserService>();
+            services.ConfigureMailjet(configuration);
             services.RegisterAggregateRepositories();
             services.RegisterReadRepositories();
             return services;
         }
 
+        private static void ConfigureMailjet(this IServiceCollection services, IConfiguration configuration)
+        {
+            ConfigureInjectableSettings<IMailjetSettings, MailjetSettings>(services, configuration);
+            services.AddScoped<IMailService<SuspectFunctionContent>, SuspectFunctionMailService>();
+        }
         private static void RegisterAggregateRepositories(this IServiceCollection services)
         {
             services.AddProxiedScoped<IUserRepository, UserRepository>(typeof(EventPublisherInterceptor));
@@ -68,7 +75,7 @@ namespace CodingChainApi.Infrastructure
                 typeof(EventPublisherInterceptor));
             services.AddProxiedScoped<IParticipationsSessionsRepository, ParticipationsSessionRepository>(
                 typeof(EventPublisherInterceptor));
-            services.AddProxiedScoped<IPlagiarizedFunctionRepository, PlagiarizedFunctionRepository>(
+            services.AddProxiedScoped<ISuspectFunctionRepository, SuspectFunctionRepository>(
                 typeof(EventPublisherInterceptor));
             services.AddProxiedScoped<ICronRepository, CronRepository>(typeof(EventPublisherInterceptor));
         }
@@ -86,8 +93,9 @@ namespace CodingChainApi.Infrastructure
             services.AddScoped<IReadParticipationSessionRepository, ReadParticipationSessionRepository>();
             services.AddScoped<IReadFunctionSessionRepository, ReadFunctionSessionRepository>();
             services.AddScoped<IReadUserSessionRepository, ReadUserSessionRepository>();
-            services.AddScoped<IReadFunctionRepository, ReadFunctionRepository>();
+            services.AddScoped<IReadSuspectFunctionRepository, ReadSuspectFunctionRepository>();
             services.AddScoped<IReadCronRepository, ReadCronRepository>();
+            services.AddScoped<IReadFunctionRepository, ReadFunctionRepository>();
         }
 
         private static void ConfigureCache(this IServiceCollection services, IConfiguration configuration)
@@ -108,7 +116,7 @@ namespace CodingChainApi.Infrastructure
         {
             ConfigureInjectableSettings<IAppDataSettings, AppDataSettings>(services, configuration);
         }
-        
+
         public static TImplementation ConfigureInjectableSettings<TInterface, TImplementation>(
             this IServiceCollection services,
             IConfiguration configuration, bool singleton = true) where TImplementation : class, TInterface

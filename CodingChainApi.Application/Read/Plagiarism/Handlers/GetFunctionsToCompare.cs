@@ -11,17 +11,17 @@ namespace Application.Read.Plagiarism.Handlers
 
     public class GetFunctionsToCompare : IRequestHandler<GetFunctionsToCompareRequest, IList<SuspectFunctionNavigation>>
     {
-        private readonly IReadFunctionRepository _readFunctionRepository;
+        private readonly IReadSuspectFunctionRepository _readSuspectFunctionRepository;
 
-        public GetFunctionsToCompare(IReadFunctionRepository readFunctionRepository)
+        public GetFunctionsToCompare(IReadSuspectFunctionRepository readSuspectFunctionRepository)
         {
-            _readFunctionRepository = readFunctionRepository;
+            _readSuspectFunctionRepository = readSuspectFunctionRepository;
         }
 
         public async Task<IList<SuspectFunctionNavigation>> Handle(GetFunctionsToCompareRequest request,
             CancellationToken cancellationToken)
         {
-            return await _readFunctionRepository.GetAllLastFunctionFiltered(new GetFunctionsQuery());
+            return await _readSuspectFunctionRepository.GetAllLastFunctionFiltered(new GetFunctionsQuery());
         }
     }
 }

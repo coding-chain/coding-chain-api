@@ -3,23 +3,24 @@ using System.Threading.Tasks;
 using Application.Common.Events;
 using CodingChainApi.Infrastructure.Hubs;
 using Domain.Participations;
+using Domain.ParticipationSessions;
 using MediatR;
 using Microsoft.AspNetCore.SignalR;
 
 namespace CodingChainApi.Infrastructure.Handlers.ParticipationsState
 {
     public class
-        ParticipationFunctionRemovedHandler : INotificationHandler<
-            DomainEventNotification<ParticipationFunctionRemoved>>
+        ParticipationSessionFunctionRemovedHandler : INotificationHandler<
+            DomainEventNotification<ParticipationSessionFunctionRemoved>>
     {
         private readonly IHubContext<ParticipationSessionsHub, IParticipationsClient> _hub;
 
-        public ParticipationFunctionRemovedHandler(IHubContext<ParticipationSessionsHub, IParticipationsClient> hub)
+        public ParticipationSessionFunctionRemovedHandler(IHubContext<ParticipationSessionsHub, IParticipationsClient> hub)
         {
             _hub = hub;
         }
 
-        public async Task Handle(DomainEventNotification<ParticipationFunctionRemoved> notification,
+        public async Task Handle(DomainEventNotification<ParticipationSessionFunctionRemoved> notification,
             CancellationToken cancellationToken)
         {
             await _hub.Clients.Group(notification.DomainEvent.ParticipationId.ToString())

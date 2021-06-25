@@ -18,28 +18,28 @@ namespace Application.Write.Plagiarism
     public class PlagiarismGlobalAnalyseHandler : IRequestHandler<PlagiarismGlobalAnalyseCommand, string?>
     {
         private readonly IDispatcher<PlagiarismAnalyzeExecutionDto> _plagiarismAnalysisDispatcherService;
-        private readonly IReadFunctionRepository _readFunctionRepository;
+        private readonly IReadSuspectFunctionRepository _readSuspectFunctionRepository;
 
         public PlagiarismGlobalAnalyseHandler(
             IDispatcher<PlagiarismAnalyzeExecutionDto> plagiarismAnalysisDispatcherService,
-            IReadFunctionRepository readFunctionRepository)
+            IReadSuspectFunctionRepository readSuspectFunctionRepository)
         {
             _plagiarismAnalysisDispatcherService = plagiarismAnalysisDispatcherService;
-            _readFunctionRepository = readFunctionRepository;
+            _readSuspectFunctionRepository = readSuspectFunctionRepository;
         }
 
         public async Task<string?> Handle(PlagiarismGlobalAnalyseCommand command,
             CancellationToken cancellationToken)
         {
             var newFunctions =
-                await _readFunctionRepository.GetAllLastFunctionFiltered(new GetFunctionsQuery());
+                await _readSuspectFunctionRepository.GetAllLastFunctionFiltered(new GetFunctionsQuery());
             foreach (var suspectFunction in newFunctions)
             {
                 
-                var olderFunctions = await _readFunctionRepository.GetAllLastFunctionFiltered(
+                var olderFunctions = await _readSuspectFunctionRepository.GetAllLastFunctionFiltered(
                     new GetFunctionsQuery
                     {
-                        ExcludedUserId = suspectFunction.LastEditorId,
+                        ExcludedUserIdFilter = suspectFunction.LastEditorId,
                         LowerThanDateFilter = suspectFunction.LastModificationDate,
                         LanguageIdFilter = suspectFunction.LanguageId
                     });

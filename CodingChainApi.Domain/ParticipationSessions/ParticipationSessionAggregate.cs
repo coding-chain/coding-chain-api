@@ -10,17 +10,18 @@ using Domain.Users;
 
 namespace Domain.ParticipationSessions
 {
-    public record ConnectedUserAdded(ParticipationId ParticipationId, UserId UserId) : IDomainEvent;
-
-    public record ConnectedUserRemoved(ParticipationId ParticipationId, UserId UserId) : IDomainEvent;
-
     public record ConnectedUserUpdated(ParticipationId ParticipationId, UserId UserId) : IDomainEvent;
 
     public record ProcessResultUpdated(ParticipationId ParticipationId) : IDomainEvent;
 
     public record ProcessStarted(ParticipationId ParticipationId) : IDomainEvent;
 
-    public record ParticipationReady(ParticipationId ParticipationId) : IDomainEvent;
+    public record ParticipationSessionReady(ParticipationId ParticipationId) : IDomainEvent;
+
+    public record ParticipationSessionFunctionRemoved
+        (ParticipationId ParticipationId, FunctionId FunctionId) : IDomainEvent;
+
+    public record ParticipationSessionScoreChanged(ParticipationId ParticipationId) : IDomainEvent;
 
     public class ParticipationSessionAggregate : ParticipationAggregate
     {
@@ -58,7 +59,7 @@ namespace Domain.ParticipationSessions
 
         public static ParticipationSessionAggregate Restore(
             ParticipationId id, TeamSessionEntity team, TournamentEntity tournament, StepSessionEntity step,
-            DateTime startDate, DateTime? endDate, decimal calculatedScore, bool isReady,  
+            DateTime startDate, DateTime? endDate, decimal calculatedScore, bool isReady,
             IList<FunctionEntity> functions)
         {
             return new(
@@ -91,6 +92,16 @@ namespace Domain.ParticipationSessions
 
             existingUser.ConnectionCount++;
             return existingUser.ConnectionCount;
+        }
+
+        public override void RemoveFunction(FunctionId functionId, UserId userId)
+        {
+            if (!Team.UserIds.Contains(userId))
+                throw new DomainException(
+                    $"Function {functionId} cannot be deleted by user : {userId} not in participation team");
+
+            RemoveFunction(functionId);
+            RegisterEvent(new ParticipationSessionFunctionRemoved(Id, functionId));
         }
 
         public int RemoveConnectedUser(UserId userId)
@@ -152,7 +163,7 @@ namespace Domain.ParticipationSessions
             if (IsReady)
                 throw new DomainException($"Participation {Id} is already ready");
             IsReady = true;
-            RegisterEvent(new ParticipationReady(Id));
+            RegisterEvent(new ParticipationSessionReady(Id));
         }
 
 
@@ -168,6 +179,21 @@ namespace Domain.ParticipationSessions
             user.IsAdmin = true;
             RegisterEvent(new ConnectedUserUpdated(Id, elevationTarget));
             RegisterEvent(new ConnectedUserUpdated(Id, currentUser));
+        }
+
+        public override void RemoveSuspectFunction(FunctionId functionId)
+        {
+            RemoveFunction(functionId);
+            RegisterEvent(new ParticipationSessionFunctionRemoved(Id, functionId));
+            SetCalculatedScore(0);
+        }
+
+        public override void SetCalculatedScore(decimal calculatedScore)
+        {
+            if (calculatedScore < 0)
+                throw new DomainException("Calculated can't be lesser than 0");
+            CalculatedScore = calculatedScore;
+            RegisterEvent(new ParticipationSessionScoreChanged(Id));
         }
     }
 }

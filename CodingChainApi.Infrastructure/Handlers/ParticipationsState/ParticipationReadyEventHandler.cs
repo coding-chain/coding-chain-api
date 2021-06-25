@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace CodingChainApi.Infrastructure.Handlers.ParticipationsState
 {
-    public class ParticipationReadyEventHandler : INotificationHandler<DomainEventNotification<ParticipationReady>>
+    public class ParticipationReadyEventHandler : INotificationHandler<DomainEventNotification<ParticipationSessionReady>>
     {
         private readonly IHubContext<ParticipationSessionsHub, IParticipationsClient> _hub;
 
@@ -17,7 +17,7 @@ namespace CodingChainApi.Infrastructure.Handlers.ParticipationsState
             _hub = hub;
         }
 
-        public async Task Handle(DomainEventNotification<ParticipationReady> notification,
+        public async Task Handle(DomainEventNotification<ParticipationSessionReady> notification,
             CancellationToken cancellationToken)
         {
             await _hub.Clients

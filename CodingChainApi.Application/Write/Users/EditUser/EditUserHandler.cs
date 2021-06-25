@@ -1,4 +1,6 @@
-﻿using System.Threading;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Application.Common.Exceptions;
 using Application.Common.Security;
@@ -9,7 +11,8 @@ using MediatR;
 namespace Application.Write.Users.EditUser
 {
     [Authenticated]
-    public record EditUserCommand(string? Username, string? Password, string? Email) : IRequest<string>;
+    public record EditUserCommand
+        (string? Username, string? Password, string? Email) : IRequest<string>;
 
     public class EditUserHandler : IRequestHandler<EditUserCommand, string>
     {

@@ -12,10 +12,10 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Application.Write.Plagiarism
 {
-    public record FunctionSimilarity(Guid Id, double Rate);
+    public record FunctionSimilarity(Guid Id, double Rate, string Hash);
 
     public record PlagiarismDoneAnalyzeNotification
-        (Guid SuspectedFunctionId, IList<FunctionSimilarity> ComparedFunctions) : INotification;
+        (Guid SuspectedFunctionId, string SuspectHash, IList<FunctionSimilarity> ComparedFunctions) : INotification;
 
     public class PlagiarismExecutionDoneHandler : INotificationHandler<PlagiarismDoneAnalyzeNotification>
     {
@@ -32,11 +32,15 @@ namespace Application.Write.Plagiarism
         public async Task Handle(PlagiarismDoneAnalyzeNotification notification, CancellationToken cancellationToken)
         {
             var plagiarizedFunctionRepository = serviceProvider.CreateScope().ServiceProvider
-                .GetRequiredService<IPlagiarizedFunctionRepository>();
+                .GetRequiredService<ISuspectFunctionRepository>();
+            var functionId = new FunctionId(notification.SuspectedFunctionId);
+
             var plagiarizedFunctions = notification.ComparedFunctions.Select(func =>
-                new PlagiarizedFunctionEntity(new FunctionId(func.Id), func.Rate, _timeService.Now())).ToList();
-            await plagiarizedFunctionRepository.SetAsync(
-                new SuspectFunctionAggregate(new FunctionId(notification.SuspectedFunctionId), plagiarizedFunctions));
+                new PlagiarizedFunctionEntity(new FunctionId(func.Id), func.Rate, func.Hash,notification.SuspectHash, _timeService.Now())).ToList();
+            var suspectFunction = await plagiarizedFunctionRepository.FindByIdAsync(functionId) ??
+                                  SuspectFunctionAggregate.CreateNew(functionId,notification.SuspectHash, new List<PlagiarizedFunctionEntity>());
+            suspectFunction.SetPlagiarizedFunctions(plagiarizedFunctions);
+            await plagiarizedFunctionRepository.SetAsync(suspectFunction);
         }
     }
 }

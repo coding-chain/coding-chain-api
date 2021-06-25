@@ -37,7 +37,8 @@ namespace CodingChainApi.Controllers
 
         [HttpGet("functions", Name = nameof(GetPaginatedSuspectFunctionsFiltered))]
         [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasPageResponse<HateoasResponse<SuspectFunctionNavigation>>))]
-        public async Task<IActionResult> GetPaginatedSuspectFunctionsFiltered([FromQuery] GetSuspectFunctionsPaginatedQuery query)
+        public async Task<IActionResult> GetPaginatedSuspectFunctionsFiltered(
+            [FromQuery] GetSuspectFunctionsPaginatedQuery query)
         {
             var functions = await Mediator.Send(query);
             var functionsWithLinks = functions.Select(function =>
@@ -67,14 +68,15 @@ namespace CodingChainApi.Controllers
         [HttpGet("functions/{functionId:guid}/plagiarized", Name = nameof(GetPlagiarizedFunctions))]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasPageResponse<HateoasResponse<FunctionCodeNavigation>>))]
+        [SwaggerResponse(HttpStatusCode.OK,
+            typeof(HateoasPageResponse<HateoasResponse<PlagiarizedFunctionNavigation>>))]
         public async Task<IActionResult> GetPlagiarizedFunctions(Guid functionId,
-            GetLastPlagiarizedFunctionsByFunctionQueryParams query)
+            [FromQuery] GetLastPlagiarizedFunctionsByFunctionQueryParams query)
         {
             var functions = await Mediator.Send(new GetLastPlagiarizedFunctionsByFunctionQuery(functionId)
-                {Page = query.Page, Size = query.Size});
+                { Page = query.Page, Size = query.Size });
             var functionsWithLinks = functions.Select(function =>
-                new HateoasResponse<FunctionCodeNavigation>(function, GetLinksForFunction(function.Id)));
+                new HateoasResponse<PlagiarizedFunctionNavigation>(function, GetLinksForFunction(function.Id)));
             return Ok(HateoasResponseBuilder.FromPagedList(
                 Url,
                 functions.ToPagedListResume(),
@@ -83,14 +85,27 @@ namespace CodingChainApi.Controllers
             );
         }
 
+        public record UpdateSuspectFunctionValidityCommandBody(IList<PlagiarizedFunction> PlagiarizedFunctions);
+
+        [HttpPut("functions/{functionId:guid}")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public async Task<IActionResult> UpdateSuspectFunctionValidity(Guid functionId,
+            UpdateSuspectFunctionValidityCommandBody cmd)
+        {
+            var id = await Mediator.Send(
+                new UpdateSuspectFunctionValidityCommand(functionId, cmd.PlagiarizedFunctions));
+            return NoContent();
+        }
+
         private IList<LinkDto> GetLinksForFunction(Guid functionId)
         {
             return new List<LinkDto>
             {
-                new(Url.Link(nameof(StartAnalyzeForFunction), new {functionId}), "analyze", HttpMethod.Post),
-                LinkDto.SelfLink(Url.Link(nameof(GetOneSuspectFunction), new {functionId})),
+                new(Url.Link(nameof(StartAnalyzeForFunction), new { functionId }), "analyze", HttpMethod.Post),
+                LinkDto.SelfLink(Url.Link(nameof(GetOneSuspectFunction), new { functionId })),
                 LinkDto.AllLink(Url.Link(nameof(GetPaginatedSuspectFunctionsFiltered), null)),
-                LinkDto.AllLink(Url.Link(nameof(GetPlagiarizedFunctions), new {functionId}))
+                LinkDto.AllLink(Url.Link(nameof(GetPlagiarizedFunctions), new { functionId }))
             };
         }
     }

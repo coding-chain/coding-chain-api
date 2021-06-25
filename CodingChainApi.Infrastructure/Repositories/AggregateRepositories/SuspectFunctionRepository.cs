@@ -1,8 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
+using Application.Contracts.IService;
 using Application.Write.Contracts;
+using CodingChainApi.Infrastructure.Common;
 using CodingChainApi.Infrastructure.Common.Extensions;
 using CodingChainApi.Infrastructure.Contexts;
 using CodingChainApi.Infrastructure.Models;
@@ -12,13 +15,16 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
 {
-    public class PlagiarizedFunctionRepository : IPlagiarizedFunctionRepository
+    public class SuspectFunctionRepository : ISuspectFunctionRepository
     {
         private readonly CodingChainContext _context;
+        private readonly IHashService _hashService;
 
-        public PlagiarizedFunctionRepository(CodingChainContext context)
+
+        public SuspectFunctionRepository(CodingChainContext context, IHashService hashService)
         {
             _context = context;
+            _hashService = hashService;
         }
 
         public async Task<FunctionId> SetAsync(SuspectFunctionAggregate aggregate)
@@ -32,7 +38,9 @@ namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
         public async Task<SuspectFunctionAggregate?> FindByIdAsync(FunctionId id)
         {
             var functionEntity = await GetIncludeQueryable()
-                .FirstOrDefaultAsync(f => f.Id == id.Value && f.IsDeleted == false);
+                .FirstOrDefaultAsync(f =>
+                    f.Id == id.Value && f.IsDeleted == false &&
+                    f.PlagiarizedFunctions.Any(pF => !pF.PlagiarizedFunction.IsDeleted));
             return functionEntity is not null ? ToEntity(functionEntity) : null;
         }
 
@@ -60,7 +68,9 @@ namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
         {
             return _context.Functions
                 .Include(f => f.PlagiarizedFunctions)
-                .ThenInclude<Function, PlagiarismFunction, Function>(pF => pF.PlagiarizedFunction);
+                .ThenInclude(pF => pF.PlagiarizedFunction)
+                .Include(f => f.CheatingFunctions)
+                .ThenInclude(pF => pF.CheatingFunction);
         }
 
         private async Task<Function?> FindAsync(Guid id)
@@ -72,11 +82,19 @@ namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
         private async Task<Function> ToModel(SuspectFunctionAggregate aggregate)
         {
             var suspectedFunction = await FindAsync(aggregate.Id.Value) ?? new Function();
-            var currentPlagiarizedFunctions = GetCurrentCheatingFunctions(suspectedFunction);
-            var removedPlagiarizedFunctions = GetRemovedPlagiarizedFunctions(aggregate, suspectedFunction);
+            var currentPlagiarizedFunctions = GetCurrentPlagiarizedFunctions(suspectedFunction);
             var newPlagiarizedFunctions = GetNewPlagiarizedFunctions(aggregate, currentPlagiarizedFunctions);
             newPlagiarizedFunctions.ForEach(pF => suspectedFunction.PlagiarizedFunctions.Add(pF));
-            removedPlagiarizedFunctions.ForEach(pF => pF.IsDeleted = true);
+            currentPlagiarizedFunctions.ForEach(pF =>
+            {
+                var func = aggregate.PlagiarizedFunctions.First(f => f.Id.Value == pF.PlagiarizedFunctionId);
+                pF.IsValid = func.IsValid;
+                pF.Rate = func.Rate;
+                pF.DetectionDate = func.DetectionDate;
+                pF.CheatingFunctionHash = func.SuspectHash;
+                pF.PlagiarizedFunctionHash = func.Hash;
+                pF.PlagiarizedFunctionHash = func.SuspectHash;
+            });
             return suspectedFunction;
         }
 
@@ -84,49 +102,56 @@ namespace CodingChainApi.Infrastructure.Repositories.AggregateRepositories
             IList<PlagiarismFunction> currentPlagiarizedFunctions)
         {
             return aggregate.PlagiarizedFunctions
-                .Where(pF => currentPlagiarizedFunctions.All(f =>
-                    f.PlagiarizedFunction.Id != pF.Id.Value
-                ))
+                .Where(pF =>
+                {
+                    var currentFunc = currentPlagiarizedFunctions.FirstOrDefault(f =>
+                        f.PlagiarizedFunction.Id == pF.Id.Value
+                    );
+                    return currentFunc?.CheatingFunctionHash != pF.SuspectHash &&
+                           currentFunc?.PlagiarizedFunctionHash != pF.Hash;
+                })
                 .Select(pF => new PlagiarismFunction
                 {
-                    CheatingFunctionId = aggregate.Id.Value, PlagiarizedFunctionId = pF.Id.Value, Rate = pF.Rate,
-                    DetectionDate = pF.DetectionDate
+                    CheatingFunctionId = aggregate.Id.Value,
+                    PlagiarizedFunctionId = pF.Id.Value,
+                    Rate = pF.Rate,
+                    CheatingFunctionHash = pF.SuspectHash,
+                    PlagiarizedFunctionHash = pF.Hash,
+                    DetectionDate = pF.DetectionDate,
+                    IsValid = pF.IsValid
                 })
                 .ToList();
         }
 
-        private static List<PlagiarismFunction> GetRemovedPlagiarizedFunctions(SuspectFunctionAggregate aggregate,
-            Function function)
+        private List<PlagiarismFunction> GetCurrentPlagiarizedFunctions(Function function)
         {
-            return function.PlagiarizedFunctions
-                .Where(pF => aggregate.PlagiarizedFunctions.All(f =>
-                    !pF.IsDeleted
-                    && !pF.PlagiarizedFunction.IsDeleted
-                    && f.Id.Value != pF.PlagiarizedFunctionId))
+            return GetFirstPlagiarizedFunctions(function);
+        }
+
+        private List<PlagiarismFunction> GetFirstPlagiarizedFunctions(Function suspectFunction)
+        {
+            return suspectFunction.PlagiarizedFunctions
+                .Where(func => !func.PlagiarizedFunction.IsDeleted)
+                .GroupBy(func => func.PlagiarizedFunctionId)
+                .Select(func => func.OrderByDescending(f => f.DetectionDate).First())
                 .ToList();
         }
 
-
-        private IList<PlagiarismFunction> GetCurrentCheatingFunctions(Function function)
+        private SuspectFunctionAggregate ToEntity(Function model)
         {
-            return function.PlagiarizedFunctions
-                .Where(pF => !pF.IsDeleted && !pF.PlagiarizedFunction.IsDeleted)
-                .ToList();
-        }
-
-
-        private static SuspectFunctionAggregate ToEntity(Function model)
-        {
-            var plagiarizedFunctions = model.PlagiarizedFunctions
-                .Where(func => !func.IsDeleted && !func.PlagiarizedFunction.IsDeleted)
+            var plagiarizedFunctions = GetFirstPlagiarizedFunctions(model)
                 .Select(func =>
-                    new PlagiarizedFunctionEntity(
+                {
+                    return new PlagiarizedFunctionEntity(
                         new FunctionId(func.PlagiarizedFunctionId),
                         func.Rate,
+                        func.PlagiarizedFunctionHash,
+                        func.CheatingFunctionHash,
                         func.DetectionDate
-                    ))
+                    );
+                })
                 .ToList();
-            return new SuspectFunctionAggregate(new FunctionId(model.Id), plagiarizedFunctions);
+            return SuspectFunctionAggregate.Restore(new FunctionId(model.Id), plagiarizedFunctions);
         }
     }
 }

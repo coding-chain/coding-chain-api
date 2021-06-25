@@ -24,11 +24,11 @@ namespace CodingChainApi.Domain.Tests
         {
             var suspectFunction = GetEmptySuspectFunctionAggregate();
             var plagiarizedFunction = GetNewPlagiarizedFunctionEntity();
-            suspectFunction.AddPlagiarizedFunction(plagiarizedFunction);
+            suspectFunction.SetPlagiarizedFunction(plagiarizedFunction);
             var newFunc = new PlagiarizedFunctionEntity(plagiarizedFunction.Id, _suspectRate, DateTime.Now);
             Assert.Throws<DomainException>(() =>
             {
-                suspectFunction.AddPlagiarizedFunction(newFunc);
+                suspectFunction.SetPlagiarizedFunction(newFunc);
             });
         }
     }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Formats.Asn1;
 using System.Linq;
 using Domain.Contracts;
 using Domain.Exceptions;
@@ -15,6 +16,11 @@ namespace Domain.Participations
         (ParticipationId ParticipationId, IList<FunctionId> FunctionIds) : IDomainEvent;
 
     public record ParticipationFunctionRemoved(ParticipationId ParticipationId, FunctionId FunctionId) : IDomainEvent;
+
+    public record ParticipationSuspectFunctionRemoved
+        (ParticipationId ParticipationId, FunctionId FunctionId) : IDomainEvent;
+    
+
 
     public record ParticipationId(Guid Value) : IEntityId
     {
@@ -46,7 +52,7 @@ namespace Domain.Participations
         public virtual StepEntity StepEntity { get; }
         public DateTime StartDate { get; }
         public DateTime? EndDate { get; private set; }
-        public decimal CalculatedScore { get; private set; }
+        public decimal CalculatedScore { get; protected set; }
         public IReadOnlyList<FunctionEntity> Functions => _functions.ToList().AsReadOnly();
 
 
@@ -165,18 +171,31 @@ namespace Domain.Participations
         }
 
 
-        public void RemoveFunction(FunctionId functionId, UserId userId)
+        public virtual void RemoveFunction(FunctionId functionId, UserId userId)
         {
             if (!Team.UserIds.Contains(userId))
                 throw new DomainException(
                     $"Function {functionId} cannot be deleted by user : {userId} not in participation team");
 
-            var stepToRemove = Functions.FirstOrDefault(f => f.Id == functionId);
-            if (stepToRemove is null)
-                throw new DomainException($"Function {functionId} not found in participation {Id}");
-            _functions.Remove(stepToRemove);
-            ReorderFunctions();
+            RemoveFunction(functionId);
             RegisterEvent(new ParticipationFunctionRemoved(Id, functionId));
+        }
+
+        protected void RemoveFunction(FunctionId functionId)
+        {
+            var functionToRemove = Functions.FirstOrDefault(f => f.Id == functionId);
+            if (functionToRemove is null)
+                throw new DomainException($"Function {functionId} not found in participation {Id}");
+            _functions.Remove(functionToRemove);
+            ReorderFunctions();
+        }
+
+        public virtual void RemoveSuspectFunction(FunctionId functionId)
+        {
+            RemoveFunction(functionId);
+            SetCalculatedScore(0);
+            RegisterEvent(new ParticipationFunctionRemoved(Id, functionId));
+            RegisterEvent(new ParticipationSuspectFunctionRemoved(Id, functionId));
         }
 
         private void ShiftExistingFunctionsOrder(int order)
@@ -228,7 +247,7 @@ namespace Domain.Participations
             EndDate = date;
         }
 
-        public void SetCalculatedScore(decimal calculatedScore)
+        public virtual void SetCalculatedScore(decimal calculatedScore)
         {
             if (calculatedScore < 0)
                 throw new DomainException("Calculated can't be lesser than 0");

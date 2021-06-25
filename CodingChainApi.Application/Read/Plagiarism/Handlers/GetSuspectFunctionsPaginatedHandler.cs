@@ -10,16 +10,16 @@ namespace Application.Read.Plagiarism.Handlers
         IRequest<IPagedList<SuspectFunctionNavigation>>;
     public class GetSuspectFunctionsPaginatedHandler: IRequestHandler<GetSuspectFunctionsPaginatedQuery, IPagedList<SuspectFunctionNavigation>>
     {
-        private readonly IReadFunctionRepository _readFunctionRepository;
+        private readonly IReadSuspectFunctionRepository _readSuspectFunctionRepository;
 
-        public GetSuspectFunctionsPaginatedHandler(IReadFunctionRepository readFunctionRepository)
+        public GetSuspectFunctionsPaginatedHandler(IReadSuspectFunctionRepository readSuspectFunctionRepository)
         {
-            _readFunctionRepository = readFunctionRepository;
+            _readSuspectFunctionRepository = readSuspectFunctionRepository;
         }
 
         public Task<IPagedList<SuspectFunctionNavigation>> Handle(GetSuspectFunctionsPaginatedQuery request, CancellationToken cancellationToken)
         {
-            return _readFunctionRepository.GetPaginatedLastSuspectFunctionsFiltered(request);
+            return _readSuspectFunctionRepository.GetPaginatedLastSuspectFunctionsFiltered(request);
         }
         
         

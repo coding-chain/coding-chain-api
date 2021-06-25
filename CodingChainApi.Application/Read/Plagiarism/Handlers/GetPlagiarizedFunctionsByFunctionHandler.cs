@@ -8,22 +8,22 @@ using MediatR;
 namespace Application.Read.Plagiarism.Handlers
 {
     public record GetLastPlagiarizedFunctionsByFunctionQuery(Guid FunctionId) : PaginationQueryBase,
-        IRequest<IPagedList<FunctionCodeNavigation>>;
+        IRequest<IPagedList<PlagiarizedFunctionNavigation>>;
 
     public class GetPlagiarizedFunctionsByFunctionHandler : IRequestHandler<GetLastPlagiarizedFunctionsByFunctionQuery,
-        IPagedList<FunctionCodeNavigation>>
+        IPagedList<PlagiarizedFunctionNavigation>>
     {
-        private IReadFunctionRepository _readFunctionRepository;
+        private IReadSuspectFunctionRepository _readSuspectFunctionRepository;
 
-        public GetPlagiarizedFunctionsByFunctionHandler(IReadFunctionRepository readFunctionRepository)
+        public GetPlagiarizedFunctionsByFunctionHandler(IReadSuspectFunctionRepository readSuspectFunctionRepository)
         {
-            _readFunctionRepository = readFunctionRepository;
+            _readSuspectFunctionRepository = readSuspectFunctionRepository;
         }
 
-        public Task<IPagedList<FunctionCodeNavigation>> Handle(GetLastPlagiarizedFunctionsByFunctionQuery request,
+        public Task<IPagedList<PlagiarizedFunctionNavigation>> Handle(GetLastPlagiarizedFunctionsByFunctionQuery request,
             CancellationToken cancellationToken)
         {
-            return _readFunctionRepository.GetPlagiarizedFunctions(request);
+            return _readSuspectFunctionRepository.GetPlagiarizedFunctions(request);
         }
     }
 }

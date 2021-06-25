@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Domain.Contracts;
+using Domain.Exceptions;
 
 namespace Domain.Users
 {
@@ -60,6 +61,13 @@ namespace Domain.Users
 
             if (password is not null)
                 Password = password;
+        }
+
+        public void SetRights(IList<Right> rights)
+        {
+            if (rights.All(r => r.Name != RightEnum.User))
+                throw new DomainException("User should has at least user right");
+            this._rights = rights.ToList();
         }
     }
 }

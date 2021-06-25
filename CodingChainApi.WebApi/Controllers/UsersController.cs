@@ -5,6 +5,7 @@ using System.Net;
 using System.Threading.Tasks;
 using Application.Read.Users;
 using Application.Read.Users.Handlers;
+using Application.Write.Users;
 using Application.Write.Users.EditUser;
 using Application.Write.Users.LoginUser;
 using Application.Write.Users.RegisterUser;
@@ -98,7 +99,7 @@ namespace CodingChainApi.Controllers
 
         [HttpGet(Name = nameof(GetAllUsers))]
         [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasPageResponse<HateoasResponse<PublicUser>>))]
-        public async Task<IActionResult> GetAllUsers([FromQuery] GetPaginatedPublicUsersQuery query)
+        public async Task<IActionResult> GetAllUsers([FromQuery] GetPublicUsersQuery query)
         {
             var users = await Mediator.Send(query);
             var usersWithLinks = users.Select(user =>
@@ -121,11 +122,35 @@ namespace CodingChainApi.Controllers
             return Ok(userWithLinks);
         }
 
+        [HttpDelete("{userId:guid}", Name = nameof(DeleteUserById))]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        public async Task<IActionResult> DeleteUserById(Guid userId)
+        {
+            var id = await Mediator.Send(new DeleteUserCommand(userId));
+            return NoContent();
+        }
+
+        public record ChangeUserRightsCommandBody(IList<Guid> RightsIds);
+
+        [HttpPut("{userId:guid}/rights", Name = nameof(ChangeUserRights))]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        public async Task<IActionResult> ChangeUserRights(Guid userId, ChangeUserRightsCommandBody cmd)
+        {
+            var id = await Mediator.Send(new ChangeUserRightsCommand(userId, cmd.RightsIds));
+            return NoContent();
+        }
+
         private IList<LinkDto> GetLinksForUser(Guid userId)
         {
             return new List<LinkDto>
             {
-                LinkDto.SelfLink(Url.Link(nameof(GetUserById), new {userId}))
+                LinkDto.SelfLink(Url.Link(nameof(GetUserById), new { userId })),
+                LinkDto.DeleteLink(Url.Link(nameof(DeleteUserById), new { userId })),
+                LinkDto.AllLink(Url.Link(nameof(GetAllUsers), null)),
             };
         }
     }

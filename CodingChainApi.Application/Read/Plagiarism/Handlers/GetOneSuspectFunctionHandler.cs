@@ -11,17 +11,17 @@ namespace Application.Read.Plagiarism.Handlers
 
     public class GetOneSuspectFunctionHandler : IRequestHandler<GetOneSuspectFunctionQuery, SuspectFunctionNavigation>
     {
-        private readonly IReadFunctionRepository _readFunctionRepository;
+        private readonly IReadSuspectFunctionRepository _readSuspectFunctionRepository;
 
-        public GetOneSuspectFunctionHandler(IReadFunctionRepository readFunctionRepository)
+        public GetOneSuspectFunctionHandler(IReadSuspectFunctionRepository readSuspectFunctionRepository)
         {
-            _readFunctionRepository = readFunctionRepository;
+            _readSuspectFunctionRepository = readSuspectFunctionRepository;
         }
 
         public async Task<SuspectFunctionNavigation> Handle(GetOneSuspectFunctionQuery request,
             CancellationToken cancellationToken)
         {
-            var func = await _readFunctionRepository.GetLastByFunctionId(request.FunctionId);
+            var func = await _readSuspectFunctionRepository.GetLastByFunctionId(request.FunctionId);
             if (func is null)
                 throw new NotFoundException(request.FunctionId.ToString(), "SuspectFunction");
             return func;
