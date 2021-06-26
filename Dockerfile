@@ -9,7 +9,7 @@ RUN dotnet publish "CodingChainApi.WebApi/CodingChainApi.WebApi.csproj" -c Relea
 
 FROM mcr.microsoft.com/dotnet/aspnet:5.0 AS final
 EXPOSE 443 80
-ENV  ASPNETCORE_ENVIRONMENT=Development ASPNETCORE_URLS=https://+:443;http://+:80
+ENV ASPNETCORE_ENVIRONMENT=Production ASPNETCORE_URLS=http://+:443;http://+:80
 USER root
 WORKDIR /app
 COPY --from=publish app/publish .
