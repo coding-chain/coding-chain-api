@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using Application.Common.Exceptions;
 using Application.Common.Pagination;
 using Application.Read.Participations;
 using Application.Read.Participations.Handlers;
@@ -17,6 +19,7 @@ using CodingChainApi.Services;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.StaticFiles;
 using NSwag.Annotations;
 
 namespace CodingChainApi.Controllers
@@ -37,7 +40,7 @@ namespace CodingChainApi.Controllers
         public async Task<IActionResult> CreateTournament(CreateTournamentCommand createTournamentCommand)
         {
             var tournamentId = await Mediator.Send(createTournamentCommand);
-            return CreatedAtAction(nameof(GetTournamentById), new {tournamentId}, null);
+            return CreatedAtAction(nameof(GetTournamentById), new { tournamentId }, null);
         }
 
         [HttpGet("{tournamentId:guid}", Name = nameof(GetTournamentById))]
@@ -51,6 +54,49 @@ namespace CodingChainApi.Controllers
                 new HateoasResponse<TournamentNavigation>(tournament, GetLinksForTournament(tournament.Id));
             return Ok(tournamentWithLinks);
         }
+
+        [HttpGet("{tournamentId:guid}/image", Name = nameof(GetTournamentImageById))]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasResponse<TournamentNavigation>))]
+        public async Task<IActionResult> GetTournamentImageById(Guid tournamentId)
+        {
+            try
+            {
+                var tournamentImageInfo = await Mediator.Send(new GetTournamentImageByIdQuery(tournamentId));
+                if (new FileExtensionContentTypeProvider().TryGetContentType(tournamentImageInfo.Name, out var contentType))
+                {
+                    return PhysicalFile(tournamentImageInfo.FullName, contentType, tournamentImageInfo.Name);
+                }
+            }
+            catch (NotFoundException e)
+            {
+                return NotFound();
+            }
+            
+
+            return BadRequest();
+        }
+
+        [HttpPost("{tournamentId:guid}/image", Name = nameof(SetTournamentImage))]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> SetTournamentImage(Guid tournamentId, [FromForm] IFormFile file)
+        {
+            var id = await Mediator.Send(new SetTournamentImageByIdCommand(tournamentId,
+                file.OpenReadStream(), Path.GetExtension(file.FileName)));
+            return CreatedAtAction(nameof(GetTournamentImageById), new { tournamentId }, null);
+        }
+        
+        [HttpDelete("{tournamentId:guid}/image", Name = nameof(DeleteTournamentImage))]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> DeleteTournamentImage(Guid tournamentId)
+        {
+            var id = await Mediator.Send(new DeleteTournamentImageByIdCommand(tournamentId));
+            return NoContent();
+        }
+
 
         [HttpDelete("{tournamentId:guid}", Name = nameof(DeleteTournament))]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -162,15 +208,17 @@ namespace CodingChainApi.Controllers
                 nameof(GetTournamentSteps))
             );
         }
-        
-        public record GetLeaderBoardTeamsPaginatedQueryParams: PaginationQueryBase
+
+        public record GetLeaderBoardTeamsPaginatedQueryParams : PaginationQueryBase
         {
             public OrderEnum? ScoreOrder { get; set; }
             public bool? HasFinishedFilter { get; set; }
         }
-        [HttpGet("{tournamentId:guid}/teams",Name = nameof(GetLeaderBoardTeams))]
+
+        [HttpGet("{tournamentId:guid}/teams", Name = nameof(GetLeaderBoardTeams))]
         [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasPageResponse<HateoasResponse<LeaderBoardTeamNavigation>>))]
-        public async Task<IActionResult> GetLeaderBoardTeams(Guid tournamentId, [FromQuery] GetLeaderBoardTeamsPaginatedQueryParams query)
+        public async Task<IActionResult> GetLeaderBoardTeams(Guid tournamentId,
+            [FromQuery] GetLeaderBoardTeamsPaginatedQueryParams query)
         {
             var teams = await Mediator.Send(new GetLeaderBoardTeamsPaginatedQuery()
             {
@@ -195,7 +243,7 @@ namespace CodingChainApi.Controllers
             return new List<LinkDto>
             {
                 LinkDto.CreateLink(Url.Link(nameof(TeamsController.CreateTeam), null)),
-                LinkDto.SelfLink(Url.Link(nameof(TeamsController.GetTeamById), new {teamId}))
+                LinkDto.SelfLink(Url.Link(nameof(TeamsController.GetTeamById), new { teamId }))
             };
         }
 
@@ -230,10 +278,10 @@ namespace CodingChainApi.Controllers
             return new List<LinkDto>
             {
                 LinkDto.CreateLink(Url.Link(nameof(CreateTournament), null)),
-                LinkDto.SelfLink(Url.Link(nameof(GetTournamentById), new {tournamentId})),
-                LinkDto.DeleteLink(Url.Link(nameof(DeleteTournament), new {tournamentId})),
-                LinkDto.UpdateLink(Url.Link(nameof(UpdateTournament), new {tournamentId})),
-                LinkDto.UpdateLink(Url.Link(nameof(UpdateTournamentSteps), new {tournamentId}))
+                LinkDto.SelfLink(Url.Link(nameof(GetTournamentById), new { tournamentId })),
+                LinkDto.DeleteLink(Url.Link(nameof(DeleteTournament), new { tournamentId })),
+                LinkDto.UpdateLink(Url.Link(nameof(UpdateTournament), new { tournamentId })),
+                LinkDto.UpdateLink(Url.Link(nameof(UpdateTournamentSteps), new { tournamentId }))
             };
         }
 
@@ -241,9 +289,9 @@ namespace CodingChainApi.Controllers
         {
             return new List<LinkDto>
             {
-                LinkDto.DeleteLink(Url.Link(nameof(DeleteTournamentStep), new {tournamentId, stepId})),
-                LinkDto.SelfLink(Url.Link(nameof(GetTournamentStepById), new {tournamentId, stepId})),
-                LinkDto.AllLink(Url.Link(nameof(GetTournamentSteps), new {tournamentId}))
+                LinkDto.DeleteLink(Url.Link(nameof(DeleteTournamentStep), new { tournamentId, stepId })),
+                LinkDto.SelfLink(Url.Link(nameof(GetTournamentStepById), new { tournamentId, stepId })),
+                LinkDto.AllLink(Url.Link(nameof(GetTournamentSteps), new { tournamentId }))
             };
         }
 
@@ -251,7 +299,7 @@ namespace CodingChainApi.Controllers
         {
             return new List<LinkDto>
             {
-                LinkDto.AllLink(Url.Link(nameof(GetTournamentParticipations), new {tournamentId}))
+                LinkDto.AllLink(Url.Link(nameof(GetTournamentParticipations), new { tournamentId }))
             };
         }
 

@@ -50,6 +50,7 @@ namespace CodingChainApi.Infrastructure
             services.AddScoped<ISecurityService, SecurityService>();
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<ITimeService, TimeService>();
+            services.AddScoped<IFileService, FileService>();
             services.AddSingleton<IHashService, HashService>();
             services.AddScoped<IFunctionTypeParserService, FunctionTypeParserService>();
             services.ConfigureMailjet(configuration);
