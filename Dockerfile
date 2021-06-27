@@ -15,5 +15,4 @@ ENV  ASPNETCORE_ENVIRONMENT=Production ASPNETCORE_URLS=https://+:443;http://+:80
 USER root
 WORKDIR /app
 COPY --from=publish app/publish .
-COPY --from=build /src/CodingChainApi.WebApi.pfx ${HOME}/.aspnet/https/CodingChainApi.WebApi.pfx
 ENTRYPOINT ["dotnet", "CodingChainApi.WebApi.dll"]
