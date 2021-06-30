@@ -108,10 +108,20 @@ namespace CodingChainApi.Domain.Tests
         }
 
         [Test]
+        public void remove_test_should_throw_when_no_more_tests()
+        {
+            var step = GetNewStep();
+            var test = GetNewTest(12);
+            step.AddTest(test);
+            Assert.Throws<DomainException>(() => step.RemoveTest(test.Id));
+        }
+
+        [Test]
         public void remove_test_should_work()
         {
             var step = GetNewStep();
             var test = GetNewTest(12);
+            step.AddTest(GetNewTest(13));
             step.AddTest(test);
             step.RemoveTest(test.Id);
             CollectionAssert.DoesNotContain(step.Tests, test);
@@ -228,7 +238,7 @@ namespace CodingChainApi.Domain.Tests
         {
             var step = GetNewStep();
             var test = GetNewTest(123);
-            Assert.Throws<DomainException>(() => step.SetTests(new List<TestEntity> {test, test}));
+            Assert.Throws<DomainException>(() => step.SetTests(new List<TestEntity> { test, test }));
         }
 
         [Test]
@@ -237,7 +247,7 @@ namespace CodingChainApi.Domain.Tests
             var step = GetNewStep();
             var failingTest = GetNewTest(-1);
             var test = GetNewTest(123);
-            Assert.Throws<DomainException>(() => step.SetTests(new List<TestEntity> {test, failingTest}));
+            Assert.Throws<DomainException>(() => step.SetTests(new List<TestEntity> { test, failingTest }));
         }
 
         [Test]
@@ -268,7 +278,7 @@ namespace CodingChainApi.Domain.Tests
         public void set_tests_should_work()
         {
             var step = GetNewStep();
-            var tests = new List<TestEntity> {GetNewTest(132), GetNewTest(123)};
+            var tests = new List<TestEntity> { GetNewTest(132), GetNewTest(123) };
             step.SetTests(tests);
             CollectionAssert.AreEqual(tests, step.Tests);
         }

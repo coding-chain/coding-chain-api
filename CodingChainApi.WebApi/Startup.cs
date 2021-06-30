@@ -49,7 +49,7 @@ namespace CodingChainApi
             services.AddScoped<ICurrentUserService, CurrentUserService>();
             services.AddScoped<IPropertyCheckerService, PropertyCheckerService>();
             services.AddHttpContextAccessor();
-            services.AddSignalR();
+            AddSignalR(services);
             services.AddHostedService<ParticipationPreparedListener>();
             services.AddHostedService<ParticipationDoneExecutionListener>();
             services.AddHostedService<PlagiarismExecutionDoneListener>();
@@ -68,8 +68,19 @@ namespace CodingChainApi
             services.AddResponseCompression(opts =>
             {
                 opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
-                    new[] {"application/octet-stream"});
+                    new[] { "application/octet-stream" });
             });
+        }
+
+        private void AddSignalR(IServiceCollection services)
+        {
+            var signalRBuilder = services.AddSignalR();
+            var signalRSettings =
+                services.ConfigureInjectableSettings<ISignalRSettings, SignalRSettings>(Configuration);
+            if (!string.IsNullOrWhiteSpace(signalRSettings.ConnectionString))
+            {
+                signalRBuilder.AddAzureSignalR(options => options.ConnectionString = signalRSettings.ConnectionString);
+            }
         }
 
         private void AddCors(IServiceCollection services)
@@ -99,7 +110,7 @@ namespace CodingChainApi
                 .AddFluentValidation(options =>
                 {
                     options.RegisterValidatorsFromAssemblies(new[]
-                        {Assembly.GetAssembly(typeof(DependencyInjection)), Assembly.GetExecutingAssembly()});
+                        { Assembly.GetAssembly(typeof(DependencyInjection)), Assembly.GetExecutingAssembly() });
                     // options.ValidatorFactoryType = typeof(HttpContextServiceProviderValidatorFactory);
                 })
                 .AddMvcOptions(options =>
@@ -146,8 +157,6 @@ namespace CodingChainApi
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-
-
             app.UseResponseCompression();
             if (env.IsDevelopment())
                 app.UseDeveloperExceptionPage();

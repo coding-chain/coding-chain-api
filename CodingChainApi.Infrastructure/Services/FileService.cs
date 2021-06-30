@@ -29,7 +29,7 @@ namespace CodingChainApi.Infrastructure.Services
         public Task SetTournamentImageById(Guid tournamentId, Stream stream, string extension)
         {
             var imagePath = Path.Combine(_appDataSettings.BasePath, _appDataSettings.TournamentsPath,
-                $"{tournamentId}.{extension}");
+                $"{tournamentId}{extension}");
             using var outputFileStream = new FileStream(imagePath, FileMode.Create);
             stream.CopyTo(outputFileStream);
             return Task.CompletedTask;

@@ -4,6 +4,6 @@ namespace Application.Contracts.IService
 {
     public interface ICurrentUserService
     {
-        UserId UserId { get; }
+        UserId UserId { get; set; }
     }
 }
