@@ -66,6 +66,10 @@
     <ItemGroup>
         <Content Remove="AppData\Templates\**" />
     </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="AppData\Tournaments\test" />
+    </ItemGroup>
     <Target Name="Echo path">
         <Message Text="$(TF_BUILD)" Importance="high" />
     </Target>
