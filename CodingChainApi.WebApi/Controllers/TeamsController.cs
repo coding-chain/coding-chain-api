@@ -38,6 +38,9 @@ namespace CodingChainApi.Controllers
             var teamId = await Mediator.Send(createTeamCommand);
             return CreatedAtAction(nameof(GetTeamById), new {teamId}, null);
         }
+        
+    
+
 
         [HttpPost("{teamId:guid}/members", Name = nameof(AddMemberToTeam))]
         [ProducesResponseType(StatusCodes.Status201Created)]

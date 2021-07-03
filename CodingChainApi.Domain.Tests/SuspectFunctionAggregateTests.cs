@@ -11,25 +11,22 @@ namespace CodingChainApi.Domain.Tests
 {
     public class SuspectFunctionAggregateTests
     {
-        
         private double _suspectRate = 0.6;
+
         private SuspectFunctionAggregate GetEmptySuspectFunctionAggregate() =>
-            new SuspectFunctionAggregate(TestsHelper.GetNewFunctionId(), new List<PlagiarizedFunctionEntity>());
+            SuspectFunctionAggregate.Restore(TestsHelper.GetNewFunctionId(), new List<PlagiarizedFunctionEntity>());
 
         private PlagiarizedFunctionEntity GetNewPlagiarizedFunctionEntity() =>
-            new (TestsHelper.GetNewFunctionId(),  _suspectRate, DateTime.Now);
+            new(TestsHelper.GetNewFunctionId(), _suspectRate, "", "", DateTime.Now);
 
         [Test]
-        public void add_existing_function_should_throw()
+        public void add_existing_function_should_work()
         {
             var suspectFunction = GetEmptySuspectFunctionAggregate();
             var plagiarizedFunction = GetNewPlagiarizedFunctionEntity();
             suspectFunction.SetPlagiarizedFunction(plagiarizedFunction);
-            var newFunc = new PlagiarizedFunctionEntity(plagiarizedFunction.Id, _suspectRate, DateTime.Now);
-            Assert.Throws<DomainException>(() =>
-            {
-                suspectFunction.SetPlagiarizedFunction(newFunc);
-            });
+            var newFunc = new PlagiarizedFunctionEntity(plagiarizedFunction.Id, _suspectRate, "", "", DateTime.Now);
+            CollectionAssert.Contains(suspectFunction.PlagiarizedFunctions, newFunc);
         }
     }
 }

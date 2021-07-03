@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using Application.Common.Pagination;
 using Application.Read.Tournaments;
@@ -22,5 +23,6 @@ namespace Application.Read.Contracts
 
         Task<IList<TournamentStepNavigation>> GetAllTournamentStepNavigationByTournamentId(
             Guid tournamentId);
+
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -10,6 +11,7 @@ using Application.Read.Tournaments.Handlers;
 using CodingChainApi.Infrastructure.Common.Extensions;
 using CodingChainApi.Infrastructure.Contexts;
 using CodingChainApi.Infrastructure.Models;
+using CodingChainApi.Infrastructure.Settings;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
 
@@ -68,6 +70,7 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
                 .Select(tournamentStep => ToTournamentStepNavigation(tournamentStep))
                 .ToListAsync();
         }
+
 
         public async Task<TournamentStepNavigation?> GetOneTournamentStepNavigationByID(Guid tournamentId, Guid stepId)
         {

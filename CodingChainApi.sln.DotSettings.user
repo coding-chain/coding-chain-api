@@ -1,17 +1,10 @@
 ﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
 	<s:String x:Key="/Default/Environment/Hierarchy/Build/BuildTool/DotNetCliExePath/@EntryValue">C:\Program Files\dotnet\dotnet.exe</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=ea0f36db_002De3a2_002D4e3a_002D8e21_002D3d129d56ca14/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="Test1" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
-  &lt;TestAncestor&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::E293AD77-084B-43A7-8469-BCAF9C859399::net5.0::NeosCodingApi.TypescriptCodeAnalyzerTests.Test1&lt;/TestId&gt;&#xD;
-  &lt;/TestAncestor&gt;&#xD;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=58ecd25c_002De76a_002D4fe1_002Daba4_002D1bb7668018dd/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="add_existing_function_should_throw" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;Project Location="C:\Code\Projets\coding-chain-environment\coding-chain-api" Presentation="&amp;lt;Core&amp;gt;" /&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=f7338368_002Dca7c_002D49bc_002D997c_002Df1c4ffb2a668/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="Test1 #2" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
-  &lt;TestAncestor&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::E293AD77-084B-43A7-8469-BCAF9C859399::net5.0::NeosCodingApi.TypescriptCodeAnalyzerTests.simple_input_type_should_works&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::E293AD77-084B-43A7-8469-BCAF9C859399::net5.0::NeosCodingApi.TypescriptCodeAnalyzerTests.simple_output_type_should_works&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::9A248A17-39EF-467E-B736-429BCD05DB83::net5.0::CodingChainApi.Domain.Tests.SuspectFunctionAggregateTests.add_existing_function_should_throw&lt;/TestId&gt;&#xD;
-  &lt;/TestAncestor&gt;&#xD;
-&lt;/SessionState&gt;</s:String>
+	
+	
 	
 	
 	
