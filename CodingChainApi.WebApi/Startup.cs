@@ -151,8 +151,6 @@ namespace CodingChainApi
             app.UseResponseCompression();
             if (env.IsDevelopment())
                 app.UseDeveloperExceptionPage();
-            else
-                app.UseHttpsRedirection();
 
 
             app.UseRouting();
