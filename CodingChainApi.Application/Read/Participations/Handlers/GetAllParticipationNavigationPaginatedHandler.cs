@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Application.Common.Pagination;
@@ -6,8 +7,20 @@ using MediatR;
 
 namespace Application.Read.Participations.Handlers
 {
-    public record GetAllParticipationNavigationPaginatedQuery : PaginationQueryBase, IRequest<IPagedList<ParticipationNavigation>>;
-    public class GetAllParticipationNavigationPaginatedHandler: IRequestHandler<GetAllParticipationNavigationPaginatedQuery, IPagedList<ParticipationNavigation>>
+    public record GetAllParticipationNavigationPaginatedQuery : PaginationQueryBase,
+        IRequest<IPagedList<ParticipationNavigation>>
+    {
+        public Guid? TeamIdFilter { get; set; }
+        public Guid? TournamentIdFilter { get; set; }
+        public Guid? StepIdFilter { get; set; }
+
+        public bool? EndTournamentStepFilter { get; set; }
+        public OrderEnum? EndDateOrder { get; set; }
+    }
+
+
+    public class GetAllParticipationNavigationPaginatedHandler : IRequestHandler<
+        GetAllParticipationNavigationPaginatedQuery, IPagedList<ParticipationNavigation>>
     {
         private readonly IReadParticipationRepository _readParticipationRepository;
 
@@ -16,7 +29,8 @@ namespace Application.Read.Participations.Handlers
             _readParticipationRepository = readParticipationRepository;
         }
 
-        public Task<IPagedList<ParticipationNavigation>> Handle(GetAllParticipationNavigationPaginatedQuery request, CancellationToken cancellationToken)
+        public Task<IPagedList<ParticipationNavigation>> Handle(GetAllParticipationNavigationPaginatedQuery request,
+            CancellationToken cancellationToken)
         {
             return _readParticipationRepository.GetAllParticipationNavigationPaginated(request);
         }

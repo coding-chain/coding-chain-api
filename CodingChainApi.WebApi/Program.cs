@@ -1,5 +1,4 @@
 using System;
-using CodingChainApi.Infrastructure;
 using CodingChainApi.Infrastructure.Contexts;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -7,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace NeosCodingApi
+namespace CodingChainApi
 {
     public class Program
     {
@@ -27,6 +26,7 @@ namespace NeosCodingApi
                     logger.LogError(ex, "An error occurred while migrating the database");
                 }
             }
+
             host.Run();
         }
 

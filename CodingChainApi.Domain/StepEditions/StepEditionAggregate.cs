@@ -9,23 +9,14 @@ namespace Domain.StepEditions
 {
     public record StepId(Guid Value) : IEntityId
     {
-        public override string ToString() => Value.ToString();
+        public override string ToString()
+        {
+            return Value.ToString();
+        }
     }
 
     public class StepEditionAggregate : Aggregate<StepId>
     {
-        public string HeaderCode { get; private set; }
-        public string Name { get; private set; }
-        public string Description { get; private set; }
-        public int? MinFunctionsCount { get; private set; }
-        public int? MaxFunctionsCount { get; private set; }
-        public decimal Score { get; private set; }
-        public int Difficulty { get; private set; }
-
-        public bool IsPublished { get; private set; }
-
-        public ProgrammingLanguageId LanguageId { get; private set; }
-        public IReadOnlyCollection<TestEntity> Tests => _tests.ToList().AsReadOnly();
         private HashSet<TestEntity> _tests;
 
         private StepEditionAggregate(StepId id, string name, string description, string headerCode,
@@ -57,6 +48,19 @@ namespace Domain.StepEditions
             IsPublished = isPublished;
         }
 
+        public string HeaderCode { get; private set; }
+        public string Name { get; private set; }
+        public string Description { get; private set; }
+        public int? MinFunctionsCount { get; private set; }
+        public int? MaxFunctionsCount { get; private set; }
+        public decimal Score { get; private set; }
+        public int Difficulty { get; private set; }
+
+        public bool IsPublished { get; }
+
+        public ProgrammingLanguageId LanguageId { get; private set; }
+        public IReadOnlyCollection<TestEntity> Tests => _tests.ToList().AsReadOnly();
+
         public static StepEditionAggregate CreateNew(StepId id, string name, string description, string headerCode,
             int? minFunctionCount, int? maxFunctionCount,
             decimal score, int difficulty, ProgrammingLanguageId languageId)
@@ -72,7 +76,7 @@ namespace Domain.StepEditions
             int? minFunctionCount, int? maxFunctionCount,
             decimal score, int difficulty, bool isPublished, ProgrammingLanguageId languageId, List<TestEntity> tests)
         {
-            return new StepEditionAggregate(id, name, description, headerCode, minFunctionCount, maxFunctionCount,
+            return new(id, name, description, headerCode, minFunctionCount, maxFunctionCount,
                 score,
                 difficulty, isPublished, languageId, tests);
         }
@@ -85,24 +89,48 @@ namespace Domain.StepEditions
 
         public void SetTests(IList<TestEntity> tests)
         {
+            if (tests.Count < 1)
+                throw new DomainException("Step should have at least one test");
             if (tests.Distinct().Count() != tests.Count)
                 throw new DomainException("Tests contains duplicates");
-            var errors = tests
-                .Where(t => t.Score < 0)
-                .Select(t => $"Test {t.Id} cannot have score {t.Score} bellow 0")
-                .ToList();
+            var errors = tests.SelectMany(t =>
+            {
+                try
+                {
+                    ValidateTest(t);
+                }
+                catch (DomainException e)
+                {
+                    return e.Errors;
+                }
+
+                return new List<string>();
+            }).ToList();
             if (errors.Any())
                 throw new DomainException(errors);
-            this._tests = tests.ToHashSet();
+            _tests = tests.ToHashSet();
+        }
+
+        public void ValidateTest(TestEntity test)
+        {
+            if (test.Score < 0)
+                throw new DomainException($"Test {test.Id} cannot have score {test.Score} bellow 0");
+        }
+
+        public void UpdateTest(TestEntity test)
+        {
+            if (!_tests.Contains(test)) throw new DomainException($"Test {test.Id} doesn't exists");
+            ValidateTest(test);
+            _tests.Remove(test);
+            _tests.Add(test);
         }
 
         public void AddTest(TestEntity test)
         {
-            if (test.Score < 0)
-                throw new DomainException($"Test {test.Id} cannot have score {test.Score} bellow 0");
+            ValidateTest(test);
             if (_tests.Contains(test))
                 throw new DomainException($"Test {test.Id} already in step tests");
-            this._tests.Add(test);
+            _tests.Add(test);
         }
 
         public void RemoveTest(TestId id)
@@ -110,6 +138,8 @@ namespace Domain.StepEditions
             var test = _tests.FirstOrDefault(t => t.Id == id);
             if (test is null)
                 throw new DomainException($"Test {id} not found");
+            if (_tests.Count <= 1)
+                throw new DomainException("Step should have at least one test");
             _tests.Remove(test);
         }
 

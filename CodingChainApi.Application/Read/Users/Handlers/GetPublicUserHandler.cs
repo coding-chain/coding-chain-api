@@ -7,7 +7,7 @@ using MediatR;
 
 namespace Application.Read.Users.Handlers
 {
-    public record GetPublicUserQuery() : IRequest<PublicUser>;
+    public record GetPublicUserQuery : IRequest<PublicUser>;
 
     public class GetPublicUserHandler : IRequestHandler<GetPublicUserQuery, PublicUser>
     {
@@ -23,10 +23,7 @@ namespace Application.Read.Users.Handlers
 
         public async Task<PublicUser> Handle(GetPublicUserQuery request, CancellationToken cancellationToken)
         {
-            if (_currentUserService.UserId is null)
-            {
-                throw new ApplicationException("User not connected currently");
-            }
+            if (_currentUserService.UserId is null) throw new ApplicationException("User not connected currently");
             return await _readUserRepository.FindPublicUserById(_currentUserService.UserId.Value) ??
                    throw new ApplicationException($"User not found by its id : {_currentUserService.UserId.Value}");
         }

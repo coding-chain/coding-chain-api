@@ -1,8 +1,6 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Intrinsics.Arm;
 using Domain.Contracts;
 using Domain.Exceptions;
 using Domain.StepEditions;
@@ -11,26 +9,16 @@ namespace Domain.Tournaments
 {
     public record TournamentId(Guid Value) : IEntityId
     {
-        public override string ToString() => Value.ToString();
+        public override string ToString()
+        {
+            return Value.ToString();
+        }
     }
 
     public class TournamentAggregate : Aggregate<TournamentId>
     {
-        public string Name { get; private set; }
-        public string Description { get; private set; }
-        public bool IsPublished { get; private set; }
-        public DateTime? StartDate { get; private set; }
-        public DateTime? EndDate { get; private set; }
         private SortedSet<StepEntity> _steps;
-        public IReadOnlyList<StepEntity> Steps => _steps.ToList().AsReadOnly();
 
-        private class StepEntityComparer : IComparer<StepEntity>
-        {
-            public int Compare(StepEntity? x, StepEntity? y)
-            {
-                return x?.Order ?? 0 - y?.Order ?? 0;
-            }
-        }
         private TournamentAggregate(TournamentId id, string name, string description,
             bool isPublished, DateTime? startDate, DateTime? endDate, IList<StepEntity> steps) : base(id)
         {
@@ -50,11 +38,19 @@ namespace Domain.Tournaments
             _steps = new SortedSet<StepEntity>();
         }
 
+        public string Name { get; private set; }
+        public string Description { get; private set; }
+        public bool IsPublished { get; private set; }
+        public DateTime? StartDate { get; private set; }
+        public DateTime? EndDate { get; private set; }
+        public IReadOnlyList<StepEntity> Steps => _steps.ToList().AsReadOnly();
+
         public static TournamentAggregate Restore(TournamentId id, string name, string description,
             bool isPublished, DateTime? startDate, DateTime? endDate, IList<StepEntity> steps)
         {
-            return new (id, name, description, isPublished, startDate, endDate, steps);
+            return new(id, name, description, isPublished, startDate, endDate, steps);
         }
+
         public static TournamentAggregate CreateNew(TournamentId id, string name, string description)
         {
             return new(id, name, description);
@@ -97,10 +93,7 @@ namespace Domain.Tournaments
         private void ReorderSteps()
         {
             var orderedSteps = _steps.ToList();
-            for (var i = 0; i < orderedSteps.Count; i++)
-            {
-                orderedSteps[i].Order = i;
-            }
+            for (var i = 0; i < orderedSteps.Count; i++) orderedSteps[i].Order = i;
             _steps = new SortedSet<StepEntity>(orderedSteps, new StepEntityComparer());
         }
 
@@ -128,7 +121,7 @@ namespace Domain.Tournaments
         {
             if (IsPublished)
                 throw new DomainException("Cannot change start or end date from published tournament");
-            if(startDate is null && endDate is not null)
+            if (startDate is null && endDate is not null)
                 throw new DomainException("Set start date first");
             if (startDate >= endDate)
                 throw new DomainException("End date couldn't be lower or equal than start date");
@@ -163,10 +156,16 @@ namespace Domain.Tournaments
             Name = name;
             Description = description;
             SetStartDateAndEndDate(startDate, endDate);
-            if(isPublished)
+            if (isPublished)
                 Publish();
         }
 
-
+        private class StepEntityComparer : IComparer<StepEntity>
+        {
+            public int Compare(StepEntity? x, StepEntity? y)
+            {
+                return x?.Order ?? 0 - y?.Order ?? 0;
+            }
+        }
     }
 }

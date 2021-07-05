@@ -8,7 +8,10 @@ using MediatR;
 namespace Application.Read.Participations.Handlers
 {
     public record GetOneParticipationNavigationByIdQuery(Guid ParticipationId) : IRequest<ParticipationNavigation>;
-    public class GetOneParticipationNavigationByIdHandler:IRequestHandler<GetOneParticipationNavigationByIdQuery, ParticipationNavigation>
+
+    public class
+        GetOneParticipationNavigationByIdHandler : IRequestHandler<GetOneParticipationNavigationByIdQuery,
+            ParticipationNavigation>
     {
         private readonly IReadParticipationRepository _readParticipationRepository;
 
@@ -17,9 +20,11 @@ namespace Application.Read.Participations.Handlers
             _readParticipationRepository = readParticipationRepository;
         }
 
-        public async Task<ParticipationNavigation> Handle(GetOneParticipationNavigationByIdQuery request, CancellationToken cancellationToken)
+        public async Task<ParticipationNavigation> Handle(GetOneParticipationNavigationByIdQuery request,
+            CancellationToken cancellationToken)
         {
-            var participation = await _readParticipationRepository.GetOneParticipationNavigationById(request.ParticipationId);
+            var participation =
+                await _readParticipationRepository.GetOneParticipationNavigationById(request.ParticipationId);
             if (participation is null)
                 throw new NotFoundException(request.ParticipationId.ToString(), nameof(ParticipationNavigation));
             return participation;

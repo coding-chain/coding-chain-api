@@ -15,8 +15,8 @@ namespace Application.Write.Teams
 
     public class ElevateTeamMemberHandler : IRequestHandler<ElevateTeamMemberCommand, string>
     {
-        private readonly ITeamRepository _teamRepository;
         private readonly ICurrentUserService _currentUserService;
+        private readonly ITeamRepository _teamRepository;
 
         public ElevateTeamMemberHandler(ITeamRepository teamRepository, ICurrentUserService currentUserService)
         {
@@ -30,7 +30,7 @@ namespace Application.Write.Teams
             if (team is null)
                 throw new ApplicationException($"Team with id {request.TeamId} doesn't exists");
             var memberId = new UserId(request.TargetMemberId);
-            team.ValidateMemberElevationByMember(_currentUserService.ConnectedUserId);
+            team.ValidateMemberElevationByMember(_currentUserService.UserId);
             team.ElevateMember(memberId);
             await _teamRepository.SetAsync(team);
             return memberId.ToString();

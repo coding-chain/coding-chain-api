@@ -3,7 +3,7 @@
     <PropertyGroup>
         <TargetFramework>net5.0</TargetFramework>
         <DockerDefaultTargetOS>Windows</DockerDefaultTargetOS>
-        <RootNamespace>NeosCodingApi</RootNamespace>
+        <RootNamespace>CodingChainApi</RootNamespace>
         <Nullable>enable</Nullable>
         <GenerateCode>True</GenerateCode>
     </PropertyGroup>
@@ -43,6 +43,7 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
+        <PackageReference Include="RabbitMQ" Version="3.6.2" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.1.1" />
         <PackageReference Include="ZymLabs.NSwag.FluentValidation" Version="0.4.0" />
         <PackageReference Include="ZymLabs.NSwag.FluentValidation.AspNetCore" Version="0.4.0" />
@@ -64,6 +65,10 @@
 
     <ItemGroup>
         <Content Remove="AppData\Templates\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="AppData\Tournaments\test" />
     </ItemGroup>
     <Target Name="Echo path">
         <Message Text="$(TF_BUILD)" Importance="high" />

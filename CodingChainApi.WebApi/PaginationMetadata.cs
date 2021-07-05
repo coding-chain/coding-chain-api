@@ -1,6 +1,6 @@
 ﻿using Application.Common.Pagination;
 
-namespace NeosCodingApi
+namespace CodingChainApi
 {
     public class PaginationMetadata
     {
@@ -17,7 +17,7 @@ namespace NeosCodingApi
                 CurrentPage = pagedList.CurrentPage,
                 TotalPages = pagedList.TotalPages,
                 PageSize = pagedList.PageSize,
-                TotalCount = pagedList.TotalCount,
+                TotalCount = pagedList.TotalCount
             };
             return metadata;
         }

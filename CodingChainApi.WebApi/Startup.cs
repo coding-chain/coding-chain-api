@@ -1,27 +1,28 @@
 using System.Linq;
-using System.Net.Http.Headers;
 using System.Reflection;
 using Application;
 using Application.Contracts.IService;
 using CodingChainApi.Infrastructure;
+using CodingChainApi.Infrastructure.Hubs;
+using CodingChainApi.Infrastructure.Settings;
+using CodingChainApi.Messaging;
+using CodingChainApi.Services;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using NeosCodingApi.Controllers;
-using NeosCodingApi.Services;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using ZymLabs.NSwag.FluentValidation;
 using DependencyInjection = Application.DependencyInjection;
 
-namespace NeosCodingApi
+namespace CodingChainApi
 {
     public class Startup
     {
@@ -43,23 +44,63 @@ namespace NeosCodingApi
 
 
             services.AddInfrastructure(Configuration);
+            AddCors(services);
             services.AddApplication();
-            services.AddSingleton<ICurrentUserService, CurrentUserService>();
+            services.AddScoped<ICurrentUserService, CurrentUserService>();
             services.AddScoped<IPropertyCheckerService, PropertyCheckerService>();
             services.AddHttpContextAccessor();
-
-            services.AddSignalR();
+            AddSignalR(services);
+            services.AddHostedService<ParticipationPreparedListener>();
+            services.AddHostedService<ParticipationDoneExecutionListener>();
+            services.AddHostedService<PlagiarismExecutionDoneListener>();
 
             services.AddCors();
-            // services.Configure<ApiBehaviorOptions>(options => { options.SuppressModelStateInvalidFilter = true; });
 
-            services.Configure<FormOptions>(options =>
+            ConfigureControllers(services);
+
+            services.AddSingleton<FluentValidationSchemaProcessor>();
+            services.AddVersionedApiExplorer(setupAction => { setupAction.GroupNameFormat = "'v'VV"; });
+
+            var apiVersionDescriptionProvider = ConfigureVersioning(services);
+
+            ConfigureSwagger(services, apiVersionDescriptionProvider);
+
+            services.AddResponseCompression(opts =>
             {
-                options.ValueCountLimit = 10;
-                options.MemoryBufferThreshold = int.MaxValue;
-                options.ValueLengthLimit = int.MaxValue; //TODO Change value
-                options.MultipartBodyLengthLimit = long.MaxValue;
+                opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
+                    new[] { "application/octet-stream" });
             });
+        }
+
+        private void AddSignalR(IServiceCollection services)
+        {
+            var signalRBuilder = services.AddSignalR();
+            var signalRSettings =
+                services.ConfigureInjectableSettings<ISignalRSettings, SignalRSettings>(Configuration);
+            if (!string.IsNullOrWhiteSpace(signalRSettings.ConnectionString))
+            {
+                signalRBuilder.AddAzureSignalR(options => options.ConnectionString = signalRSettings.ConnectionString);
+            }
+        }
+
+        private void AddCors(IServiceCollection services)
+        {
+            var corsSettings = services.ConfigureInjectableSettings<ICorsSettings, CorsSettings>(Configuration);
+            services.AddCors(options =>
+            {
+                options.AddPolicy(PolicyName, builder =>
+                {
+                    builder.WithOrigins(corsSettings.FrontEndUrl)
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials()
+                        .WithExposedHeaders("Location");
+                });
+            });
+        }
+
+        private static void ConfigureControllers(IServiceCollection services)
+        {
             services.AddControllers()
                 .AddNewtonsoftJson(options =>
                 {
@@ -69,7 +110,7 @@ namespace NeosCodingApi
                 .AddFluentValidation(options =>
                 {
                     options.RegisterValidatorsFromAssemblies(new[]
-                        {Assembly.GetAssembly(typeof(DependencyInjection)), Assembly.GetExecutingAssembly()});
+                        { Assembly.GetAssembly(typeof(DependencyInjection)), Assembly.GetExecutingAssembly() });
                     // options.ValidatorFactoryType = typeof(HttpContextServiceProviderValidatorFactory);
                 })
                 .AddMvcOptions(options =>
@@ -78,10 +119,10 @@ namespace NeosCodingApi
                     options.ModelMetadataDetailsProviders.Clear();
                     options.ModelValidatorProviders.Clear();
                 });
-            ;
-            services.AddSingleton<FluentValidationSchemaProcessor>();
-            services.AddVersionedApiExplorer(setupAction => { setupAction.GroupNameFormat = "'v'VV"; });
+        }
 
+        private static IApiVersionDescriptionProvider? ConfigureVersioning(IServiceCollection services)
+        {
             services.AddApiVersioning(setupAction =>
             {
                 setupAction.AssumeDefaultVersionWhenUnspecified = true;
@@ -91,9 +132,13 @@ namespace NeosCodingApi
 
             var apiVersionDescriptionProvider =
                 services.BuildServiceProvider().GetService<IApiVersionDescriptionProvider>();
+            return apiVersionDescriptionProvider;
+        }
 
+        private static void ConfigureSwagger(IServiceCollection services,
+            IApiVersionDescriptionProvider? apiVersionDescriptionProvider)
+        {
             foreach (var apiVersionDescription in apiVersionDescriptionProvider.ApiVersionDescriptions)
-            {
                 services.AddSwaggerDocument((settings, serviceProvider) =>
                 {
                     var fluentValidationSchemaProcessor = serviceProvider.GetService<FluentValidationSchemaProcessor>();
@@ -106,34 +151,20 @@ namespace NeosCodingApi
                         document.Info.Description = "REST API for example.";
                     };
                 });
-            }
-
-            services.AddResponseCompression(opts =>
-            {
-                opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
-                    new[] {"application/octet-stream"});
-            });
         }
+
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader().WithExposedHeaders(new []{"Location"}));
-
             app.UseResponseCompression();
             if (env.IsDevelopment())
-            {
                 app.UseDeveloperExceptionPage();
-            }
-            else
-            {
-                app.UseHttpsRedirection();
-            }
 
 
             app.UseRouting();
 
-
+            app.UseCors(PolicyName);
             app.UseAuthentication();
 
             app.UseAuthorization();
@@ -141,7 +172,10 @@ namespace NeosCodingApi
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapHub<SutHub>("/sut");
+                endpoints.MapHub<ParticipationSessionsHub>(ParticipationSessionsHub.Route,
+                    options => { options.Transports = HttpTransportType.ServerSentEvents; });
+                endpoints.MapHub<PlagiarismHub>(PlagiarismHub.Route,
+                    options => { options.Transports = HttpTransportType.ServerSentEvents; });
             });
 
             app.UseOpenApi();

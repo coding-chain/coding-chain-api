@@ -2,25 +2,25 @@ using System.Collections.Generic;
 
 namespace Domain.Contracts
 {
-    public abstract class Aggregate<TId>: Entity<TId>, IAggregate where TId : IEntityId
+    public abstract class Aggregate<TId> : Entity<TId>, IAggregate where TId : IEntityId
     {
-        public IReadOnlyList<IDomainEvent> Events => _events.AsReadOnly();
+        private readonly List<IDomainEvent> _events = new();
 
         public Aggregate(TId id) : base(id)
         {
         }
 
-        private readonly List<IDomainEvent> _events = new();
+        public IReadOnlyList<IDomainEvent> Events => _events.AsReadOnly();
+
+        public void ClearEvents()
+        {
+            _events.Clear();
+        }
 
         protected Aggregate<TId> RegisterEvent(IDomainEvent domainEvent)
         {
             _events.Add(domainEvent);
             return this;
-        }
-
-        public void ClearEvents()
-        {
-            _events.Clear();
         }
     }
 }

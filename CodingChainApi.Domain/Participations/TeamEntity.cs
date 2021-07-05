@@ -7,10 +7,11 @@ namespace Domain.Participations
 {
     public class TeamEntity : Entity<TeamId>
     {
-        public IList<UserId> UserIds { get; set; }
         public TeamEntity(TeamId id, IList<UserId> userIds) : base(id)
         {
             UserIds = userIds;
         }
+
+        public IList<UserId> UserIds { get; set; }
     }
 }

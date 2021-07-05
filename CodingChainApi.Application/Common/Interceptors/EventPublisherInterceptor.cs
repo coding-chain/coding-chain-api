@@ -22,20 +22,15 @@ namespace Application.Common.Interceptors
         public void Intercept(IInvocation invocation)
         {
             if (!IsAggregateRepository(invocation.TargetType))
-            {
                 throw new ApplicationException(
                     $"{invocation.GetType()} doesn't implement IAggregateRepository<,> interface");
-            }
 
             invocation.Proceed();
             if (!IsSetAsyncMethod(invocation.Method))
                 return;
             var aggregate = invocation.Arguments.First() as IAggregate;
-            foreach (var aggregateEvent in aggregate.Events)
-            {
-                _dispatcher.Dispatch(aggregateEvent);
-            }
-            aggregate?.ClearEvents();
+            foreach (var aggregateEvent in aggregate.Events.ToList()) _dispatcher.Dispatch(aggregateEvent);
+            aggregate.ClearEvents();
         }
 
         private bool IsAggregateRepository(Type invocationType)
@@ -46,9 +41,9 @@ namespace Application.Common.Interceptors
             );
         }
 
-        private bool IsSetAsyncMethod(MethodInfo methodInfo) =>
-            methodInfo.Name == nameof(IAggregateRepository<IEntityId, Aggregate<IEntityId>>.SetAsync);
-
-
+        private bool IsSetAsyncMethod(MethodInfo methodInfo)
+        {
+            return methodInfo.Name == nameof(IAggregateRepository<IEntityId, Aggregate<IEntityId>>.SetAsync);
+        }
     }
 }

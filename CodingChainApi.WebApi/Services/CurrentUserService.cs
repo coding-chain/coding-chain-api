@@ -4,31 +4,30 @@ using Application.Contracts.IService;
 using Domain.Users;
 using Microsoft.AspNetCore.Http;
 
-namespace NeosCodingApi.Services
+namespace CodingChainApi.Services
 {
     public class CurrentUserService : ICurrentUserService
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
-        
+
         public CurrentUserService(IHttpContextAccessor httpContextAccessor)
         {
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public UserId? UserId
+        private UserId? _userId;
+
+        public UserId UserId
         {
             get
             {
+                if (_userId is not null) return _userId;
                 var id = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
-                return id != null ? new UserId(Guid.Parse(id)) : null;
-            } 
-        }
-
-        private UserId? _connectedUserId;
-
-        public UserId ConnectedUserId
-        {
-            get => _connectedUserId ?? throw new ApplicationException("User not authenticated"); set => _connectedUserId = value;
+                if (id is null)
+                    throw new ApplicationException("User not authenticated");
+                return new UserId(Guid.Parse(id));
+            }
+            set => _userId = value;
         }
     }
 }

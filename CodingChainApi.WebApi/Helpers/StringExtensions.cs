@@ -1,7 +1,6 @@
 using System;
-using Microsoft.AspNetCore.Mvc;
 
-namespace NeosCodingApi.Helpers
+namespace CodingChainApi.Helpers
 {
     public static class StringExtensions
     {

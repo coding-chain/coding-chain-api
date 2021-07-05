@@ -1,13 +1,27 @@
 using System;
 using System.Collections.Generic;
+using System.Formats.Asn1;
 using System.Linq;
 using Domain.Contracts;
 using Domain.Exceptions;
-using Domain.Teams;
-using Domain.Tournaments;
+using Domain.Users;
 
 namespace Domain.Participations
 {
+    public record ParticipationFunctionAdded(ParticipationId ParticipationId, FunctionId FunctionId) : IDomainEvent;
+
+    public record ParticipationFunctionUpdated(ParticipationId ParticipationId, FunctionId FunctionId) : IDomainEvent;
+
+    public record ParticipationFunctionsReordered
+        (ParticipationId ParticipationId, IList<FunctionId> FunctionIds) : IDomainEvent;
+
+    public record ParticipationFunctionRemoved(ParticipationId ParticipationId, FunctionId FunctionId) : IDomainEvent;
+
+    public record ParticipationSuspectFunctionRemoved
+        (ParticipationId ParticipationId, FunctionId FunctionId) : IDomainEvent;
+    
+
+
     public record ParticipationId(Guid Value) : IEntityId
     {
         public override string ToString()
@@ -18,14 +32,28 @@ namespace Domain.Participations
 
     public class ParticipationAggregate : Aggregate<ParticipationId>
     {
-        public TeamEntity Team { get; private set; }
-        public TournamentEntity TournamentEntity { get; private set; }
-        public StepEntity StepEntity { get; private set; }
-        public DateTime StartDate { get; private set; }
+        private List<FunctionEntity> _functions;
+
+        protected ParticipationAggregate(ParticipationId id, TeamEntity team, TournamentEntity tournamentEntity,
+            StepEntity stepEntity,
+            DateTime startDate, DateTime? endDate, decimal calculatedScore, IList<FunctionEntity> functions) : base(id)
+        {
+            Team = team;
+            TournamentEntity = tournamentEntity;
+            StepEntity = stepEntity;
+            _functions = new List<FunctionEntity>(functions);
+            StartDate = startDate;
+            EndDate = endDate;
+            CalculatedScore = calculatedScore;
+        }
+
+        public virtual TeamEntity Team { get; }
+        public TournamentEntity TournamentEntity { get; }
+        public virtual StepEntity StepEntity { get; }
+        public DateTime StartDate { get; }
         public DateTime? EndDate { get; private set; }
-        public decimal CalculatedScore { get; private set; }
+        public decimal CalculatedScore { get; protected set; }
         public IReadOnlyList<FunctionEntity> Functions => _functions.ToList().AsReadOnly();
-        private SortedSet<FunctionEntity> _functions;
 
 
         public static ParticipationAggregate CreateNew(ParticipationId id, TeamEntity team,
@@ -55,28 +83,22 @@ namespace Domain.Participations
                 functions);
         }
 
-        private ParticipationAggregate(ParticipationId id, TeamEntity team, TournamentEntity tournamentEntity,
-            StepEntity stepEntity,
-            DateTime startDate, DateTime? endDate, decimal calculatedScore, IList<FunctionEntity> functions) : base(id)
-        {
-            Team = team;
-            TournamentEntity = tournamentEntity;
-            StepEntity = stepEntity;
-            _functions = new SortedSet<FunctionEntity>(functions);
-            StartDate = startDate;
-            EndDate = endDate;
-            CalculatedScore = calculatedScore;
-        }
-
         public void SetFunctions(IList<FunctionEntity> functions)
         {
-            var orderedFunctions = new SortedSet<FunctionEntity>(functions);
+            var orderedFunctions = new List<FunctionEntity>(functions);
+            orderedFunctions.Sort((f1, f2) => (f1.Order ?? 0) - (f2.Order ?? 0));
+            var i = 1;
             var errors = orderedFunctions
-                .SelectMany((function, i) =>
+                .SelectMany(function =>
                 {
                     var subErrors = new List<string>();
-                    if (function.Order is not null && function.Order != i + 1)
-                        subErrors.Add($"Function {function.Id} and order {function.Order} isn't ordered");
+                    if (function.Order is not null)
+                    {
+                        if (function.Order != i)
+                            subErrors.Add($"Function {function.Id} and order {function.Order} isn't ordered");
+                        i++;
+                    }
+
                     var sameFunction = _functions.FirstOrDefault(oldFunction => function.Id == oldFunction.Id);
                     if (sameFunction?.LastModificationDate > function.LastModificationDate)
                         subErrors.Add($"Function {function.Id} have last modification date lower than before");
@@ -88,6 +110,7 @@ namespace Domain.Participations
                     {
                         subErrors.AddRange(e.Errors);
                     }
+
                     return subErrors;
                 })
                 .ToList();
@@ -104,37 +127,118 @@ namespace Domain.Participations
                     $"User {function.UserId} for function  {function.Id} is not in participation team {Team.Id}");
         }
 
-        public void AddFunction(FunctionEntity function)
+        public void AddFunction(FunctionEntity function, UserId userId)
         {
+            if (!Team.UserIds.Contains(userId))
+                throw new DomainException(
+                    $"Function {function.Id} cannot be added by user : {userId} not in participation team");
+
             ValidateFunction(function);
-            if (_functions.Contains(function))
+            if (_functions.ToList().Any(f => f.Id == function.Id))
                 throw new DomainException($"Function {function.Id} already in functions");
             _functions.Add(function);
             ReorderFunctions();
+            RegisterEvent(new ParticipationFunctionAdded(Id, function.Id));
         }
 
-        public void RemoveFunction(FunctionId id)
+        public void UpdateFunction(FunctionEntity function, UserId userId)
         {
-            var stepToRemove = Functions.FirstOrDefault(f => f.Id == id);
-            if (stepToRemove is null)
-                throw new DomainException($"Function {id} not found in participation {Id}");
-            _functions.Remove(stepToRemove);
+            if (!Team.UserIds.Contains(userId))
+                throw new DomainException(
+                    $"Function {function.Id} cannot be added by user : {userId} not in participation team");
+
+            ValidateFunction(function);
+            var existingFunction = _functions.FirstOrDefault(f => f.Id == function.Id);
+            if (existingFunction is null)
+                throw new DomainException($"Function {function.Id} not in participation functions");
+            var otherFunctionWithSameOrder =
+                _functions.FirstOrDefault(f => f.Order == function.Order && function.Order != null);
+            if (otherFunctionWithSameOrder is not null && existingFunction.Order is not null)
+            {
+                otherFunctionWithSameOrder.Order = existingFunction.Order;
+                RegisterEvent(new ParticipationFunctionsReordered(Id,
+                    new List<FunctionId> {otherFunctionWithSameOrder.Id, function.Id}));
+            }
+
+            if (existingFunction.Order is null && function.Order is not null)
+                ShiftExistingFunctionsOrder(function.Order.Value);
+            existingFunction.Order = function.Order;
+            existingFunction.Code = function.Code;
+            existingFunction.LastModificationDate = function.LastModificationDate;
+            existingFunction.UserId = function.UserId;
+            ReorderFunctions();
+            RegisterEvent(new ParticipationFunctionUpdated(Id, function.Id));
+        }
+
+
+        public virtual void RemoveFunction(FunctionId functionId, UserId userId)
+        {
+            if (!Team.UserIds.Contains(userId))
+                throw new DomainException(
+                    $"Function {functionId} cannot be deleted by user : {userId} not in participation team");
+
+            RemoveFunction(functionId);
+            RegisterEvent(new ParticipationFunctionRemoved(Id, functionId));
+        }
+
+        protected void RemoveFunction(FunctionId functionId)
+        {
+            var functionToRemove = Functions.FirstOrDefault(f => f.Id == functionId);
+            if (functionToRemove is null)
+                throw new DomainException($"Function {functionId} not found in participation {Id}");
+            _functions.Remove(functionToRemove);
             ReorderFunctions();
         }
 
-        private void ReorderFunctions()
+        public virtual void RemoveSuspectFunction(FunctionId functionId)
         {
-            var orderedFunctions = _functions.ToList();
-            for (var i = 0; i < orderedFunctions.Count; i++)
-            {
-                if (orderedFunctions[i].Order is not null)
-                    orderedFunctions[i].Order = i;
-            }
-
-            _functions = new SortedSet<FunctionEntity>(orderedFunctions);
+            RemoveFunction(functionId);
+            SetCalculatedScore(0);
+            RegisterEvent(new ParticipationFunctionRemoved(Id, functionId));
+            RegisterEvent(new ParticipationSuspectFunctionRemoved(Id, functionId));
         }
 
-        public void SetEndDate(DateTime date)
+        private void ShiftExistingFunctionsOrder(int order)
+        {
+            var reorderedFunctions = new List<FunctionId>();
+            GetSortedFunctions().ForEach(f =>
+            {
+                if (f.Order >= order)
+                {
+                    f.Order++;
+                    reorderedFunctions.Add(f.Id);
+                }
+            });
+            if (reorderedFunctions.Any()) RegisterEvent(new ParticipationFunctionsReordered(Id, reorderedFunctions));
+        }
+
+        private IList<FunctionId> ReorderFunctions()
+        {
+            var functionsWithOrder = GetSortedFunctions();
+            var functionsWithDifferentIds = new List<FunctionId>();
+            for (var i = 0; i < functionsWithOrder.Count; i++)
+            {
+                if (functionsWithOrder[i].Order == i + 1) continue;
+                functionsWithDifferentIds.Add(functionsWithOrder[i].Id);
+                functionsWithOrder[i].Order = i + 1;
+            }
+
+            if (functionsWithDifferentIds.Any())
+                RegisterEvent(new ParticipationFunctionsReordered(Id, functionsWithDifferentIds));
+            return functionsWithDifferentIds;
+        }
+
+        private List<FunctionEntity> GetSortedFunctions()
+        {
+            var functionsWithOrder = _functions
+                .ToList()
+                .Where(f => f.Order is not null)
+                .ToList();
+            functionsWithOrder.Sort((f1, f2) => f1.Order.Value - f2.Order.Value);
+            return functionsWithOrder;
+        }
+
+        public void SetEndDate(DateTime? date)
         {
             if (date <= StartDate)
                 throw new DomainException("End date couldn't be lower or equal than start date");
@@ -143,7 +247,7 @@ namespace Domain.Participations
             EndDate = date;
         }
 
-        public void SetCalculatedScore(decimal calculatedScore)
+        public virtual void SetCalculatedScore(decimal calculatedScore)
         {
             if (calculatedScore < 0)
                 throw new DomainException("Calculated can't be lesser than 0");

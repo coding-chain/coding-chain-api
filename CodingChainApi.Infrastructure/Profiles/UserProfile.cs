@@ -2,7 +2,6 @@
 using AutoMapper;
 using CodingChainApi.Infrastructure.Models;
 using Domain.Users;
-using User = CodingChainApi.Infrastructure.Models.User;
 
 namespace CodingChainApi.Infrastructure.Profiles
 {
@@ -12,8 +11,8 @@ namespace CodingChainApi.Infrastructure.Profiles
         {
             CreateMap<Guid, UserId>().ConvertUsing((val, id) => new UserId(val));
             CreateMap<UserId, Guid>().ConvertUsing((id, val) => id.Value);
-            
-            CreateMap<User, Domain.Users.UserAggregate>().ReverseMap();
+
+            CreateMap<User, UserAggregate>().ReverseMap();
         }
     }
 }

@@ -10,10 +10,11 @@ using MediatR;
 namespace Application.Write.Tournaments
 {
     public record DeleteTournamentCommand(Guid TournamentId) : IRequest<string>;
-    public class DeleteTournamentHandler: IRequestHandler<DeleteTournamentCommand, string>
+
+    public class DeleteTournamentHandler : IRequestHandler<DeleteTournamentCommand, string>
     {
-        private readonly ITournamentRepository _tournamentRepository;
         private readonly ITimeService _timeService;
+        private readonly ITournamentRepository _tournamentRepository;
 
         public DeleteTournamentHandler(ITournamentRepository tournamentRepository, ITimeService timeService)
         {

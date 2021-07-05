@@ -1,21 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Application.Read.Users;
 using Application.Read.Users.Handlers;
+using Application.Write.Users;
+using Application.Write.Users.EditUser;
 using Application.Write.Users.LoginUser;
 using Application.Write.Users.RegisterUser;
 using AutoMapper;
+using CodingChainApi.Helpers;
+using CodingChainApi.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using NeosCodingApi.Helpers;
-using NeosCodingApi.Services;
 using NSwag.Annotations;
 
-namespace NeosCodingApi.Controllers
+namespace CodingChainApi.Controllers
 {
     public class UsersController : ApiControllerBase
     {
@@ -76,16 +79,79 @@ namespace NeosCodingApi.Controllers
             }
         }
 
+        [HttpPut(TemplateActionName, Name = nameof(Me))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public async Task<IActionResult> Me(EditUserCommand cmd)
+        {
+            try
+            {
+                await Mediator.Send(cmd);
+                return NoContent();
+            }
+            catch (ApplicationException e)
+            {
+                return Unauthorized();
+            }
+        }
+
         [HttpGet(Name = nameof(GetAllUsers))]
-        [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasResponse<IList<PublicUser>>))]
-        public async Task<IActionResult> GetAllUsers([FromQuery] GetPaginatedPublicUsersQuery query)
+        [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasPageResponse<HateoasResponse<PublicUser>>))]
+        public async Task<IActionResult> GetAllUsers([FromQuery] GetPublicUsersQuery query)
         {
             var users = await Mediator.Send(query);
+            var usersWithLinks = users.Select(user =>
+                new HateoasResponse<PublicUser>(user, GetLinksForUser(user.Id)));
             return Ok(HateoasResponseBuilder.FromPagedList(
                 Url,
                 users.ToPagedListResume(),
-                users,
+                usersWithLinks.ToList(),
                 nameof(GetAllUsers)));
+        }
+
+        [HttpGet("{userId:guid}", Name = nameof(GetUserById))]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasResponse<PublicUser>))]
+        public async Task<IActionResult> GetUserById(Guid userId)
+        {
+            var user = await Mediator.Send(new GetPublicUserByIdQuery(userId));
+            var userWithLinks = new HateoasResponse<PublicUser>(user, GetLinksForUser(user.Id));
+            return Ok(userWithLinks);
+        }
+
+        [HttpDelete("{userId:guid}", Name = nameof(DeleteUserById))]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        public async Task<IActionResult> DeleteUserById(Guid userId)
+        {
+            var id = await Mediator.Send(new DeleteUserCommand(userId));
+            return NoContent();
+        }
+
+        public record ChangeUserRightsCommandBody(IList<Guid> RightsIds);
+
+        [HttpPut("{userId:guid}/rights", Name = nameof(ChangeUserRights))]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        public async Task<IActionResult> ChangeUserRights(Guid userId, ChangeUserRightsCommandBody cmd)
+        {
+            var id = await Mediator.Send(new ChangeUserRightsCommand(userId, cmd.RightsIds));
+            return NoContent();
+        }
+
+        private IList<LinkDto> GetLinksForUser(Guid userId)
+        {
+            return new List<LinkDto>
+            {
+                LinkDto.SelfLink(Url.Link(nameof(GetUserById), new { userId })),
+                LinkDto.DeleteLink(Url.Link(nameof(DeleteUserById), new { userId })),
+                LinkDto.AllLink(Url.Link(nameof(GetAllUsers), null)),
+            };
         }
     }
 }

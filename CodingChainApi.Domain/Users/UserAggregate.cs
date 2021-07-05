@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using Domain.Contracts;
+using Domain.Exceptions;
 
 namespace Domain.Users
 {
-    public record UserId(Guid Value): IEntityId
+    public record UserId(Guid Value) : IEntityId
     {
         public override string ToString()
         {
@@ -15,8 +16,6 @@ namespace Domain.Users
 
     public class UserAggregate : Aggregate<UserId>
     {
-        public string Email;
-        public string Username;
         private List<Right> _rights;
 
         public UserAggregate(UserId id, string password, IList<Right> rights, string email, string username) : base(id)
@@ -27,7 +26,10 @@ namespace Domain.Users
             Username = username;
         }
 
-        public string Password { get; set; }
+        public string Email { get; private set; }
+        public string Username { get; private set; }
+
+        public string Password { get; private set; }
 
         public IReadOnlyList<Right> Rights => _rights.AsReadOnly();
 
@@ -47,6 +49,25 @@ namespace Domain.Users
         public IList<Right> GetNotMatchingRoles(IList<Right> roles)
         {
             return roles.Where(r => !_rights.Contains(r)).ToList();
+        }
+
+        public void UpdateUser(string? email, string? username, string? password)
+        {
+            if (email is not null)
+                Email = email;
+
+            if (username is not null)
+                Username = username;
+
+            if (password is not null)
+                Password = password;
+        }
+
+        public void SetRights(IList<Right> rights)
+        {
+            if (rights.All(r => r.Name != RightEnum.User))
+                throw new DomainException("User should has at least user right");
+            this._rights = rights.ToList();
         }
     }
 }

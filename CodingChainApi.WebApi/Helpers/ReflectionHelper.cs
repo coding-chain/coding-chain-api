@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace NeosCodingApi.Helpers
+namespace CodingChainApi.Helpers
 {
     public static class ReflectionHelper
     {
-        public static List<PropertyInfo>  GetPropertyInfoListByFields<TSource>(string fields)
+        public static List<PropertyInfo> GetPropertyInfoListByFields<TSource>(string fields)
         {
             var propertyInfoList = new List<PropertyInfo>();
             if (string.IsNullOrWhiteSpace(fields))
@@ -24,9 +24,7 @@ namespace NeosCodingApi.Helpers
                         typeof(TSource).GetProperty(trimmedField,
                             BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
                     if (propertyInfo == null)
-                    {
                         throw new Exception($"Property {trimmedField} wasn't found on {typeof(TSource)}");
-                    }
 
                     propertyInfoList.Add(propertyInfo);
                 }

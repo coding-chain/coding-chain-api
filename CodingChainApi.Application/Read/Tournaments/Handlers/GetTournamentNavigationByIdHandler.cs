@@ -7,7 +7,9 @@ using MediatR;
 namespace Application.Read.Tournaments.Handlers
 {
     public record GetTournamentNavigationByIdQuery(Guid Id) : IRequest<TournamentNavigation>;
-    public class GetTournamentNavigationByIdHandler: IRequestHandler<GetTournamentNavigationByIdQuery, TournamentNavigation>
+
+    public class
+        GetTournamentNavigationByIdHandler : IRequestHandler<GetTournamentNavigationByIdQuery, TournamentNavigation>
     {
         private readonly IReadTournamentRepository _readTournamentRepository;
 
@@ -16,7 +18,8 @@ namespace Application.Read.Tournaments.Handlers
             _readTournamentRepository = readTournamentRepository;
         }
 
-        public async Task<TournamentNavigation> Handle(GetTournamentNavigationByIdQuery request, CancellationToken cancellationToken)
+        public async Task<TournamentNavigation> Handle(GetTournamentNavigationByIdQuery request,
+            CancellationToken cancellationToken)
         {
             var tournament = await _readTournamentRepository.GetOneTournamentNavigationById(request.Id);
             if (tournament is null)

@@ -12,15 +12,16 @@ using MediatR;
 namespace Application.Write.Teams
 {
     [Authenticated]
-    public record AddMemberToTeamCommand(Guid TeamId, Guid MemberId ): IRequest<string>;
+    public record AddMemberToTeamCommand(Guid TeamId, Guid MemberId) : IRequest<string>;
 
-    public class AddMemberToTeamHandler: IRequestHandler<AddMemberToTeamCommand, string>
+    public class AddMemberToTeamHandler : IRequestHandler<AddMemberToTeamCommand, string>
     {
-        private readonly ITeamRepository _teamRepository;
-        private readonly IReadUserRepository _readUserRepository;
         private readonly ICurrentUserService _currentUserService;
+        private readonly IReadUserRepository _readUserRepository;
+        private readonly ITeamRepository _teamRepository;
 
-        public AddMemberToTeamHandler(ITeamRepository teamRepository, IReadUserRepository readUserRepository, ICurrentUserService currentUserService)
+        public AddMemberToTeamHandler(ITeamRepository teamRepository, IReadUserRepository readUserRepository,
+            ICurrentUserService currentUserService)
         {
             _teamRepository = teamRepository;
             _readUserRepository = readUserRepository;
@@ -31,19 +32,16 @@ namespace Application.Write.Teams
         public async Task<string> Handle(AddMemberToTeamCommand request, CancellationToken cancellationToken)
         {
             var team = await _teamRepository.FindByIdAsync(new TeamId(request.TeamId));
-            
-            if (team is null)
-            {
-                throw new ApplicationException($"Team with id {request.TeamId} not found");
-            }
-            
-            team.ValidateMemberAdditionByMember(_currentUserService.ConnectedUserId);
-            
-            if(!await  _readUserRepository.UserExistsByIdAsync(request.MemberId))
+
+            if (team is null) throw new ApplicationException($"Team with id {request.TeamId} not found");
+
+            team.ValidateMemberAdditionByMember(_currentUserService.UserId);
+
+            if (!await _readUserRepository.UserExistsByIdAsync(request.MemberId))
                 throw new ApplicationException($"User with id {request.MemberId} not found");
-            
-            
-            var newMember = new MemberEntity(new UserId(request.MemberId),false); 
+
+
+            var newMember = new MemberEntity(new UserId(request.MemberId), false);
             team.AddMember(newMember);
             await _teamRepository.SetAsync(team);
             return newMember.Id.ToString();

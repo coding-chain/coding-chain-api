@@ -18,9 +18,10 @@ namespace Application.Read.Tests.Handlers
             _readTestRepository = readTestRepository;
         }
 
-        public async Task<TestNavigation> Handle(GetTestNavigationByIdQuery request, CancellationToken cancellationToken)
+        public async Task<TestNavigation> Handle(GetTestNavigationByIdQuery request,
+            CancellationToken cancellationToken)
         {
-            return await _readTestRepository.GetOneTestNavigationByID( request.TestId) ??
+            return await _readTestRepository.GetOneTestNavigationByID(request.TestId) ??
                    throw new NotFoundException(request.TestId.ToString(),
                        nameof(TestNavigation));
         }

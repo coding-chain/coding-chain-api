@@ -1,8 +1,6 @@
-using System.Collections.Generic;
-using System.Linq;
 using Application.Common.Pagination;
 
-namespace NeosCodingApi.Helpers
+namespace CodingChainApi.Helpers
 {
     public static class IPageListExtensions
     {
@@ -12,9 +10,11 @@ namespace NeosCodingApi.Helpers
                 page.HasPrevious, page.HasNext);
         }
     }
+
     public class PagedListResume
     {
-        public PagedListResume(long currentPage, long totalPages, long pageSize, long totalCount, bool hasPrevious, bool hasNext)
+        public PagedListResume(long currentPage, long totalPages, long pageSize, long totalCount, bool hasPrevious,
+            bool hasNext)
         {
             CurrentPage = currentPage;
             TotalPages = totalPages;
@@ -30,6 +30,5 @@ namespace NeosCodingApi.Helpers
         public long TotalCount { get; }
         public bool HasPrevious { get; }
         public bool HasNext { get; }
-
     }
 }

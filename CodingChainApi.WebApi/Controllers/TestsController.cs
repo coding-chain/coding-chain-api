@@ -4,19 +4,17 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Application.Common.Pagination;
-using Application.Read.Steps;
-using Application.Read.Steps.Handlers;
 using Application.Read.Tests;
 using Application.Read.Tests.Handlers;
 using AutoMapper;
+using CodingChainApi.Helpers;
+using CodingChainApi.Services;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using NeosCodingApi.Helpers;
-using NeosCodingApi.Services;
 using NSwag.Annotations;
 
-namespace NeosCodingApi.Controllers
+namespace CodingChainApi.Controllers
 {
     public class TestsController : ApiControllerBase
     {
@@ -24,6 +22,20 @@ namespace NeosCodingApi.Controllers
             mediator, mapper, propertyCheckerService)
         {
         }
+
+        #region Links
+
+        private IList<LinkDto> GetLinksForTest(Guid stepId, Guid testId)
+        {
+            return new List<LinkDto>
+            {
+                LinkDto.SelfLink(Url.Link(nameof(GetTestById), new {testId})),
+                LinkDto.CreateLink(Url.Link(nameof(StepsController.AddTest), new {stepId, testId})),
+                LinkDto.AllLink(Url.Link(nameof(GetTests), null))
+            };
+        }
+
+        #endregion
 
         #region Tests
 
@@ -38,12 +50,13 @@ namespace NeosCodingApi.Controllers
             return Ok(testWithLinks);
         }
 
-        public record GetPaginatedTestNavigationQueryParams() : PaginationQueryBase;
+        public record GetPaginatedTestNavigationQueryParams : PaginationQueryBase;
+
         [HttpGet(Name = nameof(GetTests))]
-        [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasResponse<IList<HateoasResponse<TestNavigation>>>))]
+        [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasPageResponse<HateoasResponse<TestNavigation>>))]
         public async Task<IActionResult> GetTests([FromQuery] GetPaginatedTestNavigationQueryParams query)
         {
-            var test = await Mediator.Send(new GetPaginatedTestNavigationQuery(){Page = query.Page,Size = query.Size});
+            var test = await Mediator.Send(new GetPaginatedTestNavigationQuery {Page = query.Page, Size = query.Size});
             var testWithLinks = test.Select(test =>
                 new HateoasResponse<TestNavigation>(test, GetLinksForTest(test.StepId, test.Id)));
             return Ok(HateoasResponseBuilder.FromPagedList(
@@ -55,20 +68,5 @@ namespace NeosCodingApi.Controllers
         }
 
         #endregion
-
-        #region Links
-        private IList<LinkDto> GetLinksForTest(Guid stepId, Guid testId)
-        {
-            return new List<LinkDto>()
-            {
-                LinkDto.SelfLink(Url.Link(nameof(GetTestById), new {testId})),
-                LinkDto.CreateLink(Url.Link(nameof(StepsController.AddTest), new {stepId, testId})),
-                LinkDto.AllLink(Url.Link(nameof(GetTests), null))
-            };
-        }
-        
-
-        #endregion
-       
     }
 }

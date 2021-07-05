@@ -10,15 +10,15 @@ using Application.Read.Tests;
 using Application.Read.Tests.Handlers;
 using Application.Write.StepEditions;
 using AutoMapper;
+using CodingChainApi.Helpers;
+using CodingChainApi.Services;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http;
-using NeosCodingApi.Helpers;
-using NeosCodingApi.Services;
 using NSwag.Annotations;
 
-namespace NeosCodingApi.Controllers
+namespace CodingChainApi.Controllers
 {
     public class StepsController : ApiControllerBase
 
@@ -52,7 +52,7 @@ namespace NeosCodingApi.Controllers
         }
 
         [HttpGet(Name = nameof(GetSteps))]
-        [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasResponse<IList<HateoasResponse<StepNavigation>>>))]
+        [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasPageResponse<HateoasResponse<StepNavigation>>))]
         public async Task<IActionResult> GetSteps([FromQuery] GetPaginatedStepNavigationQuery query)
         {
             var steps = await Mediator.Send(query);
@@ -65,17 +65,18 @@ namespace NeosCodingApi.Controllers
                 nameof(GetSteps))
             );
         }
-        
-        public record GetPaginatedTestNavigationQueryParams() : PaginationQueryBase;
+
+        public record GetPaginatedTestNavigationQueryParams : PaginationQueryBase;
 
         [HttpGet("{stepId:guid}/tests", Name = nameof(GetStepTests))]
-        [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasResponse<IList<HateoasResponse<TestNavigation>>>))]
-        public async Task<IActionResult> GetStepTests(Guid stepId, [FromQuery] GetPaginatedTestNavigationQueryParams query)
+        [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasPageResponse<HateoasResponse<TestNavigation>>))]
+        public async Task<IActionResult> GetStepTests(Guid stepId,
+            [FromQuery] GetPaginatedTestNavigationQueryParams query)
         {
             var tests = await Mediator.Send(new GetPaginatedTestNavigationQuery
                 {StepId = stepId, Page = query.Page, Size = query.Size});
             var testsWithLinks = tests.Select(test =>
-                new HateoasResponse<TestNavigation>(test, GetLinksForTest(stepId,test.Id)));
+                new HateoasResponse<TestNavigation>(test, GetLinksForTest(stepId, test.Id)));
             return Ok(HateoasResponseBuilder.FromPagedList(
                 Url,
                 tests.ToPagedListResume(),
@@ -83,6 +84,26 @@ namespace NeosCodingApi.Controllers
                 nameof(GetStepTests))
             );
         }
+
+        public record GetPaginatedPublicTestNavigationQueryParams : PaginationQueryBase;
+
+        [HttpGet("{stepId:guid}/publictests", Name = nameof(GetPublicStepTests))]
+        [SwaggerResponse(HttpStatusCode.OK, typeof(HateoasPageResponse<HateoasResponse<PublicTestNavigation>>))]
+        public async Task<IActionResult> GetPublicStepTests(Guid stepId,
+            [FromQuery] GetPaginatedPublicTestNavigationQueryParams query)
+        {
+            var tests = await Mediator.Send(new GetPaginatedPublicTestNavigationQuery
+                {StepId = stepId, Page = query.Page, Size = query.Size});
+            var testsWithLinks = tests.Select(test =>
+                new HateoasResponse<PublicTestNavigation>(test, GetLinksForTest(stepId, test.Id)));
+            return Ok(HateoasResponseBuilder.FromPagedList(
+                Url,
+                tests.ToPagedListResume(),
+                testsWithLinks.ToList(),
+                nameof(GetPublicStepTests))
+            );
+        }
+
 
         [HttpDelete("{stepId:guid}", Name = nameof(DeleteStep))]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -128,7 +149,7 @@ namespace NeosCodingApi.Controllers
 
         #region Tests
 
-        public record AddTestCommandBody(string OutputValidator, string InputGenerator, decimal Score);
+        public record AddTestCommandBody(string Name, string OutputValidator, string InputGenerator, decimal Score);
 
         [HttpPost("{stepId:guid}/tests", Name = nameof(AddTest))]
         [ProducesResponseType(StatusCodes.Status201Created)]
@@ -136,8 +157,9 @@ namespace NeosCodingApi.Controllers
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         public async Task<IActionResult> AddTest(Guid stepId, [FromBody] AddTestCommandBody addTestCommand)
         {
-            var (outputValidator, inputGenerator, score) = addTestCommand;
-            var testId = await Mediator.Send(new AddTestCommand(stepId, outputValidator, inputGenerator, score));
+            var (name, outputValidator, inputGenerator, score) = addTestCommand;
+            var testId = await Mediator.Send(new AddTestCommand(stepId, name, outputValidator,
+                inputGenerator, score));
             return CreatedAtRoute(
                 nameof(TestsController.GetTestById),
                 new {controller = nameof(TestsController).ControllerName(), testId}, null);
@@ -152,34 +174,49 @@ namespace NeosCodingApi.Controllers
             return NoContent();
         }
 
+        public record SetStepsTestsCommandBody(IList<StepTest> Tests);
+
+        [HttpPut("{stepId:guid}/tests", Name = nameof(UpdateStepTests))]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        public async Task<IActionResult> UpdateStepTests(Guid stepId,
+            [FromBody] SetStepsTestsCommandBody command)
+        {
+            await Mediator.Send(new SetStepTestsCommand(stepId, command.Tests));
+            return NoContent();
+        }
+
         #endregion
 
         #region Links
+
         private IList<LinkDto> GetLinksForStep(Guid stepId)
         {
-            return new List<LinkDto>()
+            return new List<LinkDto>
             {
                 LinkDto.CreateLink(Url.Link(nameof(CreateStep), null)),
                 LinkDto.SelfLink(Url.Link(nameof(GetStepById), new {stepId})),
                 LinkDto.DeleteLink(Url.Link(nameof(DeleteStep), new {stepId})),
                 LinkDto.UpdateLink(Url.Link(nameof(UpdateStep), new {stepId})),
                 LinkDto.AllLink(Url.Link(nameof(GetSteps), null)),
+                new(Url.Link(nameof(UpdateStepTests), new {stepId}), "set tests", HttpMethod.Put),
                 new(Url.Link(nameof(AddTest), new {stepId}), "add test", HttpMethod.Post)
             };
         }
+
         private IList<LinkDto> GetLinksForTest(Guid stepId, Guid testId)
         {
-            return new List<LinkDto>()
+            return new List<LinkDto>
             {
                 LinkDto.SelfLink(Url.Link(nameof(TestsController.GetTestById), new {testId})),
                 LinkDto.CreateLink(Url.Link(nameof(AddTest), new {stepId, testId})),
-                LinkDto.AllLink(Url.Link(nameof(GetStepTests),new {stepId}))
+                LinkDto.AllLink(Url.Link(nameof(GetStepTests), new {stepId})),
+                LinkDto.AllLink(Url.Link(nameof(GetPublicStepTests), new {stepId}))
             };
         }
 
         #endregion
-
-        
-
     }
 }

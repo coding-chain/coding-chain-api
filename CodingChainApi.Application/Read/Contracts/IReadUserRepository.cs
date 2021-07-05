@@ -1,9 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Application.Common.Pagination;
 using Application.Read.Users;
 using Application.Read.Users.Handlers;
-using Domain.Users;
 
 namespace Application.Read.Contracts
 {
@@ -14,6 +14,8 @@ namespace Application.Read.Contracts
         public Task<Guid?> FindUserIdByEmail(string email);
 
         public Task<PublicUser?> FindPublicUserById(Guid id);
-        public Task<IPagedList<PublicUser>> FindPaginatedPublicUsers(GetPaginatedPublicUsersQuery query);
+        public Task<IPagedList<PublicUser>> FindPaginatedPublicUsers(GetPublicUsersQuery query);
+
+        public Task<IList<PublicUser>> FindAllPublicUsers(GetPublicUsersQuery query);
     }
 }

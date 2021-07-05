@@ -4,7 +4,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Application.Common.Exceptions;
 using Application.Common.Security;
-using Application.Contracts;
 using Application.Contracts.IService;
 using Application.Write.Contracts;
 using Domain.Users;
@@ -38,7 +37,6 @@ namespace Application.Common.Behaviors
                 var user = await _userRepository.FindByIdAsync(_currentUserService.UserId);
                 if (user is null)
                     throw new UnauthorizedAccessException($"User with id {_currentUserService.UserId} not found");
-                _currentUserService.ConnectedUserId = user.Id;
                 var rolesMatch = false;
                 var requiredRoleLists = authorizeAttributes
                     .Select(a => a.Roles.Select(r => new Right(r)).ToList());

@@ -10,13 +10,13 @@ namespace CodingChainApi.Domain.Tests
 {
     public class StepAggregateTests
     {
-        private string _name;
         private string _description;
+        private int _difficulty;
         private string _headerCode;
         private StepId _id;
-        private int _difficulty;
-        private decimal _score;
         private ProgrammingLanguageId _languageId;
+        private string _name;
+        private decimal _score;
 
         [SetUp]
         public void Setup()
@@ -30,22 +30,30 @@ namespace CodingChainApi.Domain.Tests
             _languageId = new ProgrammingLanguageId(Guid.NewGuid());
         }
 
-        public TestEntity GetNewTest(decimal score) =>
-            new(new TestId(Guid.NewGuid()), "Validator", "Generator", score);
+        public TestEntity GetNewTest(decimal score)
+        {
+            return new(new TestId(Guid.NewGuid()), "Name", "Validator", "Generator", score);
+        }
 
-        public StepEditionAggregate GetNewStep(int? minFunctionCount = null, int? maxFunctionCount = null) =>
-            StepEditionAggregate.Restore(_id, _name, _description, _headerCode, minFunctionCount, maxFunctionCount,
+        public StepEditionAggregate GetNewStep(int? minFunctionCount = null, int? maxFunctionCount = null)
+        {
+            return StepEditionAggregate.Restore(_id, _name, _description, _headerCode, minFunctionCount,
+                maxFunctionCount,
                 _score, _difficulty,
                 false,
                 _languageId,
                 new List<TestEntity>());
+        }
 
-        public StepEditionAggregate GetPublishedStep(int? minFunctionCount = null, int? maxFunctionCount = null) =>
-            StepEditionAggregate.Restore(_id, _name, _description, _headerCode, minFunctionCount, maxFunctionCount,
+        public StepEditionAggregate GetPublishedStep(int? minFunctionCount = null, int? maxFunctionCount = null)
+        {
+            return StepEditionAggregate.Restore(_id, _name, _description, _headerCode, minFunctionCount,
+                maxFunctionCount,
                 _score, _difficulty,
                 true,
                 _languageId,
                 new List<TestEntity>());
+        }
 
         [Test]
         public void create_new_step_should_work()
@@ -70,7 +78,8 @@ namespace CodingChainApi.Domain.Tests
             var step = GetNewStep();
             var test = GetNewTest(10);
             step.AddTest(test);
-            var duplicatedTest = new TestEntity(test.Id, test.OutputValidator, test.InputGenerator, test.Score);
+            var duplicatedTest =
+                new TestEntity(test.Id, test.Name, test.OutputValidator, test.InputGenerator, test.Score);
             Assert.Throws<DomainException>(() => step.AddTest(duplicatedTest));
         }
 
@@ -99,10 +108,20 @@ namespace CodingChainApi.Domain.Tests
         }
 
         [Test]
+        public void remove_test_should_throw_when_no_more_tests()
+        {
+            var step = GetNewStep();
+            var test = GetNewTest(12);
+            step.AddTest(test);
+            Assert.Throws<DomainException>(() => step.RemoveTest(test.Id));
+        }
+
+        [Test]
         public void remove_test_should_work()
         {
             var step = GetNewStep();
             var test = GetNewTest(12);
+            step.AddTest(GetNewTest(13));
             step.AddTest(test);
             step.RemoveTest(test.Id);
             CollectionAssert.DoesNotContain(step.Tests, test);
@@ -171,7 +190,7 @@ namespace CodingChainApi.Domain.Tests
         [Test]
         public void set_max_function_count_bellow_than_min_function_count_should_throw()
         {
-            var step = GetNewStep(3, null);
+            var step = GetNewStep(3);
             Assert.Throws<DomainException>(() => step.SetMaxFunctionCnt(1));
         }
 
@@ -192,14 +211,14 @@ namespace CodingChainApi.Domain.Tests
         [Test]
         public void set_max_function_count_equals_to_min_function_count_should_throw()
         {
-            var step = GetNewStep(3, null);
+            var step = GetNewStep(3);
             Assert.Throws<DomainException>(() => step.SetMaxFunctionCnt(3));
         }
 
         [Test]
         public void set_max_function_count_should_work()
         {
-            var step = GetNewStep(1, null);
+            var step = GetNewStep(1);
             const int maxCnt = 3;
             step.SetMaxFunctionCnt(maxCnt);
             Assert.AreEqual(maxCnt, step.MaxFunctionsCount);
@@ -219,7 +238,7 @@ namespace CodingChainApi.Domain.Tests
         {
             var step = GetNewStep();
             var test = GetNewTest(123);
-            Assert.Throws<DomainException>(() => step.SetTests(new List<TestEntity>() {test, test}));
+            Assert.Throws<DomainException>(() => step.SetTests(new List<TestEntity> { test, test }));
         }
 
         [Test]
@@ -228,7 +247,30 @@ namespace CodingChainApi.Domain.Tests
             var step = GetNewStep();
             var failingTest = GetNewTest(-1);
             var test = GetNewTest(123);
-            Assert.Throws<DomainException>(() => step.SetTests(new List<TestEntity>() {test, failingTest}));
+            Assert.Throws<DomainException>(() => step.SetTests(new List<TestEntity> { test, failingTest }));
+        }
+
+        [Test]
+        public void update_not_found_test_should_throw()
+        {
+            var step = GetNewStep();
+            var test = GetNewTest(123);
+            Assert.Throws<DomainException>(() => step.UpdateTest(test));
+        }
+
+        [Test]
+        public void update_test_should_work()
+        {
+            var step = GetNewStep();
+            var existingTest = GetNewTest(10);
+            step.AddTest(existingTest);
+            var modifications =
+                new TestEntity(existingTest.Id, "Name", "TestOutput", "TestInput", existingTest.Score + 1);
+            step.UpdateTest(modifications);
+            var modifiedTest = step.Tests.First();
+            Assert.AreEqual(modifiedTest.Score, modifications.Score);
+            Assert.AreEqual(modifiedTest.OutputValidator, modifications.OutputValidator);
+            Assert.AreEqual(modifiedTest.InputGenerator, modifications.InputGenerator);
         }
 
 
@@ -236,7 +278,7 @@ namespace CodingChainApi.Domain.Tests
         public void set_tests_should_work()
         {
             var step = GetNewStep();
-            var tests = new List<TestEntity>() {GetNewTest(132), GetNewTest(123)};
+            var tests = new List<TestEntity> { GetNewTest(132), GetNewTest(123) };
             step.SetTests(tests);
             CollectionAssert.AreEqual(tests, step.Tests);
         }

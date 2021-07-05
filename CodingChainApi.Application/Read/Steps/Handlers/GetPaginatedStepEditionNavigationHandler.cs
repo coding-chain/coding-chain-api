@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Application.Common.Pagination;
@@ -9,8 +11,13 @@ namespace Application.Read.Steps.Handlers
     public record GetPaginatedStepNavigationQuery : PaginationQueryBase,
         IRequest<IPagedList<StepNavigation>>
     {
-        public bool? IsPublished { get; set; }
-    };
+        public bool? IsPublishedFilter { get; set; }
+        public string? NameFilter { get; set; }
+
+        public OrderEnum? NameOrder { get; set; }
+        public Guid? LanguageIdFilter { get; set; }
+        public IList<Guid>? WithoutIdsFilter { get; set; }
+    }
 
     public class GetPaginatedStepEditionNavigationHandler : IRequestHandler<GetPaginatedStepNavigationQuery,
         IPagedList<StepNavigation>>

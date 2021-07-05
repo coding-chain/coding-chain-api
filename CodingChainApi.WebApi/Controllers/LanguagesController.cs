@@ -1,20 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Application.Read.ProgrammingLanguages;
 using Application.Read.ProgrammingLanguages.Handlers;
 using AutoMapper;
+using CodingChainApi.Helpers;
+using CodingChainApi.Services;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using NeosCodingApi.Helpers;
-using NeosCodingApi.Services;
 using NSwag.Annotations;
 
-namespace NeosCodingApi.Controllers
+namespace CodingChainApi.Controllers
 {
     public class LanguagesController : ApiControllerBase
     {
@@ -53,16 +52,11 @@ namespace NeosCodingApi.Controllers
 
         private IList<LinkDto> GetLinksForLanguage(Guid languageId)
         {
-            return new List<LinkDto>()
+            return new List<LinkDto>
             {
                 LinkDto.SelfLink(Url.Link(nameof(GetLanguageById), new {languageId})),
                 LinkDto.AllLink(Url.Link(nameof(GetLanguages), null))
             };
         }
-
-
-      
-
-       
     }
 }

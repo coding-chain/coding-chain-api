@@ -7,7 +7,8 @@ using MediatR;
 namespace Application.Read.Steps.Handlers
 {
     public record GetStepNavigationByIdQuery(Guid StepId) : IRequest<StepNavigation>;
-    public class GetStepEditionNavigationByIdHandler: IRequestHandler<GetStepNavigationByIdQuery, StepNavigation>
+
+    public class GetStepEditionNavigationByIdHandler : IRequestHandler<GetStepNavigationByIdQuery, StepNavigation>
     {
         private readonly IReadStepRepository _readStepRepository;
 
@@ -16,7 +17,8 @@ namespace Application.Read.Steps.Handlers
             _readStepRepository = readStepRepository;
         }
 
-        public async Task<StepNavigation> Handle(GetStepNavigationByIdQuery request, CancellationToken cancellationToken)
+        public async Task<StepNavigation> Handle(GetStepNavigationByIdQuery request,
+            CancellationToken cancellationToken)
         {
             var step = await _readStepRepository.GetOneStepNavigationById(request.StepId);
             if (step is null)

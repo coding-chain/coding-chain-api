@@ -13,12 +13,18 @@ namespace Application.Read.Tournaments.Handlers
     {
         public Guid? LanguageIdFilter { get; set; }
         public string? NameFilter { get; set; }
-        
+
         public OrderEnum? NameOrder { get; set; }
-        
+
         public Guid? ParticipantIdFilter { get; set; }
+
+        public bool? IsPublishedFilter { get; set; }
+
+        public Guid? TeamId { get; set; }
     }
-    public class GetTournamentNavigationPaginatedHandler: IRequestHandler<GetTournamentNavigationPaginatedQuery, IPagedList<TournamentNavigation>>
+
+    public class GetTournamentNavigationPaginatedHandler : IRequestHandler<GetTournamentNavigationPaginatedQuery,
+        IPagedList<TournamentNavigation>>
     {
         private readonly IReadTournamentRepository _readTournamentRepository;
 
@@ -27,7 +33,8 @@ namespace Application.Read.Tournaments.Handlers
             _readTournamentRepository = readTournamentRepository;
         }
 
-        public async Task<IPagedList<TournamentNavigation>> Handle(GetTournamentNavigationPaginatedQuery request, CancellationToken cancellationToken)
+        public async Task<IPagedList<TournamentNavigation>> Handle(GetTournamentNavigationPaginatedQuery request,
+            CancellationToken cancellationToken)
         {
             return await _readTournamentRepository.GetAllTournamentNavigationPaginated(request);
         }

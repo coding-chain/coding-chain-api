@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Domain.Contracts;
 using Domain.Exceptions;
+using Domain.Tournaments;
 using Domain.Users;
 
 namespace Domain.Teams
@@ -17,20 +18,36 @@ namespace Domain.Teams
 
     public class TeamAggregate : Aggregate<TeamId>
     {
-        public IReadOnlyList<MemberEntity> Members => _members.AsReadOnly();
-        private List<MemberEntity> _members;
-        private MemberEntity Admin => _members.First(u => u.IsAdmin);
-        public string Name { get; private set; }
+        private readonly List<MemberEntity> _members;
 
-        public TeamAggregate(TeamId id, string name, List<MemberEntity> members) : base(id)
+        private readonly List<TournamentId> _tournamentIds;
+
+        private TeamAggregate(TeamId id, string name, List<MemberEntity> members, List<TournamentId> tournamentIds) :
+            base(id)
         {
             Name = name;
-            if (members.All(m => !m.IsAdmin))
-            {
-                throw new DomainException(new List<string>() {"Cannot create team without admin member"});
-            }
-
             _members = members;
+            _tournamentIds = tournamentIds;
+        }
+
+        public IReadOnlyList<MemberEntity> Members => _members.AsReadOnly();
+        private MemberEntity Admin => _members.First(u => u.IsAdmin);
+
+        public IReadOnlyList<TournamentId> TournamentIds => _tournamentIds.AsReadOnly();
+        public string Name { get; private set; }
+
+        public static TeamAggregate CreateNew(TeamId id, string name, MemberEntity admin)
+        {
+            if (!admin.IsAdmin)
+                throw new DomainException(new List<string> {"Cannot create team without admin member"});
+
+            return new TeamAggregate(id, name, new List<MemberEntity> {admin}, new List<TournamentId>());
+        }
+
+        public static TeamAggregate Restore(TeamId id, string name, List<MemberEntity> members,
+            List<TournamentId> tournamentIds)
+        {
+            return new(id, name, members, tournamentIds);
         }
 
         public void ValidateMemberAdditionByMember(UserId requestingUserId)
@@ -38,23 +55,26 @@ namespace Domain.Teams
             if (requestingUserId != Admin.Id)
                 throw new DomainException($"User with id {requestingUserId} doesn't has sufficient rights to add user");
         }
-        
+
         public void ValidateMemberDeletionByMember(UserId requestingUserId, UserId targetMemberId)
         {
             if (requestingUserId != Admin.Id && requestingUserId != targetMemberId)
-                throw new DomainException($"User with id {requestingUserId} doesn't has sufficient rights to remove user");
+                throw new DomainException(
+                    $"User with id {requestingUserId} doesn't has sufficient rights to remove user");
         }
-        
+
         public void ValidateMemberElevationByMember(UserId requestingUserId)
         {
-            if (requestingUserId != Admin.Id )
-                throw new DomainException($"User with id {requestingUserId} doesn't has sufficient rights to elevate user");
+            if (requestingUserId != Admin.Id)
+                throw new DomainException(
+                    $"User with id {requestingUserId} doesn't has sufficient rights to elevate user");
         }
-        
+
         public void ValidateTeamRenamingByMember(UserId requestingUserId)
         {
-            if (requestingUserId != Admin.Id )
-                throw new DomainException($"User with id {requestingUserId} doesn't has sufficient rights to rename team");
+            if (requestingUserId != Admin.Id)
+                throw new DomainException(
+                    $"User with id {requestingUserId} doesn't has sufficient rights to rename team");
         }
 
         public void Rename(string newName)
@@ -65,14 +85,9 @@ namespace Domain.Teams
         public void AddMember(MemberEntity newMember)
         {
             if (_members.Contains(newMember))
-            {
-                throw new DomainException(new List<string>() {$"Member with id {newMember.Id} already in team"});
-            }
+                throw new DomainException(new List<string> {$"Member with id {newMember.Id} already in team"});
 
-            if (newMember.IsAdmin)
-            {
-                Admin.IsAdmin = false;
-            }
+            if (newMember.IsAdmin) Admin.IsAdmin = false;
 
             _members.Add(newMember);
         }
@@ -81,10 +96,8 @@ namespace Domain.Teams
         {
             var teamMember = GetMember(memberId);
             if (Admin.Id == teamMember.Id)
-            {
-                throw new DomainException(new List<string>()
+                throw new DomainException(new List<string>
                     {$"Member with id {teamMember.Id} cannot be removed because it's the team administrator"});
-            }
 
             _members.Remove(teamMember);
         }
@@ -93,9 +106,7 @@ namespace Domain.Teams
         {
             var teamMember = _members.FirstOrDefault(m => m.Id == memberId);
             if (teamMember is null)
-            {
-                throw new DomainException(new List<string>() {$"User with id {memberId} is not team member"});
-            }
+                throw new DomainException(new List<string> {$"User with id {memberId} is not team member"});
 
             return teamMember;
         }
@@ -110,9 +121,24 @@ namespace Domain.Teams
         public void ValidateTeamDeletionByMember(UserId memberId)
         {
             if (Admin.Id != memberId)
-            {
-                throw new DomainException(new List<string>() {$"Member with id {memberId} can't delete team"});
-            }
+                throw new DomainException(new List<string> {$"Member with id {memberId} can't delete team"});
+        }
+
+        public void LeaveTournament(TournamentId tournamentId, UserId memberId)
+        {
+            ValidateTournamentLeaving(tournamentId, memberId);
+            _tournamentIds.Remove(tournamentId);
+        }
+
+        public void ValidateTournamentLeaving(TournamentId tournamentId, UserId memberId)
+        {
+            var errors = new List<string>();
+            if (Admin.Id != memberId)
+                errors.Add($"Member with id {memberId} can't delete team");
+            if (!_tournamentIds.Contains(tournamentId))
+                errors.Add($"Team is not in tournament : {tournamentId}");
+            if (errors.Any())
+                throw new DomainException(errors);
         }
     }
 }

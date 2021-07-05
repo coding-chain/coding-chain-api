@@ -8,6 +8,7 @@ using CodingChainApi.Infrastructure.Common.Extensions;
 using CodingChainApi.Infrastructure.Contexts;
 using Domain.ProgrammingLanguages;
 using Microsoft.EntityFrameworkCore;
+using ProgrammingLanguage = CodingChainApi.Infrastructure.Models.ProgrammingLanguage;
 
 namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
 {
@@ -29,7 +30,6 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
                 .FromPaginationQueryAsync(paginationQuery);
         }
 
-
         public async Task<ProgrammingLanguageNavigation?> GetOneLanguageNavigationByIdAsync(Guid id)
         {
             var language = await _context.ProgrammingLanguages.FirstOrDefaultAsync(l => l.Id == id && !l.IsDeleted);
@@ -44,10 +44,16 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
                 l => !l.IsDeleted && l.Id == programmingLanguageId);
         }
 
-        public async Task<bool> LanguageExistsByName(string name)
+        public async Task<bool> LanguageExistsByName(LanguageEnum name)
         {
             return await _context.ProgrammingLanguages.AnyAsync(
                 l => !l.IsDeleted && l.Name == name);
+        }
+
+        public static ProgrammingLanguageNavigation ToProgrammingLanguageNavigation(ProgrammingLanguage language)
+        {
+            return new(
+                language.Id, language.Name);
         }
     }
 }

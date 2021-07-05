@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Domain.Users;
 
 namespace Application.Read.Users
 {

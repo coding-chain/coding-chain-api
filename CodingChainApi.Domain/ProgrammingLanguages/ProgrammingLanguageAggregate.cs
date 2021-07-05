@@ -3,7 +3,13 @@ using Domain.Contracts;
 
 namespace Domain.ProgrammingLanguages
 {
-    public record ProgrammingLanguageId(Guid Value): IEntityId
+    public enum LanguageEnum
+    {
+        CSharp,
+        Typescript
+    }
+
+    public record ProgrammingLanguageId(Guid Value) : IEntityId
     {
         public override string ToString()
         {
@@ -13,12 +19,11 @@ namespace Domain.ProgrammingLanguages
 
     public class ProgrammingLanguage : Aggregate<ProgrammingLanguageId>
     {
-        public ProgrammingLanguage(ProgrammingLanguageId id, string name): base(id)
+        public ProgrammingLanguage(ProgrammingLanguageId id, LanguageEnum name) : base(id)
         {
             Name = name;
         }
 
-        public string Name { get; set; }
-
+        public LanguageEnum Name { get; set; }
     }
 }
