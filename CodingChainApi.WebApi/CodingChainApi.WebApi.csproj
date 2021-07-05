@@ -73,13 +73,4 @@
     <Target Name="Echo path">
         <Message Text="$(TF_BUILD)" Importance="high" />
     </Target>
-    <Target Name="NSwag" BeforeTargets="AfterBuild" Condition="'$(TF_BUILD)'!='True'">
-        <Exec ConsoleToMSBuild="true" ContinueOnError="true" Command="$(NSwagExe_Net50) run nswag.json /variables:Configuration=$(Configuration),CSharpOutputPath=$(WebApiCSharpClientPath),TypescriptOutputPath=$(WebApiTypescriptClientPath)">
-            <Output TaskParameter="ExitCode" PropertyName="NSwagExitCode" />
-            <Output TaskParameter="ConsoleOutput" PropertyName="NSwagOutput" />
-        </Exec>
-
-        <Message Text="$(NSwagOutput)" Condition="'$(NSwagExitCode)' == '0'" Importance="low" />
-        <Error Text="$(NSwagOutput)" Condition="'$(NSwagExitCode)' != '0'" />
-    </Target>
 </Project>
