@@ -9,10 +9,8 @@ RUN dotnet publish "CodingChainApi.WebApi/CodingChainApi.WebApi.csproj" -c Relea
 
 FROM mcr.microsoft.com/dotnet/aspnet:5.0 AS final
 EXPOSE 443 80
-ENV  ASPNETCORE_ENVIRONMENT=Production ASPNETCORE_URLS=http://+:443;http://+:80 APPLICATION_USER=app_user APPLICATION_GROUP=app_users 
-RUN groupadd -g 1010 $APPLICATION_GROUP \
-    && useradd --create-home -g $APPLICATION_GROUP $APPLICATION_USER 
-USER $APPLICATION_USER
-WORKDIR /home/$APPLICATION_USER
+ENV  ASPNETCORE_ENVIRONMENT=Production ASPNETCORE_URLS=http://+:443;http://+:80 
+USER root
+WORKDIR /app
 COPY --from=publish app/publish .
 ENTRYPOINT ["dotnet", "CodingChainApi.WebApi.dll"]
