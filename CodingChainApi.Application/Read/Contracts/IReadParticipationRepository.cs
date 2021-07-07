@@ -15,6 +15,8 @@ namespace Application.Read.Contracts
 
         public Task<IList<ParticipationNavigation>> GetAllParticipationsByTeamAndTournamentId(Guid teamId,
             Guid tournamentId);
+        
+        public Task<IList<ParticipationNavigation>> GetAllParticipationsByTeamId(Guid teamId);
 
         public Task<ParticipationNavigation?> GetOneParticipationNavigationById(Guid id);
         public Task<bool> ExistsById(Guid id);

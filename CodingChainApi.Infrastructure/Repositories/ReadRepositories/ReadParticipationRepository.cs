@@ -48,6 +48,17 @@ namespace CodingChainApi.Infrastructure.Repositories.ReadRepositories
                 .ToListAsync();
         }
 
+        public async Task<IList<ParticipationNavigation>> GetAllParticipationsByTeamId(Guid teamId)
+        {
+            return await GetParticipationIncludeQueryable()
+                .Where(p => !p.Deactivated
+                            && !p.Tournament.IsDeleted && p.Tournament.IsPublished 
+                            && !p.Step.IsDeleted
+                            && !p.Team.IsDeleted && p.Team.Id == teamId)
+                .Select(p => ToParticipationNavigation(p))
+                .ToListAsync();
+        }
+
         public async Task<ParticipationNavigation?> GetOneParticipationNavigationById(Guid id)
         {
             var participation = await GetParticipationIncludeQueryable()

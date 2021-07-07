@@ -24,7 +24,12 @@
       "launchUrl": "swagger",
       "applicationUrl": "https://localhost:5003;http://localhost:5002",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "DatabaseSettings:ConnectionString":  "Server=tcp:coding-chain.database.windows.net,1433;Initial Catalog=coding-chain-db;Persist Security Info=False;User ID=CodingChain;Password=codingDevPwd21;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;",
+        "RedisCacheSettings:ConnectionString": "coding-chain.redis.cache.windows.net:6380,password=cfovFM7qRo+825XX2YTXzWvHqrao47L7vflpXI0fthw=,ssl=True,abortConnect=False",
+        "RabbitMqSettings:Port": 15672,
+        "RabbitMqSettings:Username": "guest",
+        "RabbitMqSettings:Password": "guest"
       }
     },
     "ApiWithoutClientsGeneration": {

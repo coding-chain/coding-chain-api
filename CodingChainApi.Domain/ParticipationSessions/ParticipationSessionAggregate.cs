@@ -18,6 +18,8 @@ namespace Domain.ParticipationSessions
 
     public record ParticipationSessionReady(ParticipationId ParticipationId) : IDomainEvent;
 
+    public record ParticipationUserRemoved(ParticipationId ParticipationId, UserId UserId) : IDomainEvent;
+
     public record ParticipationSessionFunctionRemoved
         (ParticipationId ParticipationId, FunctionId FunctionId) : IDomainEvent;
 
@@ -194,6 +196,29 @@ namespace Domain.ParticipationSessions
                 throw new DomainException("Calculated can't be lesser than 0");
             CalculatedScore = calculatedScore;
             RegisterEvent(new ParticipationSessionScoreChanged(Id));
+        }
+
+        public void AddTeamMember(UserId userId)
+        {
+            if (Team.UserIds.Any(id => id == userId))
+            {
+                throw new DomainException("User already in participation team");
+            }
+
+            Team.UserIds.Add(userId);
+        }
+
+        public void RemoveTeamMember(UserId userId)
+        {
+            var user = Team.UserIds.FirstOrDefault(id => id == userId);
+            if (user is null)
+            {
+                throw new DomainException("User not in participation team");
+            }
+
+            Team.UserIds.Remove(user);
+            ConnectedTeam.ConnectedUserEntities.RemoveWhere(u => u.Id == userId);
+            RegisterEvent(new ParticipationUserRemoved(Id, userId));
         }
     }
 }

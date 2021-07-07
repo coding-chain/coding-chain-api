@@ -8,6 +8,10 @@ using Domain.Users;
 
 namespace Domain.Teams
 {
+    public record TeamMemberAdded(TeamId TeamId, UserId MemberId) : IDomainEvent;
+
+    public record TeamMemberRemoved(TeamId TeamId, UserId MemberId) : IDomainEvent;
+
     public record TeamId(Guid Value) : IEntityId
     {
         public override string ToString()
@@ -89,6 +93,7 @@ namespace Domain.Teams
 
             if (newMember.IsAdmin) Admin.IsAdmin = false;
 
+            RegisterEvent(new TeamMemberAdded(Id, newMember.Id));
             _members.Add(newMember);
         }
 
@@ -98,7 +103,7 @@ namespace Domain.Teams
             if (Admin.Id == teamMember.Id)
                 throw new DomainException(new List<string>
                     {$"Member with id {teamMember.Id} cannot be removed because it's the team administrator"});
-
+            RegisterEvent(new TeamMemberRemoved(Id, memberId));
             _members.Remove(teamMember);
         }
 
